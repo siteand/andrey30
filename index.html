@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrey30</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5; 
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            scroll-behavior: smooth;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .profile-img {
+            width: 350px;
+            height: 350px;
+            border-radius: 500px;
+            object-fit: cover;
+            margin-bottom: 60px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            background-color: #fff; 
+        }
+
+        .profile-img:hover {
+            transform: scale(1.03);
+        }
+
+        h1 {
+            display: none;
+        }
+
+        p {
+            display: none;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 30px;
+            background-color: #fff;
+            border-radius: 14px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 48px;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            background-color: #f8f9fa;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: transparent;
+            width: 100%;
+            font-family: Arial, sans-serif; 
+            color: gray;
+            font-size: 14px;
+            box-shadow: none;
+        }
+
+        .social-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex: 0 0 20px;
+            color: currentColor;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+            
+            .profile-img {
+                width: 130px;
+                height: 130px;
+            }
+
+            h1 {
+                font-size: 1.7em;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+            }
+
+            h1 {
+                color: #e0e0e0;
+            }
+
+            p {
+                color: #b0b0b0; 
+            }
+
+            .profile-img {
+                background-color: #333;
+            }
+
+            .social-link {
+                background-color: #333;
+                color: #e0e0e0; 
+                box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+            }
+
+            .social-link:hover {
+                background-color: #444; 
+            }
+
+            footer {
+                background-color: transparent;
+                color: gray;
+                box-shadow: none;
+            }
+        }
+
+        .privacy-link {
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+        }
+
+        .privacy-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.65);
+        }
+
+        .privacy-modal.open {
+            display: flex;
+        }
+
+        .privacy-modal-window {
+            width: min(900px, 100%);
+            height: min(85vh, 850px);
+            overflow: hidden;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .privacy-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 54px;
+            padding: 10px 14px 10px 18px;
+            border-bottom: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .privacy-modal-title {
+            margin: 0;
+            display: block;
+            font-size: 17px;
+            color: #222;
+        }
+
+        .privacy-modal-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: #eee;
+            color: #333;
+            font-family: Arial, sans-serif;
+            font-size: 25px;
+            line-height: 1;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .privacy-modal-close:hover,
+        .privacy-modal-close:focus-visible {
+            background: #ddd;
+        }
+
+        .privacy-frame {
+            display: block;
+            width: 100%;
+            height: calc(100% - 54px);
+            border: 0;
+            background: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .privacy-modal {
+                padding: 10px;
+            }
+
+            .privacy-modal-window {
+                height: calc(100dvh - 20px);
+                border-radius: 10px;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .privacy-modal-window,
+            .privacy-modal-header {
+                background: #1e1e1e;
+            }
+
+            .privacy-modal-header {
+                border-bottom-color: #444;
+            }
+
+            .privacy-modal-title {
+                color: #f0f0f0;
+            }
+
+            .privacy-modal-close {
+                background: #333;
+                color: #fff;
+            }
+
+            .privacy-modal-close:hover,
+            .privacy-modal-close:focus-visible {
+                background: #444;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="content">
+        <img src="images/profile_img.webp" alt="Фото профиля" class="profile-img">
+
+        <div class="social-links">
+            <a href="calculator_kbju.html" class="social-link" aria-label="Перейти к калькулятору КБЖУ">
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13.5 3.5c.8 3.1-2.2 4.4-.8 7.2.6 1.2 1.8 1.7 2.8 2.8.8.9 1.2 2 1.2 3.2A4.7 4.7 0 0 1 12 21a4.9 4.9 0 0 1-5-4.9c0-2.4 1.4-4.3 3.4-5.9-.1 2 1 3.1 2.1 3.7-.4-2.1.1-4.3 1-5.8"/>
+                </svg>
+                Калькулятор КБЖУ
+            </a>
+            <a href="vklad.html" class="social-link" aria-label="Перейти к калькулятору вкладов">
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="14.5" cy="7.5" r="3.5"/>
+                    <path d="M3 13h4l2.2 2h5.3a1.8 1.8 0 0 1 0 3.6H9.2"/>
+                    <path d="M3 12v8M7 19.5h8.5l5-3.2a1.7 1.7 0 0 0-1.8-2.9L15 15.5"/>
+                </svg>
+                Калькулятор вкладов
+            </a>
+            <a href="credit.html" class="social-link" aria-label="Перейти к кредитному калькулятору">
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="7" cy="7" r="2.5"/>
+                    <circle cx="17" cy="17" r="2.5"/>
+                    <path d="M18.5 5.5 5.5 18.5"/>
+                </svg>
+                Кредитный калькулятор 
+            </a>
+            <a href="fuel.html" class="social-link" aria-label="Перейти к калькулятору расхода топлива">
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17"/>
+                    <path d="M4 21h12M7 6h6v5H7zM15 7h2l2 2v7.5a1.5 1.5 0 0 0 3 0V10l-2-2"/>
+                </svg>
+                Калькулятор расхода топлива
+            </a>
+            <a href="currencyconvener.html" class="social-link" aria-label="Перейти к конвертеру валют">
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 20V4h5a5 5 0 0 1 0 10H8M6 14h8M6 17h7"/>
+                </svg>
+                Конвертер валют 
+            </a>
+            <a href="rates.html" class="social-link" aria-label="Перейти к курсам валют">
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20V5M4 20h17"/>
+                    <path d="m7 16 4-5 3 3 6-7"/>
+                    <path d="M17 7h3v3"/>
+                </svg>
+                Курсы валют
+            </a>
+        </div>
+    </div>
+
+    <footer style="
+  text-align: center;
+  margin-top: 30px;
+  padding: 15px;
+  color: #666;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+">
+  © Andrey30 
+  <span aria-hidden="true"> · </span>
+  <a href="privacy.html" style="
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  ">
+    Политика конфиденциальности
+  </a>
+</footer>
+
+    <div
+        class="privacy-modal"
+        id="privacy-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="privacy-modal-title"
+        aria-hidden="true"
+    >
+        <div class="privacy-modal-window">
+            <div class="privacy-modal-header">
+                <h2 class="privacy-modal-title" id="privacy-modal-title">
+                    Политика конфиденциальности
+                </h2>
+
+                <button
+                    type="button"
+                    class="privacy-modal-close"
+                    id="privacy-close"
+                    aria-label="Закрыть окно политики"
+                >
+                    ×
+                </button>
+            </div>
+
+            <iframe
+                class="privacy-frame"
+                id="privacy-frame"
+                title="Политика конфиденциальности"
+                data-src="privacy.html"
+            ></iframe>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const openLink = document.getElementById('privacy-open');
+            const modal = document.getElementById('privacy-modal');
+            const closeButton = document.getElementById('privacy-close');
+            const frame = document.getElementById('privacy-frame');
+
+            if (!openLink || !modal || !closeButton || !frame) {
+                return;
+            }
+
+            function openPrivacy(event) {
+                event.preventDefault();
+
+                if (!frame.getAttribute('src')) {
+                    frame.setAttribute('src', frame.dataset.src);
+                }
+
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                closeButton.focus();
+            }
+
+            function closePrivacy() {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                openLink.focus();
+            }
+
+            openLink.addEventListener('click', openPrivacy);
+            closeButton.addEventListener('click', closePrivacy);
+
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    closePrivacy();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && modal.classList.contains('open')) {
+                    closePrivacy();
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "Forex часы",
+  "short_name": "Forex",
+  "id": "./fxc.html",
+  "description": "Forex часы с торговыми сессиями",
+  "start_url": "./fxc.html",
+  "scope": "./fxc.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f2f5",
+  "theme_color": "#f0f2f5",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "images/fxc-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/fxc-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

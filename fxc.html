@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forex часы</title>
+  <meta name="theme-color" content="#f0f2f5">
+
+  <link rel="manifest" href="./fxc.webmanifest">
+
+  <link
+	rel="icon"
+	type="image/png"
+	sizes="192x192"
+	href="./images/fxc-192.png"
+  >
+
+  <link
+	rel="apple-touch-icon"
+	sizes="192x192"
+	href="./images/fxc-192.png"
+  >
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+	content="black-translucent"
+  >
+  <meta name="apple-mobile-web-app-title" content="Forex часы">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg-page: #000000;
+      --bg-glow: rgba(255,255,255,0.08);
+      --clock-bg: #050505;
+      --clock-card-bg-1: rgba(255,255,255,0.045);
+      --clock-card-bg-2: rgba(255,255,255,0.01);
+      --panel: rgba(255, 255, 255, 0.055);
+      --panel-strong: rgba(0,0,0,0.32);
+      --panel-solid: rgba(255,255,255,0.08);
+      --border: rgba(255, 255, 255, 0.1);
+      --soft-border: rgba(255,255,255,0.08);
+      --text: #f4f4f5;
+      --text-strong: #ffffff;
+      --muted: #8f8f99;
+      --yellow: #e8c547;
+      --green: #00d85a;
+      --green-soft: rgba(0, 216, 90, 0.16);
+      --green-soft-2: rgba(0, 216, 90, 0.08);
+      --red: #ef4444;
+      --red-soft: rgba(239, 68, 68, 0.16);
+      --red-soft-2: rgba(239, 68, 68, 0.08);
+      --grid: rgba(255,255,255,0.08);
+      --tick-small: rgba(255,255,255,0.22);
+      --tick-hour: rgba(255,255,255,0.5);
+      --session-gray: rgba(122,122,122,0.74);
+      --footer: #8f8f99;
+      --shadow: rgba(0,0,0,0.35);
+      --select-arrow: #f4f4f5;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-page: #f3f4f6;
+        --bg-glow: rgba(232,197,71,0.22);
+        --clock-bg: #ffffff;
+        --clock-card-bg-1: rgba(255,255,255,0.96);
+        --clock-card-bg-2: rgba(255,255,255,0.72);
+        --panel: rgba(255,255,255,0.82);
+        --panel-strong: rgba(255,255,255,0.86);
+        --panel-solid: #ffffff;
+        --border: rgba(17,24,39,0.12);
+        --soft-border: rgba(17,24,39,0.12);
+        --text: #111827;
+        --text-strong: #111827;
+        --muted: #6b7280;
+        --yellow: #b88a00;
+        --green: #0a9f45;
+        --green-soft: rgba(10, 159, 69, 0.14);
+        --green-soft-2: rgba(10, 159, 69, 0.06);
+        --red: #dc2626;
+        --red-soft: rgba(220, 38, 38, 0.13);
+        --red-soft-2: rgba(220, 38, 38, 0.06);
+        --grid: rgba(17,24,39,0.12);
+        --tick-small: rgba(17,24,39,0.28);
+        --tick-hour: rgba(17,24,39,0.56);
+        --session-gray: rgba(107,114,128,0.72);
+        --footer: #4b5563;
+        --shadow: rgba(17,24,39,0.12);
+        --select-arrow: #111827;
+      }
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at center 230px, var(--bg-glow), transparent 32%),
+        var(--bg-page);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      padding: 22px;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .header {
+      position: relative;
+      text-align: center;
+      margin-bottom: 14px;
+      min-height: 52px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+    }
+
+    .lang-toggle {
+      position: absolute;
+      top: 4px;
+      right: 0;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .lang-toggle img {
+      display: block;
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 8px rgba(0,0,0,0.18));
+    }
+
+    .top-tools {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 16px 0 20px;
+    }
+
+    .select-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .tz-select {
+      width: 100%;
+      min-height: 66px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel-solid);
+      color: var(--text);
+      padding: 14px 60px 14px 24px;
+      outline: none;
+      font-weight: 800;
+      font-size: 18px;
+      line-height: 1.2;
+      box-shadow: 0 10px 28px var(--shadow);
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .tz-select::-ms-expand { display: none; }
+
+    .select-arrow {
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .select-arrow svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .clock-card {
+      position: relative;
+      max-width: 790px;
+      margin: 0 auto 18px;
+      border-radius: 30px;
+      background: radial-gradient(circle, var(--clock-card-bg-1), var(--clock-card-bg-2));
+      border: 1px solid var(--soft-border);
+      padding: 12px;
+      box-shadow: 0 0 45px rgba(255,255,255,0.045), 0 28px 80px var(--shadow);
+    }
+
+    .clock-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+    .dial-bg {
+      fill: var(--clock-bg);
+      stroke: var(--border);
+      stroke-width: 1.4;
+    }
+
+    .grid-line { stroke: var(--grid); stroke-width: 1; }
+    .small-tick { stroke: var(--tick-small); stroke-width: 1.15; opacity: 0.78; }
+
+    .minute-dot {
+      fill: color-mix(in srgb, var(--text) 62%, transparent);
+      opacity: 0.62;
+    }
+
+    .minute-dot.major {
+      fill: var(--yellow);
+      opacity: 0.95;
+    }
+
+    .hour-text {
+      fill: var(--text);
+      font-size: 29px;
+      font-weight: 900;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .minute-text {
+      fill: var(--yellow);
+      font-size: 16px;
+      font-weight: 900;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      letter-spacing: 0.3px;
+    }
+
+    .market-session {
+      fill: none;
+      stroke: var(--session-gray);
+      stroke-linecap: butt;
+    }
+
+    .market-session.open {
+      stroke: var(--green);
+      filter: none;
+    }
+
+    .live-dot {
+      display: none;
+    }
+
+    .market-label {
+      fill: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.35px;
+      dominant-baseline: middle;
+      opacity: 0.96;
+    }
+
+    .now-hand {
+      stroke: #000000;
+      stroke-width: 9;
+      stroke-linecap: round;
+      filter: none;
+    }
+
+    .minute-hand {
+      stroke: #000000;
+      stroke-width: 4;
+      stroke-linecap: round;
+      filter: none;
+    }
+
+    .second-hand {
+      stroke: var(--red);
+      stroke-width: 2;
+      stroke-linecap: round;
+      filter: none;
+    }
+
+    .center-dot {
+      fill: var(--red);
+      stroke: var(--text-strong);
+      stroke-width: 4;
+    }
+
+    .center-box {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 148px;
+      height: 148px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(232,197,71,0.45);
+      background: color-mix(in srgb, var(--clock-bg) 68%, transparent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      text-align: center;
+      padding: 14px;
+      box-shadow: 0 16px 36px var(--shadow);
+    }
+
+    .center-title {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .center-time {
+      color: #000000;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      line-height: 1;
+    }
+
+    .center-zone {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      max-width: 118px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 150px;
+      border-radius: 22px;
+      padding: 14px;
+      box-shadow: 0 18px 45px var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));
+    }
+
+    .card.open-card {
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 30%),
+        linear-gradient(180deg, var(--green-soft), var(--green-soft-2));
+      border-color: rgba(0,216,90,0.35);
+    }
+
+    .card.closed-card {
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 30%),
+        linear-gradient(180deg, var(--red-soft), var(--red-soft-2));
+      border-color: rgba(239,68,68,0.30);
+    }
+
+    .card-time-box {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 3;
+      min-width: 118px;
+      text-align: right;
+      padding: 9px 10px;
+      border-radius: 15px;
+      background: var(--panel-strong);
+      border: 1px solid var(--soft-border);
+      backdrop-filter: blur(8px);
+    }
+
+    .digital {
+      font-size: 25px;
+      font-weight: 900;
+      color: var(--text-strong);
+      line-height: 1;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+    }
+
+    .date-text {
+      color: var(--muted);
+      font-size: 11px;
+      text-align: right;
+      margin-top: 5px;
+      white-space: nowrap;
+    }
+
+    .card-main {
+      position: relative;
+      z-index: 2;
+      padding-right: 140px;
+    }
+
+    .flag {
+      width: 30px;
+      height: 30px;
+      margin-bottom: 6px;
+      display: block;
+      object-fit: contain;
+    }
+    .name { font-weight: 900; font-size: 20px; margin-bottom: 8px; }
+
+    .trade-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .trade-time {
+      display: inline-flex;
+      flex-wrap: nowrap;
+      gap: 4px;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 7px 8px;
+      border-radius: 13px;
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+      border: 1px solid var(--soft-border);
+      white-space: nowrap;
+      flex: 0 0 auto;
+      width: max-content;
+      max-width: 100%;
+    }
+
+    .trade-time span { color: var(--muted); }
+
+    .status-row {
+      position: static;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      color: var(--yellow);
+      background: rgba(232,197,71,0.12);
+      border: 1px solid rgba(232,197,71,0.25);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 15px;
+      margin-top: 20px;
+      background-color: transparent;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      color: gray;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0;
+      box-shadow: none;
+    }
+
+    @media (max-width: 900px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      body { padding: 14px; }
+      .header h1 { font-size: 36px; }
+      .lang-toggle {
+        top: 4px;
+        right: 0;
+      }
+      .lang-toggle img {
+        width: 26px;
+        height: 26px;
+      }
+      .tz-select {
+        min-height: 60px;
+        font-size: 16px;
+        padding: 12px 52px 12px 18px;
+      }
+      .select-arrow {
+        right: 18px;
+        width: 16px;
+        height: 16px;
+      }
+      .clock-card { padding: 6px; border-radius: 22px; }
+      .center-box { width: 104px; height: 104px; }
+      .center-title { font-size: 8px; }
+      .center-time { font-size: 17px; }
+      .center-zone { font-size: 8px; max-width: 88px; }
+      .hour-text { font-size: 22px; }
+      .minute-text { font-size: 12px; }
+      .market-label {
+        font-size: 12px;
+        letter-spacing: 0.7px;
+      }
+      .card { min-height: auto; }
+      .card-time-box {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        margin: 0;
+        min-width: 0;
+        width: max-content;
+        max-width: max-content;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+      }
+      .digital { font-size: 29px; font-weight: 300; }
+      .card-main { padding-right: 0; }
+      .flag { margin-top: 0; }
+      .name {
+        font-size: 18px;
+        margin-bottom: 7px;
+        padding-right: 118px;
+      }
+      .trade-time {
+        max-width: none;
+        width: max-content;
+        font-size: 11px;
+        gap: 3px;
+        padding: 6px 7px;
+      }
+      .timer-pill { font-size: 11px; padding: 6px 8px; }
+      .footer { font-size: 14px; }
+    }
+
+    @media (max-width: 390px) {
+      .header h1 {
+        font-size: 32px;
+      }
+      .lang-toggle {
+        top: 4px;
+        right: 0;
+      }
+      .lang-toggle img {
+        width: 24px;
+        height: 24px;
+      }
+      .tz-select {
+        font-size: 15px;
+        min-height: 58px;
+        padding-right: 48px;
+      }
+
+      .card {
+        min-height: auto;
+        padding-bottom: 14px;
+      }
+
+      .card-time-box {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        margin: 0;
+        min-width: 0;
+        width: max-content;
+        max-width: max-content;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+      }
+
+      .card-main { padding-right: 0; }
+      .name { padding-right: 112px; }
+      .trade-row { gap: 6px; }
+      .trade-time {
+        width: max-content;
+        max-width: none;
+        font-size: 10.5px;
+      }
+    }
+  
+    /* FIX: цифровые часы без плашки — только текст */
+    .card-time-box,
+    .card .card-time-box {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      min-width: 0 !important;
+      width: auto !important;
+      max-width: none !important;
+      display: block !important;
+      text-align: right !important;
+    }
+
+    .digital,
+    .date {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+    }
+
+  
+    /* FIX: цифровые часы именно в карточках — крупнее и без жирности */
+    .card .card-time-box .digital {
+      font-size: 34px !important;
+      font-weight: 300 !important;
+      letter-spacing: 0 !important;
+      line-height: 0.95 !important;
+      font-family: Arial, sans-serif !important;
+      text-shadow: none !important;
+    }
+
+    .card .card-time-box .date {
+      font-weight: 500 !important;
+      font-size: 12px !important;
+    }
+
+    @media (max-width: 620px) {
+      .card .card-time-box .digital {
+        font-size: 31px !important;
+        font-weight: 300 !important;
+      }
+      .card .card-time-box .date {
+        font-size: 12px !important;
+        font-weight: 500 !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .card .card-time-box .digital {
+        font-size: 30px !important;
+        font-weight: 300 !important;
+      }
+    }
+
+  
+    /* FIX: меньше только флаг языка страницы, не флаги в карточках */
+    .lang-btn {
+      width: 40px !important;
+      height: 40px !important;
+    }
+
+    .lang-btn img,
+    .lang-flag-img {
+      width: 28px !important;
+      height: 28px !important;
+      object-fit: contain !important;
+    }
+
+    @media (max-width: 620px) {
+      .lang-btn {
+        width: 36px !important;
+        height: 36px !important;
+      }
+
+      .lang-btn img,
+      .lang-flag-img {
+        width: 25px !important;
+        height: 25px !important;
+      }
+    }
+
+  
+    @media (prefers-color-scheme: dark) {
+      .center-time {
+        color: #e0e0e0 !important;
+      }
+
+      .center-box {
+        background: color-mix(in srgb, var(--clock-bg) 58%, transparent) !important;
+        border-color: rgba(232,197,71,0.36) !important;
+      }
+
+      .footer {
+        color: gray !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+  
+    /* FIX: стрелки в ночном режиме */
+    @media (prefers-color-scheme: dark) {
+      .now-hand {
+        stroke: #f2f2f2 !important;
+        filter: none !important;
+      }
+
+      .minute-hand {
+        stroke: #f2f2f2 !important;
+        filter: none !important;
+      }
+
+      .second-hand {
+        stroke: #ff4b4b !important;
+        filter: none !important;
+      }
+
+      .center-dot {
+        stroke: #f2f2f2 !important;
+      }
+    }
+
+  
+    .timer-pill,
+    .timer-pill * {
+      color: inherit !important;
+    }
+
+  
+
+
+  
+    .timer-pill,
+    .timer-pill * {
+      color: #8a6a00 !important;
+    }
+
+    /* FIX: таймер хорошо виден в ночном режиме */
+    @media (prefers-color-scheme: dark) {
+      .timer-pill,
+      .timer-pill * {
+        color: #ffffff !important;
+      }
+
+      .timer-pill {
+        background: rgba(0, 0, 0, 0.34) !important;
+        border-color: rgba(255, 255, 255, 0.26) !important;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 id="pageTitle">Forex часы</h1>
+      <button class="lang-toggle" id="languageToggle" type="button"><img id="languageIcon" src="flags/gb.png" alt="English"></button>
+    </header>
+
+    <div class="top-tools">
+      <div class="select-wrap">
+        <select class="tz-select" id="clockTimezone"></select>
+
+        <div class="select-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 8L12 16L20 8" stroke="var(--select-arrow)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <section class="clock-card">
+      <div class="clock-wrap">
+        <svg id="marketClock" viewBox="0 0 600 600">
+          <defs id="defsLayer"></defs>
+
+          <circle class="dial-bg" cx="300" cy="300" r="292"></circle>
+
+          <g id="gridLayer"></g>
+          <g id="sessionLayer"></g>
+          <g id="liveLayer"></g>
+          <g id="labelLayer"></g>
+          <g id="minuteDotsLayer"></g>
+          <g id="numberLayer"></g>
+
+          <line id="nowHand" class="now-hand" x1="300" y1="300" x2="300" y2="165"></line>
+          <line id="minuteHand" class="minute-hand" x1="300" y1="300" x2="300" y2="108"></line>
+          <line id="secondHand" class="second-hand" x1="300" y1="300" x2="300" y2="76"></line>
+          <circle class="center-dot" cx="300" cy="300" r="11"></circle>
+        </svg>
+
+        <div class="center-box">
+          <div class="center-title" id="centerTitle">Текущее время</div>
+          <div class="center-time" id="centerTime">--:--:--</div>
+          <div class="center-zone" id="centerZone">Europe/Moscow</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cards" id="cards"></section>
+
+    <footer style="
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    ">
+      © Andrey30
+      <span aria-hidden="true"> · </span>
+      <a href="privacy.html" style="
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      ">
+        Политика конфиденциальности
+      </a>
+    </footer>
+  </div>
+
+  <script>
+    const markets = [
+      {
+        id: "forex-sydney",
+        label: { ru: "СИДНЕЙ", en: "SYDNEY" },
+        country: { ru: "Австралия", en: "Australia" },
+        city: { ru: "Сидней", en: "Sydney" },
+        flag: "🇦🇺",
+        flagImg: "flags/au.png",
+        timezone: "Australia/Sydney",
+        sessions: [["08:00", "17:00"]]
+      },
+      {
+        id: "forex-tokyo",
+        label: { ru: "ТОКИО", en: "TOKYO" },
+        country: { ru: "Япония", en: "Japan" },
+        city: { ru: "Токио", en: "Tokyo" },
+        flag: "🇯🇵",
+        flagImg: "flags/jp.png",
+        timezone: "Asia/Tokyo",
+        sessions: [["09:00", "18:00"]]
+      },
+      {
+        id: "forex-frankfurt",
+        label: { ru: "ФРАНКФУРТ", en: "FRANKFURT" },
+        country: { ru: "Германия", en: "Germany" },
+        city: { ru: "Франкфурт", en: "Frankfurt" },
+        flag: "🇩🇪",
+        flagImg: "flags/de.png",
+        timezone: "Europe/Berlin",
+        sessions: [["08:00", "17:00"]]
+      },
+      {
+        id: "forex-london",
+        label: { ru: "ЛОНДОН", en: "LONDON" },
+        country: { ru: "Великобритания", en: "United Kingdom" },
+        city: { ru: "Лондон", en: "London" },
+        flag: "🇬🇧",
+        flagImg: "flags/gb.png",
+        timezone: "Europe/London",
+        sessions: [["08:00", "17:00"]]
+      },
+      {
+        id: "forex-new-york",
+        label: { ru: "НЬЮ-ЙОРК", en: "NEW YORK" },
+        country: { ru: "США", en: "USA" },
+        city: { ru: "Нью-Йорк", en: "New York" },
+        flag: "🇺🇸",
+        flagImg: "flags/us.png",
+        timezone: "America/New_York",
+        sessions: [["08:00", "17:00"]]
+      }
+    ];
+
+    const defaultTimezone = "auto";
+
+    const CX = 300;
+    const CY = 300;
+
+    const defsLayer = document.getElementById("defsLayer");
+    const gridLayer = document.getElementById("gridLayer");
+    const sessionLayer = document.getElementById("sessionLayer");
+    const liveLayer = document.getElementById("liveLayer");
+    const labelLayer = document.getElementById("labelLayer");
+    const minuteDotsLayer = document.getElementById("minuteDotsLayer");
+    const numberLayer = document.getElementById("numberLayer");
+
+    const nowHand = document.getElementById("nowHand");
+    const minuteHand = document.getElementById("minuteHand");
+    const secondHand = document.getElementById("secondHand");
+
+    const pageTitle = document.getElementById("pageTitle");
+    const languageToggle = document.getElementById("languageToggle");
+    const languageIcon = document.getElementById("languageIcon");
+
+
+
+    const centerTitle = document.getElementById("centerTitle");
+    const centerTime = document.getElementById("centerTime");
+    const centerZone = document.getElementById("centerZone");
+
+    const cards = document.getElementById("cards");
+    const clockTimezoneSelect = document.getElementById("clockTimezone");
+
+    const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+    const timezoneLabels = {
+      ru: {
+        "Europe/Moscow": "МСК",
+        "Europe/Berlin": "Берлин",
+        "Europe/London": "Лондон",
+        "America/New_York": "Нью-Йорк",
+        "Asia/Tokyo": "Токио",
+        "Australia/Sydney": "Сидней"
+      },
+      en: {
+        "Europe/Moscow": "Moscow",
+        "Europe/Berlin": "Berlin",
+        "Europe/London": "London",
+        "America/New_York": "New York",
+        "Asia/Tokyo": "Tokyo",
+        "Australia/Sydney": "Sydney"
+      }
+    };
+
+    const translations = {
+      ru: {
+        pageTitle: "Forex часы",
+        centerTitle: "Текущее время",
+        autoTimezone: "Мой часовой пояс",
+        autoWord: "авто",
+        yourTime: "по вашему времени",
+        closesIn: "закроется через",
+        opensIn: "откроется через",
+        dayShort: "д"
+      },
+      en: {
+        pageTitle: "Forex Clock",
+        centerTitle: "Current time",
+        autoTimezone: "My time zone",
+        autoWord: "auto",
+        yourTime: "your time",
+        closesIn: "closes in",
+        opensIn: "opens in",
+        dayShort: "d"
+      }
+    };
+
+    let currentLang = localStorage.getItem("forexClockLang") || "ru";
+    if (!translations[currentLang]) currentLang = "ru";
+
+    function addOption(group, value, text, selected = false) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = text;
+      option.selected = selected;
+      group.appendChild(option);
+    }
+
+    function makeUtcValue(offset) {
+      if (offset === 0) return "UTC+0";
+      return offset > 0 ? `UTC+${offset}` : `UTC${offset}`;
+    }
+
+    function formatUtcOffsetLabel(offsetMinutes) {
+      offsetMinutes = Math.round(offsetMinutes);
+
+      if (offsetMinutes === 0) return "UTC±0";
+
+      const sign = offsetMinutes > 0 ? "+" : "-";
+      const abs = Math.abs(offsetMinutes);
+      const hours = Math.floor(abs / 60);
+      const minutes = abs % 60;
+
+      if (minutes === 0) {
+        return `UTC${sign}${hours}`;
+      }
+
+      return `UTC${sign}${hours}:${pad(minutes)}`;
+    }
+
+    function buildTimezoneOptions() {
+      const previousValue = clockTimezoneSelect.value || "auto";
+      const t = translations[currentLang];
+
+      clockTimezoneSelect.innerHTML = "";
+
+      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const deviceOffset = getOffsetMinutes(new Date(), deviceTimezone);
+
+      addOption(
+        clockTimezoneSelect,
+        "auto",
+        `${t.autoTimezone} — ${formatUtcOffsetLabel(deviceOffset)} (${t.autoWord})`,
+        previousValue === "auto"
+      );
+
+      for (let offset = 14; offset >= -12; offset--) {
+        const value = makeUtcValue(offset);
+        const text = offset === 0 ? "UTC±0" : value;
+        addOption(clockTimezoneSelect, value, text, previousValue === value);
+      }
+
+      if (!clockTimezoneSelect.value) {
+        clockTimezoneSelect.value = "auto";
+      }
+    }
+
+    function isFixedUtcZone(zone) {
+      return /^UTC[+-]\d{1,2}$/.test(zone);
+    }
+
+    function getFixedUtcOffsetMinutes(zone) {
+      if (zone === "UTC+0") return 0;
+      const match = zone.match(/^UTC([+-]\d{1,2})$/);
+      return match ? Number(match[1]) * 60 : 0;
+    }
+
+    function getFixedUtcParts(date, offsetMinutes) {
+      const shifted = new Date(date.getTime() + offsetMinutes * 60000);
+      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+      return {
+        weekday: weekdays[shifted.getUTCDay()],
+        year: shifted.getUTCFullYear(),
+        month: shifted.getUTCMonth() + 1,
+        day: shifted.getUTCDate(),
+        hour: shifted.getUTCHours(),
+        minute: shifted.getUTCMinutes(),
+        second: shifted.getUTCSeconds()
+      };
+    }
+
+    function pad(num) { return String(num).padStart(2, "0"); }
+
+    function locationLine(market) {
+      return `${market.city[currentLang]} • ${market.country[currentLang]}`;
+    }
+
+    function marketLabel(market) {
+      return market.label[currentLang];
+    }
+
+    function timeToMinutes(time) {
+      const [h, m] = time.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function minutesToTime(minutes) {
+      let fixed = Math.round(minutes);
+      while (fixed < 0) fixed += 1440;
+      while (fixed >= 1440) fixed -= 1440;
+      const h = Math.floor(fixed / 60);
+      const m = fixed % 60;
+      return `${pad(h)}:${pad(m)}`;
+    }
+
+    function minutesToAngle(minutes) {
+      return (minutes / 1440) * 360;
+    }
+
+    function polarToCartesian(radius, angleDeg) {
+      const angleRad = (angleDeg - 90) * Math.PI / 180;
+      return { x: CX + radius * Math.cos(angleRad), y: CY + radius * Math.sin(angleRad) };
+    }
+
+    function arcPath(radius, startAngle, endAngle, sweep = 1) {
+      if (sweep === 1) {
+        while (endAngle < startAngle) endAngle += 360;
+      } else {
+        while (startAngle < endAngle) startAngle += 360;
+      }
+
+      const start = polarToCartesian(radius, startAngle);
+      const end = polarToCartesian(radius, endAngle);
+      const span = Math.abs(endAngle - startAngle);
+      const largeArc = span <= 180 ? 0 : 1;
+
+      return ["M", start.x, start.y, "A", radius, radius, 0, largeArc, sweep, end.x, end.y].join(" ");
+    }
+
+    function getClockTimezone() {
+      if (clockTimezoneSelect.value === "auto") {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }
+      return clockTimezoneSelect.value;
+    }
+
+    function getClockLabel() {
+      if (clockTimezoneSelect.value === "auto") {
+        return translations[currentLang].yourTime;
+      }
+
+      const zone = getClockTimezone();
+
+      if (isFixedUtcZone(zone)) {
+        return zone === "UTC+0" ? "UTC±0" : zone;
+      }
+
+      return timezoneLabels[currentLang][zone] || zone;
+    }
+
+    function getZonedParts(date, timezone) {
+      if (isFixedUtcZone(timezone)) {
+        return getFixedUtcParts(date, getFixedUtcOffsetMinutes(timezone));
+      }
+
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: timezone,
+        weekday: "short",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      });
+
+      const parts = formatter.formatToParts(date);
+      const data = {};
+      parts.forEach(part => {
+        if (part.type !== "literal") data[part.type] = part.value;
+      });
+
+      return {
+        weekday: data.weekday,
+        year: Number(data.year),
+        month: Number(data.month),
+        day: Number(data.day),
+        hour: Number(data.hour),
+        minute: Number(data.minute),
+        second: Number(data.second)
+      };
+    }
+
+    function getOffsetMinutes(date, timezone) {
+      if (isFixedUtcZone(timezone)) {
+        return getFixedUtcOffsetMinutes(timezone);
+      }
+
+      const p = getZonedParts(date, timezone);
+      const asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+      return Math.round((asUTC - date.getTime()) / 60000);
+    }
+
+    function marketMinutesToClockMinutes(market, marketMinutes, now, clockTimezone) {
+      const marketOffset = getOffsetMinutes(now, market.timezone);
+      const clockOffset = getOffsetMinutes(now, clockTimezone);
+      return marketMinutes + clockOffset - marketOffset;
+    }
+
+    function marketSessionToClockMinutes(market, session, now, clockTimezone) {
+      return {
+        start: marketMinutesToClockMinutes(market, timeToMinutes(session[0]), now, clockTimezone),
+        end: marketMinutesToClockMinutes(market, timeToMinutes(session[1]), now, clockTimezone)
+      };
+    }
+
+    function normalizeSegments(start, end) {
+      const segments = [];
+      while (start < 0) { start += 1440; end += 1440; }
+      while (start >= 1440) { start -= 1440; end -= 1440; }
+
+      if (end <= 1440) {
+        segments.push([start, end]);
+      } else {
+        segments.push([start, 1440]);
+        segments.push([0, end - 1440]);
+      }
+
+      return segments;
+    }
+
+    function sessionsText(sessions) {
+      return sessions.map(s => `${s[0]}–${s[1]}`).join(" / ");
+    }
+
+    function sessionsInClockText(market, now) {
+      const clockTimezone = getClockTimezone();
+      return market.sessions.map(session => {
+        const converted = marketSessionToClockMinutes(market, session, now, clockTimezone);
+        return `${minutesToTime(converted.start)}–${minutesToTime(converted.end)}`;
+      }).join(" / ");
+    }
+
+    function tradeTimeText(market, now) {
+      return `${sessionsText(market.sessions)} <span>(${sessionsInClockText(market, now)} ${getClockLabel()})</span>`;
+    }
+
+    function formatDuration(ms) {
+      let total = Math.max(0, Math.floor(ms / 1000));
+      const days = Math.floor(total / 86400);
+      total %= 86400;
+      const h = Math.floor(total / 3600);
+      total %= 3600;
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+
+      if (days > 0) return `${days}${translations[currentLang].dayShort} ${pad(h)}:${pad(m)}:${pad(s)}`;
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    function formatMarketDate(parts) {
+      if (currentLang === "en") {
+        return `${pad(parts.month)}/${pad(parts.day)}/${parts.year}`;
+      }
+
+      return `${pad(parts.day)}.${pad(parts.month)}.${parts.year}`;
+    }
+
+    function isWeekend(parts) {
+      const weekday = weekdayMap[parts.weekday];
+      return weekday === 0 || weekday === 6;
+    }
+
+    function getState(market, date) {
+      const parts = getZonedParts(date, market.timezone);
+      const minutesNow = parts.hour * 60 + parts.minute + parts.second / 60;
+
+      if (isWeekend(parts)) {
+        return { isOpen: false, parts, activeSession: null };
+      }
+
+      for (const session of market.sessions) {
+        const start = timeToMinutes(session[0]);
+        const end = timeToMinutes(session[1]);
+        if (minutesNow >= start && minutesNow < end) {
+          return { isOpen: true, parts, activeSession: session };
+        }
+      }
+
+      return { isOpen: false, parts, activeSession: null };
+    }
+
+    function findNextChange(market, now, currentStatus) {
+      let low = now.getTime();
+      let high = low;
+
+      for (let i = 0; i < 45 * 24 * 60; i++) {
+        high += 60000;
+        const status = getState(market, new Date(high)).isOpen;
+        if (status !== currentStatus) break;
+      }
+
+      while (high - low > 1000) {
+        const mid = Math.floor((low + high) / 2);
+        const status = getState(market, new Date(mid)).isOpen;
+        if (status === currentStatus) low = mid;
+        else high = mid;
+      }
+
+      return high;
+    }
+
+    function svgLine(r1, r2, angle, className) {
+      const p1 = polarToCartesian(r1, angle);
+      const p2 = polarToCartesian(r2, angle);
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", p1.x);
+      line.setAttribute("y1", p1.y);
+      line.setAttribute("x2", p2.x);
+      line.setAttribute("y2", p2.y);
+      line.setAttribute("class", className);
+      return line;
+    }
+
+    function svgText(radius, angle, text, className) {
+      const p = polarToCartesian(radius, angle);
+      const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      el.setAttribute("x", p.x);
+      el.setAttribute("y", p.y);
+      el.setAttribute("class", className);
+      el.textContent = text;
+      return el;
+    }
+
+    function svgDot(radius, angle, dotRadius, className) {
+      const p = polarToCartesian(radius, angle);
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", p.x);
+      dot.setAttribute("cy", p.y);
+      dot.setAttribute("r", dotRadius);
+      dot.setAttribute("class", className);
+      return dot;
+    }
+
+    function drawBaseDial() {
+      gridLayer.innerHTML = "";
+      minuteDotsLayer.innerHTML = "";
+      numberLayer.innerHTML = "";
+
+      for (let i = 0; i < 96; i++) {
+        const angle = i * 3.75;
+        const isHour = i % 4 === 0;
+
+        if (!isHour) {
+          gridLayer.appendChild(svgLine(270, 278, angle, "small-tick"));
+        }
+      }
+
+      for (let i = 0; i < 60; i++) {
+        const angle = i * 6;
+        const hasMinuteNumber = i % 5 === 0;
+
+        if (!hasMinuteNumber) {
+          minuteDotsLayer.appendChild(
+            svgDot(230, angle, 1.55, "minute-dot")
+          );
+        }
+      }
+
+      for (let h = 1; h <= 24; h++) {
+        const angle = minutesToAngle(h * 60);
+        numberLayer.appendChild(svgText(256, angle, String(h), "hour-text"));
+      }
+
+      for (let m = 5; m <= 60; m += 5) {
+        const angle = minutesToAngle(m * 24);
+        numberLayer.appendChild(svgText(214, angle, String(m), "minute-text"));
+      }
+
+      for (let h = 0; h < 24; h++) {
+        const angle = minutesToAngle(h * 60);
+        gridLayer.appendChild(svgLine(90, 196, angle, "grid-line"));
+      }
+    }
+
+    function drawArc(radius, startMinutes, endMinutes, className, strokeWidth, targetLayer) {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", arcPath(radius, minutesToAngle(startMinutes), minutesToAngle(endMinutes), 1));
+      path.setAttribute("class", className);
+      path.setAttribute("stroke-width", strokeWidth);
+      targetLayer.appendChild(path);
+    }
+
+    function createArcLabel(market, radius, segment, labelIndex, strokeWidth) {
+      const label = marketLabel(market);
+      const start = segment[0];
+      const end = segment[1];
+      const spanMinutes = end - start;
+
+      if (spanMinutes < 95) return;
+
+      const circumference = 2 * Math.PI * radius;
+      const pxPerMinute = circumference / 1440;
+
+      // keep clear padding on both sides of the label inside the band
+      const sidePadPx = Math.max(22, strokeWidth * 1.15);
+      const sidePadMinutes = sidePadPx / pxPerMinute;
+
+      // rough width estimate of the label
+      const approxLetterPx = currentLang === "ru" ? 8.2 : 7.2;
+      const approxSpacingPx = 0.7;
+      const approxLabelPx = (label.length * approxLetterPx) + ((Math.max(0, label.length - 1)) * approxSpacingPx);
+      const approxLabelMinutes = approxLabelPx / pxPerMinute;
+
+      let usableStart = start + sidePadMinutes;
+      let usableEnd = end - sidePadMinutes;
+
+      if (usableEnd - usableStart < approxLabelMinutes) {
+        // If the band is short, trim the side padding a little, but keep some margin.
+        const reducedPadMinutes = Math.max(6, sidePadMinutes * 0.45);
+        usableStart = start + reducedPadMinutes;
+        usableEnd = end - reducedPadMinutes;
+      }
+
+      if (usableEnd - usableStart < approxLabelMinutes * 0.9) return;
+
+      const mid = (usableStart + usableEnd) / 2;
+      const midAngle = minutesToAngle(mid);
+
+      let startAngle = minutesToAngle(usableStart);
+      let endAngle = minutesToAngle(usableEnd);
+      let sweep = 1;
+
+      // Flip labels on the left side so they stay readable.
+      if (midAngle > 90 && midAngle < 270) {
+        startAngle = minutesToAngle(usableEnd);
+        endAngle = minutesToAngle(usableStart);
+        sweep = 0;
+      }
+
+      const pathId = `label-path-${market.id}-${labelIndex}`;
+      const labelRadius = radius;
+      const labelPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      labelPath.setAttribute("id", pathId);
+      labelPath.setAttribute("d", arcPath(labelRadius, startAngle, endAngle, sweep));
+      defsLayer.appendChild(labelPath);
+
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("class", "market-label");
+
+      // Dynamic font-size so long names fit without touching the arc edges.
+      let fontSize = 12;
+      if (label.length >= 8) fontSize = 11.5;
+      if (label.length >= 10) fontSize = 11;
+      text.setAttribute("font-size", String(fontSize));
+      text.setAttribute("dy", "0.8");
+
+      const textPath = document.createElementNS("http://www.w3.org/2000/svg", "textPath");
+      textPath.setAttribute("href", `#${pathId}`);
+      textPath.setAttribute("startOffset", "50%");
+      textPath.setAttribute("text-anchor", "middle");
+      textPath.textContent = label;
+
+      text.appendChild(textPath);
+      labelLayer.appendChild(text);
+    }
+
+    function drawMarkets(now) {
+      const clockTimezone = getClockTimezone();
+
+      defsLayer.innerHTML = "";
+      sessionLayer.innerHTML = "";
+      liveLayer.innerHTML = "";
+      labelLayer.innerHTML = "";
+
+      const outerRadius = 188;
+      const innerRadius = 96;
+      const step = markets.length > 1 ? Math.min(28, (outerRadius - innerRadius) / (markets.length - 1)) : 0;
+      const strokeWidth = Math.max(21, Math.min(26, step * 0.82 || 24));
+
+      markets.forEach((market, index) => {
+        const radius = outerRadius - index * step;
+        let labelSegment = null;
+        let labelLength = 0;
+
+        market.sessions.forEach(session => {
+          const converted = marketSessionToClockMinutes(market, session, now, clockTimezone);
+          const segments = normalizeSegments(converted.start, converted.end);
+
+          segments.forEach(segment => {
+            drawArc(radius, segment[0], segment[1], "market-session", strokeWidth, sessionLayer);
+            const length = segment[1] - segment[0];
+            if (length > labelLength) {
+              labelLength = length;
+              labelSegment = segment;
+            }
+          });
+        });
+
+        if (labelSegment) createArcLabel(market, radius, labelSegment, index, strokeWidth);
+
+        const state = getState(market, now);
+        if (state.isOpen && state.activeSession) {
+          const marketCurrentMinutes = state.parts.hour * 60 + state.parts.minute + state.parts.second / 60;
+          const progressStart = marketMinutesToClockMinutes(market, timeToMinutes(state.activeSession[0]), now, clockTimezone);
+          const progressEnd = marketMinutesToClockMinutes(market, marketCurrentMinutes, now, clockTimezone);
+          const progressSegments = normalizeSegments(progressStart, progressEnd);
+
+          progressSegments.forEach(segment => {
+            if (segment[1] > segment[0]) {
+              drawArc(radius, segment[0], segment[1], "market-session open", strokeWidth, liveLayer);
+              const dotPoint = polarToCartesian(radius, minutesToAngle(segment[1]));
+              const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+              dot.setAttribute("cx", dotPoint.x);
+              dot.setAttribute("cy", dotPoint.y);
+              dot.setAttribute("r", Math.max(4, strokeWidth * 0.25));
+              dot.setAttribute("class", "live-dot");
+              liveLayer.appendChild(dot);
+            }
+          });
+        }
+      });
+    }
+
+    function updateHands(now) {
+      const clockTimezone = getClockTimezone();
+      const p = getZonedParts(now, clockTimezone);
+
+      const minutes24 = p.hour * 60 + p.minute + p.second / 60;
+      const angle24 = minutesToAngle(minutes24);
+      const minuteAngle = p.minute * 6 + p.second * 0.1;
+      const secondAngle = p.second * 6;
+
+      const pNow = polarToCartesian(145, angle24);
+      const pMinute = polarToCartesian(210, minuteAngle);
+      const pSecond = polarToCartesian(238, secondAngle);
+
+      nowHand.setAttribute("x1", CX);
+      nowHand.setAttribute("y1", CY);
+      nowHand.setAttribute("x2", pNow.x);
+      nowHand.setAttribute("y2", pNow.y);
+
+      minuteHand.setAttribute("x1", CX);
+      minuteHand.setAttribute("y1", CY);
+      minuteHand.setAttribute("x2", pMinute.x);
+      minuteHand.setAttribute("y2", pMinute.y);
+
+      secondHand.setAttribute("x1", CX);
+      secondHand.setAttribute("y1", CY);
+      secondHand.setAttribute("x2", pSecond.x);
+      secondHand.setAttribute("y2", pSecond.y);
+
+      centerTitle.textContent = translations[currentLang].centerTitle;
+      centerTime.textContent = `${pad(p.hour)}:${pad(p.minute)}:${pad(p.second)}`;
+      centerZone.textContent = clockTimezone;
+    }
+
+    function renderCards(now) {
+      cards.innerHTML = "";
+
+      markets.forEach(market => {
+        const state = getState(market, now);
+
+        if (market.nextChangeAt === undefined || market.lastStatus !== state.isOpen || now.getTime() >= market.nextChangeAt) {
+          market.nextChangeAt = findNextChange(market, now, state.isOpen);
+          market.lastStatus = state.isOpen;
+        }
+
+        const left = market.nextChangeAt - now.getTime();
+        const marketTime = `${pad(state.parts.hour)}:${pad(state.parts.minute)}:${pad(state.parts.second)}`;
+        const marketDate = formatMarketDate(state.parts);
+        const timerLabel = state.isOpen
+          ? translations[currentLang].closesIn
+          : translations[currentLang].opensIn;
+
+        const card = document.createElement("article");
+        card.className = `card ${state.isOpen ? "open-card" : "closed-card"}`;
+
+        card.innerHTML = `
+          <div class="card-time-box">
+            <div class="digital">${marketTime}</div>
+            <div class="date-text">${marketDate}</div>
+          </div>
+
+          <div class="card-main">
+            <img class="flag" src="${market.flagImg}" alt="">
+            <div class="name">${locationLine(market)}</div>
+
+            <div class="trade-row">
+              <div class="trade-time">
+                ${tradeTimeText(market, now)}
+              </div>
+
+              <div class="status-row">
+                <div class="timer-pill">
+                  ${timerLabel} ${formatDuration(left)}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        cards.appendChild(card);
+      });
+    }
+
+    function updateStaticTexts() {
+      const t = translations[currentLang];
+
+      document.documentElement.lang = currentLang;
+      document.title = t.pageTitle;
+      pageTitle.textContent = t.pageTitle;
+
+      const nextLangIsEnglish = currentLang === "ru";
+      languageIcon.src = nextLangIsEnglish ? "flags/gb.png" : "flags/ru.png";
+      languageIcon.alt = nextLangIsEnglish ? "English" : "Русский";
+      languageToggle.setAttribute(
+        "aria-label",
+        nextLangIsEnglish ? "Switch to English" : "Переключить на русский"
+      );
+    }
+
+    function resetMarketCache() {
+      markets.forEach(market => {
+        market.nextChangeAt = undefined;
+        market.lastStatus = undefined;
+      });
+    }
+
+    function setLanguage(lang) {
+      if (!translations[lang]) return;
+
+      currentLang = lang;
+      localStorage.setItem("forexClockLang", currentLang);
+
+      updateStaticTexts();
+      buildTimezoneOptions();
+      resetMarketCache();
+      update();
+    }
+
+    function update() {
+      const now = new Date();
+      updateHands(now);
+      drawMarkets(now);
+      renderCards(now);
+    }
+
+    updateStaticTexts();
+    buildTimezoneOptions();
+    drawBaseDial();
+    update();
+
+    languageToggle.addEventListener("click", () => {
+      setLanguage(currentLang === "ru" ? "en" : "ru");
+    });
+
+    clockTimezoneSelect.addEventListener("change", () => {
+      resetMarketCache();
+      update();
+    });
+
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>

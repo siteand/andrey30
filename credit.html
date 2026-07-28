@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кредитный Калькулятор</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ccc;
+            --button-bg: #007bff;
+            --button-text: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            padding-bottom: 60px;
+        }
+
+        .calculator {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .custom-select {
+            position: relative;
+            width: 100%;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .custom-select .cs-trigger {
+            width: 100%;
+            padding: 12px;
+            padding-right: 36px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: normal;
+            position: relative;
+        }
+        .custom-select .cs-trigger::after {
+            content: "";
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-70%) rotate(45deg);
+            opacity: 0.6;
+            transition: transform 0.2s;
+        }
+        .custom-select.open .cs-trigger::after {
+            transform: translateY(-30%) rotate(-135deg);
+        }
+        .custom-select .cs-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            overflow: hidden;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .custom-select.open .cs-menu {
+            display: block;
+        }
+        .custom-select .cs-option {
+            padding: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+        .custom-select .cs-option:hover,
+        .custom-select .cs-option.selected {
+            background: rgba(0, 123, 255, 0.12);
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .term-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .term-row input {
+            flex: 2;
+        }
+
+        .term-row select,
+        .term-row .custom-select {
+            flex: 1;
+        }
+
+
+
+        .down-payment-option {
+            text-align: left;
+            padding: 6px 2px 2px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            color: var(--text-color);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .checkbox-label input {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            accent-color: var(--button-bg);
+            flex: 0 0 auto;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-tip {
+            width: 17px;
+            height: 17px;
+            min-width: 17px;
+            padding: 0;
+            border: 1px solid #aaa;
+            border-radius: 50%;
+            background: transparent;
+            color: #777;
+            font-size: 12px;
+            font-weight: bold;
+            font-style: normal;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            position: relative;
+            flex: 0 0 auto;
+        }
+
+        .info-tip:hover,
+        .info-tip:focus,
+        .info-tip.active {
+            background: rgba(0, 123, 255, 0.10);
+            color: var(--button-bg);
+            border-color: var(--button-bg);
+            outline: none;
+        }
+
+        .info-tip-text {
+            position: absolute;
+            left: 50%;
+            bottom: calc(100% + 8px);
+            transform: translateX(-50%) translateY(4px);
+            width: max-content;
+            max-width: 230px;
+            padding: 7px 9px;
+            border-radius: 7px;
+            background: rgba(30, 30, 30, 0.94);
+            color: #fff;
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 1.3;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.16s, transform 0.16s, visibility 0.16s;
+            z-index: 20;
+        }
+
+        .info-tip-text::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(30, 30, 30, 0.94);
+        }
+
+        .info-tip:hover .info-tip-text,
+        .info-tip:focus .info-tip-text,
+        .info-tip.active .info-tip-text {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .down-payment-fields {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .down-payment-fields.show {
+            display: flex;
+        }
+
+        input[readonly] {
+            opacity: 0.85;
+            cursor: default;
+        }
+
+        .result {
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .result p {
+            display: flex;
+            align-items: baseline;
+            font-weight: normal;
+            color: #777;
+            padding: 4px 0;
+        }
+
+        .result p .label {
+            white-space: nowrap;
+        }
+
+        .result p .dots {
+            flex: 1;
+            border-bottom: 1px dotted #999;
+            margin: 0 6px;
+        }
+
+        .result p b {
+            font-weight: bold;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+
+        .side-back-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: calc((100vw - 400px) / 2);
+            display: none;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .side-back-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+            opacity: 0.45;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+        }
+
+        .side-back-arrow svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .side-back-zone:hover .side-back-arrow {
+            opacity: 0.85;
+            transform: translate(-50%, -50%) translateX(-4px);
+            background-color: rgba(128, 128, 128, 0.10);
+        }
+
+        @media (min-width: 769px) {
+            .side-back-zone {
+                display: block;
+            }
+        }
+footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f2f5;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            color: gray;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator {
+                max-width: 100%;
+            }
+
+            input, select, button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1e1e1e;
+                --text-color: #f4f4f9;
+                --input-bg: #333;
+                --input-border: #555;
+                --button-bg: #0d6efd;
+                --button-text: #fff;
+            }
+
+            footer {
+                background-color: #1e1e1e;
+                color: gray;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="side-back-zone" aria-label="Вернуться на главную" onclick="event.preventDefault(); window.location.replace('index.html');">
+        <span class="side-back-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18L9 12L15 6"></path>
+            </svg>
+        </span>
+    </a>
+
+    <div class="calculator">
+        <h2>Кредитный Калькулятор</h2>
+
+        <div class="down-payment-option">
+            <div class="checkbox-row">
+                <label class="checkbox-label" for="useDownPayment">
+                    <input type="checkbox" id="useDownPayment">
+                    <span>Учесть первоначальный взнос</span>
+                </label>
+                <button class="info-tip" type="button" aria-label="Подсказка: подходит для ипотеки, авто или крупной покупки">
+                    i
+                    <span class="info-tip-text">Подходит для ипотеки, авто или крупной покупки.</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="down-payment-fields" id="downPaymentFields">
+            <input type="text" inputmode="decimal" id="purchasePrice" placeholder="Стоимость покупки (₽)" />
+            <input type="text" inputmode="decimal" id="downPayment" placeholder="Первоначальный взнос (₽)" />
+        </div>
+
+        <input type="text" inputmode="decimal" id="amount" placeholder="Сумма кредита (₽)" />
+
+        <div class="custom-select" id="rateType" data-value="year">
+            <button type="button" class="cs-trigger">Процентная ставка в год</button>
+            <div class="cs-menu">
+                <div class="cs-option selected" data-value="year">Процентная ставка в год</div>
+                <div class="cs-option" data-value="month">Процентная ставка в месяц</div>
+                <div class="cs-option" data-value="day">Процентная ставка в день</div>
+            </div>
+        </div>
+
+        <input type="number" id="rate" placeholder="Процентная ставка (%)" min="0" step="any" />
+
+        <div class="term-row">
+            <input type="number" id="term" placeholder="Срок" min="0" step="any" />
+            <div class="custom-select" id="termType" data-value="years">
+                <button type="button" class="cs-trigger">лет</button>
+                <div class="cs-menu">
+                    <div class="cs-option selected" data-value="years">лет</div>
+                    <div class="cs-option" data-value="months">месяцев</div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="calculateLoan()">Рассчитать</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function initCustomSelects() {
+            document.querySelectorAll(".custom-select").forEach(sel => {
+                const trigger = sel.querySelector(".cs-trigger");
+                const options = sel.querySelectorAll(".cs-option");
+
+                trigger.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll(".custom-select.open").forEach(o => {
+                        if (o !== sel) o.classList.remove("open");
+                    });
+                    sel.classList.toggle("open");
+                });
+
+                options.forEach(opt => {
+                    opt.addEventListener("click", () => {
+                        const value = opt.dataset.value;
+                        const label = opt.textContent;
+                        sel.dataset.value = value;
+                        trigger.textContent = label;
+                        options.forEach(o => o.classList.remove("selected"));
+                        opt.classList.add("selected");
+                        sel.classList.remove("open");
+                    });
+                });
+            });
+
+            document.addEventListener("click", () => {
+                document.querySelectorAll(".custom-select.open").forEach(o => o.classList.remove("open"));
+            });
+        }
+        initCustomSelects();
+
+        const infoTip = document.querySelector(".info-tip");
+        if (infoTip) {
+            infoTip.addEventListener("click", (e) => {
+                e.stopPropagation();
+                infoTip.classList.toggle("active");
+            });
+            document.addEventListener("click", () => infoTip.classList.remove("active"));
+        }
+
+        const useDownPayment = document.getElementById("useDownPayment");
+        const downPaymentFields = document.getElementById("downPaymentFields");
+        const purchasePriceInput = document.getElementById("purchasePrice");
+        const downPaymentInput = document.getElementById("downPayment");
+        const amountInput = document.getElementById("amount");
+        const resultBox = document.getElementById("result");
+
+        function parseMoney(value) {
+            return parseFloat(String(value).replace(/\s/g, "").replace(",", "."));
+        }
+
+        function formatInputMoney(n) {
+            if (!isFinite(n) || n <= 0) return "";
+            return n.toLocaleString("ru-RU", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function setupMoneyInput(el, afterInput) {
+            el.addEventListener("input", () => {
+                const oldValue = el.value;
+                const cursorPos = el.selectionStart;
+
+                let raw = oldValue.replace(/[^\d.,]/g, "").replace(",", ".");
+                const parts = raw.split(".");
+                if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+
+                const spacesBeforeOld = (oldValue.slice(0, cursorPos).match(/\s/g) || []).length;
+                const digitsBeforeCursor = cursorPos - spacesBeforeOld;
+
+                const dotIdx = raw.indexOf(".");
+                let intPart = dotIdx >= 0 ? raw.slice(0, dotIdx) : raw;
+                const fracPart = dotIdx >= 0 ? raw.slice(dotIdx) : "";
+                intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                const newValue = intPart + fracPart;
+
+                el.value = newValue;
+
+                let newCursor = 0;
+                let digitCount = 0;
+                for (let i = 0; i < newValue.length && digitCount < digitsBeforeCursor; i++) {
+                    if (/\d/.test(newValue[i])) digitCount++;
+                    newCursor = i + 1;
+                }
+                if (digitsBeforeCursor === 0) newCursor = 0;
+                try { el.setSelectionRange(newCursor, newCursor); } catch (e) {}
+
+                if (typeof afterInput === "function") afterInput();
+            });
+        }
+
+        function updateAmountMode() {
+            const enabled = useDownPayment.checked;
+            downPaymentFields.classList.toggle("show", enabled);
+            amountInput.readOnly = enabled;
+            amountInput.placeholder = enabled ? "Сумма кредита после взноса (₽)" : "Сумма кредита (₽)";
+            resultBox.innerHTML = "";
+
+            if (enabled) {
+                updateCreditAmount();
+            }
+        }
+
+        function updateCreditAmount() {
+            if (!useDownPayment.checked) return;
+
+            const purchasePrice = parseMoney(purchasePriceInput.value);
+            const downPayment = parseMoney(downPaymentInput.value) || 0;
+
+            if (!isNaN(purchasePrice) && purchasePrice > 0 && !isNaN(downPayment) && downPayment >= 0) {
+                amountInput.value = formatInputMoney(purchasePrice - downPayment);
+            } else {
+                amountInput.value = "";
+            }
+        }
+
+        useDownPayment.addEventListener("change", updateAmountMode);
+        setupMoneyInput(amountInput);
+        setupMoneyInput(purchasePriceInput, updateCreditAmount);
+        setupMoneyInput(downPaymentInput, updateCreditAmount);
+
+        function calculateLoan() {
+            let amount = parseMoney(amountInput.value);
+            let purchasePrice = null;
+            let downPayment = null;
+
+            if (useDownPayment.checked) {
+                purchasePrice = parseMoney(purchasePriceInput.value);
+                downPayment = parseMoney(downPaymentInput.value) || 0;
+
+                if (isNaN(purchasePrice) || purchasePrice <= 0 || isNaN(downPayment) || downPayment < 0) {
+                    resultBox.innerText = "Введите корректную стоимость покупки и первоначальный взнос";
+                    return;
+                }
+
+                amount = purchasePrice - downPayment;
+
+                if (amount <= 0) {
+                    resultBox.innerText = "Первоначальный взнос должен быть меньше стоимости покупки";
+                    return;
+                }
+
+                amountInput.value = formatInputMoney(amount);
+            }
+
+            const rate = parseFloat(document.getElementById("rate").value);
+            const rateType = document.getElementById("rateType").dataset.value;
+            const term = parseFloat(document.getElementById("term").value);
+            const termType = document.getElementById("termType").dataset.value;
+
+            if (isNaN(amount) || isNaN(rate) || isNaN(term) || amount <= 0 || rate <= 0 || term <= 0) {
+                resultBox.innerText = "Введите корректные данные";
+                return;
+            }
+
+            let rateYear;
+            if (rateType === "year") {
+                rateYear = rate;
+            } else if (rateType === "month") {
+                rateYear = (Math.pow(1 + rate / 100, 12) - 1) * 100;
+            } else {
+                rateYear = (Math.pow(1 + rate / 100, 365) - 1) * 100;
+            }
+
+            const rateMonth = rateYear / 12 / 100;
+            const termMonths = termType === "years" ? term * 12 : term;
+
+            const monthlyPayment = (amount * rateMonth) / (1 - Math.pow(1 + rateMonth, -termMonths));
+            const totalPayments = monthlyPayment * termMonths;
+            const totalInterest = totalPayments - amount;
+
+            const fmt = n => {
+                const hasKopecks = Math.round(n * 100) % 100 !== 0;
+                return n.toLocaleString("ru-RU", {
+                    minimumFractionDigits: hasKopecks ? 2 : 0,
+                    maximumFractionDigits: 2
+                });
+            };
+
+            function plural(n, forms) {
+                const abs = Math.abs(n) % 100;
+                const n1 = abs % 10;
+                if (abs > 10 && abs < 20) return forms[2];
+                if (n1 > 1 && n1 < 5) return forms[1];
+                if (n1 === 1) return forms[0];
+                return forms[2];
+            }
+
+            function formatTerm(months) {
+                months = Math.round(months);
+                const y = Math.floor(months / 12);
+                const m = months % 12;
+                const parts = [];
+                if (y > 0) parts.push(`${y} ${plural(y, ["год", "года", "лет"])}`);
+                if (m > 0) parts.push(`${m} ${plural(m, ["месяц", "месяца", "месяцев"])}`);
+                if (parts.length === 0) parts.push(`0 ${plural(0, ["месяц", "месяца", "месяцев"])}`);
+                return parts.join(" ");
+            }
+
+            const downPaymentRows = useDownPayment.checked ? `
+                <p><span class="label">Стоимость покупки:</span><span class="dots"></span><b>${fmt(purchasePrice)} ₽</b></p>
+                <p><span class="label">Первоначальный взнос:</span><span class="dots"></span><b>${fmt(downPayment)} ₽</b></p>
+            ` : "";
+
+            resultBox.innerHTML = `
+                ${downPaymentRows}
+                <p><span class="label">Сумма кредита:</span><span class="dots"></span><b>${fmt(amount)} ₽</b></p>
+                <p><span class="label">Эффективная годовая ставка:</span><span class="dots"></span><b>${fmt(rateYear)} %</b></p>
+                <p><span class="label">Срок кредита:</span><span class="dots"></span><b>${formatTerm(termMonths)} (${Math.round(termMonths)} мес.)</b></p>
+                <p><span class="label">Ежемесячный платеж:</span><span class="dots"></span><b>${fmt(monthlyPayment)} ₽</b></p>
+                <p><span class="label">Сумма всех платежей:</span><span class="dots"></span><b>${fmt(totalPayments)} ₽</b></p>
+                <p><span class="label">Переплата по процентам:</span><span class="dots"></span><b>${fmt(totalInterest)} ₽</b></p>
+            `;
+        }
+
+        document.querySelectorAll("#amount, #purchasePrice, #downPayment, #rate, #term").forEach(el => {
+            el.addEventListener("keydown", e => {
+                if (e.key === "Enter") calculateLoan();
+            });
+        });
+    </script>
+
+    <footer style="
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    ">
+      © Andrey30
+      <span aria-hidden="true"> · </span>
+      <a href="privacy.html" style="
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      ">
+        Политика конфиденциальности
+      </a>
+    </footer>
+    <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+
+</body>
+</html>

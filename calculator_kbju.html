@@ -1,0 +1,2797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор КБЖУ на 100 г</title>
+    <style>
+        :root {
+            --history-accent: #b77900;
+            --history-accent-hover: #8a5a00;
+            --history-accent-soft: rgba(255, 193, 7, 0.12);
+            --danger-accent: #d9534f;
+            --danger-accent-soft: #ffecec;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            padding-top: 20px;
+            background-color: #ffffff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        h1, h3, h4 { text-align: center; }
+        label, input, button {
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group { margin-bottom: 15px; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background-color: #45a049; }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+        }
+        .button-row button { margin: 5px 0; }
+        .reset-btn {
+            background-color: #d9534f;
+        }
+        .reset-btn:hover {
+            background-color: #c9302c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th { background-color: #f2f2f2; }
+        .total-row { font-weight: bold; }
+        .total-table { margin-top: 20px; }
+        .on-gram-table { background-color: #f4f4f9; }
+        .on-100g-table {
+            background-color: #e8f9e8;
+            color: #4CAF50;
+        }
+
+        .delete-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 4px 10px;
+            width: auto;
+            margin: 0;
+            font-size: 14px;
+        }
+        .delete-btn:hover { background-color: #c9302c; }
+
+
+        .reset-btn,
+        .reset-btn:hover,
+        .delete-btn,
+        .delete-btn:hover {
+            color: #ffffff;
+        }
+
+        .product-name-wrapper {
+            position: relative;
+        }
+
+        .product-name-wrapper input {
+            padding-right: 112px;
+        }
+
+        .history-toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            width: auto;
+            height: 32px;
+            margin: 0;
+            padding: 0 8px;
+            background: transparent;
+            color: var(--history-accent);
+            border: none;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1;
+            white-space: nowrap;
+            box-shadow: none;
+        }
+
+        .history-toggle-text {
+            display: inline-block;
+        }
+
+        .history-toggle-btn.has-history {
+            color: var(--history-accent);
+        }
+
+        .history-toggle-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .history-toggle-btn:hover {
+            background-color: var(--history-accent-soft);
+            color: var(--history-accent-hover);
+        }
+
+        .product-history-panel {
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 4px);
+            z-index: 20;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .product-history-panel.is-open {
+            display: block;
+        }
+
+        .history-row {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .history-use-btn {
+            flex: 1;
+            width: auto;
+            margin: 0;
+            padding: 9px 12px;
+            background: transparent;
+            color: inherit;
+            border: none;
+            border-radius: 0;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .history-use-btn:hover {
+            background-color: #f7f7f7;
+        }
+
+        .history-delete-btn {
+            width: 30px;
+            min-width: 30px;
+            height: 30px;
+            margin: 4px 6px 4px 0;
+            padding: 0;
+            background: transparent;
+            color: #999;
+            border: none;
+            border-radius: 50%;
+            font-size: 17px;
+            line-height: 1;
+        }
+
+        .history-delete-btn:hover {
+            background-color: var(--danger-accent-soft);
+            color: var(--danger-accent);
+        }
+
+        .history-empty {
+            padding: 10px 12px;
+            color: #777;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            width: 100%;
+            padding: 8px;
+            background-color: #fafafa;
+            box-sizing: border-box;
+            text-align: right;
+        }
+
+        .history-footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-left: auto;
+        }
+
+        .history-action-btn {
+            width: auto;
+            margin: 0;
+            padding: 6px 10px;
+            background: transparent;
+            color: #777;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .history-action-btn:hover {
+            background-color: #f0f0f0;
+            color: #222;
+        }
+
+        .import-history-btn {
+            margin-left: 0;
+        }
+
+        .clear-history-btn {
+            color: var(--danger-accent);
+        }
+
+        .clear-history-btn:hover {
+            background-color: var(--danger-accent-soft);
+            color: var(--danger-accent);
+        }
+
+
+        .product-list-heading-row {
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .product-list-heading-row h3 {
+            margin: 0;
+            text-align: center;
+        }
+
+        .list-history-header-cell {
+            position: relative;
+            width: 1%;
+            min-width: 112px;
+            white-space: nowrap;
+            padding: 4px 6px;
+        }
+
+        .product-list-history-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+        }
+
+        .list-history-toggle-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            width: auto;
+            height: 28px;
+            margin: 0;
+            padding: 0 6px;
+            background: transparent;
+            color: var(--history-accent);
+            border: none;
+            border-radius: 14px;
+            font-size: 12px;
+            line-height: 1;
+            white-space: nowrap;
+            box-shadow: none;
+        }
+
+        .list-history-toggle-btn:hover {
+            background-color: var(--history-accent-soft);
+            color: var(--history-accent-hover);
+        }
+
+        .list-history-toggle-btn.has-list-history {
+            color: var(--history-accent);
+        }
+
+        .list-history-toggle-text {
+            display: inline-block;
+        }
+
+        .list-history-toggle-btn svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .list-history-toggle-btn.is-saved svg,
+        .list-history-toggle-btn.is-saved .list-history-toggle-text {
+            display: none;
+        }
+
+        .list-history-toggle-btn.is-saved::before {
+            content: "✓";
+            font-size: 16px;
+            line-height: 1;
+            color: #4CAF50;
+        }
+
+
+        .list-history-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: auto;
+            z-index: 1000;
+            width: min(800px, calc(100vw - 40px));
+            min-width: 0;
+            max-width: calc(100vw - 40px);
+            max-height: 320px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .list-history-panel.is-open {
+            display: block;
+        }
+
+        .list-history-menu-action,
+        .list-history-save-action {
+            width: auto;
+            margin: 0;
+            padding: 6px 8px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .list-history-menu-action {
+            color: #777;
+        }
+
+        .list-history-menu-action.import-list-history-action,
+        .list-history-menu-action.export-list-history-action {
+            color: #777;
+        }
+
+        .list-history-save-action {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .list-history-menu-action:hover:not(:disabled) {
+            background-color: #f0f0f0;
+            color: #222;
+        }
+
+        .list-history-save-action:hover:not(:disabled) {
+            background-color: rgba(76, 175, 80, 0.10);
+            color: #1b5e20;
+        }
+
+        .list-history-save-action:disabled,
+        .list-history-menu-action:disabled {
+            color: #aaa;
+            font-weight: 400;
+            cursor: default;
+        }
+
+        .list-history-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 5px;
+            align-items: center;
+            padding: 6px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .list-history-item-btn {
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 6px 8px;
+            background: transparent;
+            color: inherit;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .list-history-item-btn:hover {
+            background-color: #f7f7f7;
+        }
+
+        .list-history-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+            overflow-wrap: anywhere;
+            font-size: 13px;
+        }
+
+        .list-history-meta {
+            color: #777;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .list-history-delete-btn,
+        .list-history-clear-btn {
+            width: auto;
+            margin: 0;
+            padding: 5px 8px;
+            background: transparent;
+            color: #777;
+            border: none;
+            border-radius: 14px;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        .list-history-delete-btn {
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            color: #999;
+            font-size: 17px;
+            line-height: 1;
+        }
+
+        .list-history-clear-btn {
+            color: var(--danger-accent);
+        }
+
+        .list-history-delete-btn:hover,
+        .list-history-clear-btn:hover {
+            background-color: var(--danger-accent-soft);
+            color: var(--danger-accent);
+        }
+
+        .list-history-empty {
+            padding: 10px 12px;
+            color: #777;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .list-history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 6px;
+            background-color: #fafafa;
+        }
+
+        .list-history-footer-left,
+        .list-history-footer-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .list-history-footer-left {
+            justify-content: flex-start;
+        }
+
+        .list-history-footer-right {
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        .list-history-menu-action.import-list-history-action,
+        .list-history-menu-action.export-list-history-action {
+            color: #777;
+        }
+
+        .list-history-save-action {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .list-history-clear-btn,
+        .clear-history-btn {
+            color: var(--danger-accent);
+        }
+
+        .reset-btn {
+            background-color: #d9534f;
+            color: #fff;
+        }
+
+        .reset-btn:hover {
+            background-color: #c9302c;
+            color: #fff;
+        }
+
+        .delete-btn {
+            background-color: #d9534f;
+            color: #fff;
+        }
+
+        .delete-btn:hover {
+            background-color: #c9302c;
+            color: #fff;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+
+        .side-back-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: calc((100vw - 800px) / 2);
+            display: none;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .side-back-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+            opacity: 0.45;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+        }
+
+        .side-back-arrow svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .side-back-zone:hover .side-back-arrow {
+            opacity: 0.85;
+            transform: translate(-50%, -50%) translateX(-4px);
+            background-color: rgba(128, 128, 128, 0.10);
+        }
+
+        @media (min-width: 769px) {
+            .side-back-zone {
+                display: block;
+            }
+        }
+
+        @media (max-width: 600px) {
+            label, input, button { font-size: 14px; }
+            table { font-size: 12px; }
+            .form-group { margin-bottom: 10px; }
+            .total-table { font-size: 14px; }
+            th, td { padding: 4px; }
+            .product-name-wrapper input { padding-right: 48px; }
+            .history-toggle-btn {
+                width: 32px;
+                padding: 0;
+                border-radius: 50%;
+            }
+            .history-toggle-text { display: none; }
+
+
+            .product-list-heading-row {
+                margin-top: 16px;
+            }
+            .list-history-header-cell {
+                min-width: 38px;
+                padding: 2px 3px;
+            }
+            .list-history-toggle-btn {
+                width: 30px;
+                height: 30px;
+                padding: 0;
+                border-radius: 50%;
+            }
+            .list-history-toggle-text {
+                display: none;
+            }
+            .list-history-panel {
+                width: calc(100vw - 40px);
+                max-width: calc(100vw - 40px);
+            }
+            .list-history-row {
+                gap: 4px;
+                padding: 6px;
+            }
+        }
+
+        .about-project {
+            margin-top: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .about-project p {
+            margin: 10px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .about-project span {
+            color: #4CAF50;
+            font-size: 14px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --history-accent: #f2c94c;
+                --history-accent-hover: #ffe58a;
+                --history-accent-soft: rgba(242, 201, 76, 0.14);
+                --danger-accent: #d9534f;
+                --danger-accent-soft: #4a2a2a;
+            }
+
+            body {
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+            }
+            input, button {
+                background-color: #333;
+                color: #e0e0e0;
+                border: 1px solid #555;
+            }
+            button {
+                background-color: #4CAF50;
+                color: white;
+            }
+            button:hover { background-color: #45a049; }
+            .reset-btn { background-color: #d9534f; color: white; border: none; }
+            .reset-btn:hover { background-color: #c9302c; color: white; }
+            .delete-btn { background-color: #d9534f; color: white; border: none; }
+            .delete-btn:hover { background-color: #c9302c; color: white; }
+            .history-toggle-btn {
+                color: var(--history-accent);
+                border: none;
+                background: transparent;
+                box-shadow: none;
+            }
+            .history-toggle-btn:hover {
+                background-color: var(--history-accent-soft);
+                color: var(--history-accent-hover);
+            }
+            .product-history-panel {
+                background-color: #2d2d2d;
+                border-color: #555;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+            }
+            .history-row { border-bottom-color: #444; }
+            .history-use-btn {
+                background: transparent;
+                color: #e0e0e0;
+                border: none;
+            }
+            .history-use-btn:hover { background-color: #383838; }
+            .history-delete-btn {
+                background: transparent;
+                color: #bdbdbd;
+                border: none;
+            }
+            .history-delete-btn:hover {
+                background-color: var(--danger-accent-soft);
+                color: var(--danger-accent);
+            }
+            .history-empty { color: #aaa; }
+            .history-footer { background-color: #262626; }
+            .history-footer-actions { justify-content: flex-end; }
+            .clear-history-btn {
+                background: transparent;
+                color: var(--danger-accent);
+                border: none;
+            }
+            .clear-history-btn:hover {
+                background-color: var(--danger-accent-soft);
+                color: var(--danger-accent);
+            }
+
+            .list-history-toggle-btn {
+                background: transparent;
+                color: var(--history-accent);
+                border: none;
+                box-shadow: none;
+            }
+            .list-history-toggle-btn:hover {
+                background-color: var(--history-accent-soft);
+                color: var(--history-accent-hover);
+            }
+            .list-history-toggle-btn.has-list-history { color: var(--history-accent); }
+            .list-history-panel {
+                background-color: #2d2d2d;
+                border-color: #555;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.30);
+            }
+            .list-history-footer { background-color: #262626; }
+            .list-history-row { border-bottom-color: #444; }
+            .list-history-meta,
+            .list-history-empty { color: #aaa; }
+            .list-history-save-action,
+            .list-history-menu-action,
+            .list-history-item-btn,
+            .list-history-delete-btn,
+            .list-history-clear-btn {
+                background: transparent;
+                color: #bdbdbd;
+                border: none;
+            }
+            .list-history-menu-action {
+                color: #aaa;
+            }
+            .list-history-save-action {
+                color: #81c784;
+            }
+            .list-history-clear-btn {
+                color: var(--danger-accent);
+            }
+            .list-history-save-action:hover:not(:disabled) {
+                background-color: rgba(76, 175, 80, 0.16);
+                color: #a5d6a7;
+            }
+            .list-history-menu-action:hover:not(:disabled),
+            .list-history-item-btn:hover {
+                background-color: #444;
+                color: #ffffff;
+            }
+            .list-history-save-action:disabled,
+            .list-history-menu-action:disabled { color: #777; }
+            .list-history-delete-btn:hover,
+            .list-history-clear-btn:hover {
+                background-color: var(--danger-accent-soft);
+                color: var(--danger-accent);
+            }
+
+            table { border-color: #555; }
+            th, td { border-color: #555; }
+            th {
+                background-color: #333;
+                color: #e0e0e0;
+            }
+            .on-gram-table { background-color: #2d2d2d; }
+            .on-100g-table {
+                background-color: #1e3d1e;
+                color: #4CAF50;
+            }
+            .about-project {
+                background-color: #2d2d2d;
+                border-color: #555;
+            }
+            .about-project p { color: #e0e0e0; }
+            .about-project span { color: #4CAF50; }
+        }
+    
+
+        .product-history-panel,
+        .list-history-panel {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .list-history-panel {
+            position: fixed;
+            z-index: 1000;
+            max-height: 320px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .list-history-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 0;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .list-history-item-btn {
+            flex: 1;
+            width: auto;
+            min-width: 0;
+            margin: 0;
+            padding: 9px 12px;
+            background: transparent !important;
+            color: inherit;
+            border: none !important;
+            border-radius: 0;
+            text-align: left;
+            font-size: 14px;
+            box-shadow: none !important;
+        }
+
+        .list-history-item-btn:hover {
+            background-color: #f7f7f7 !important;
+            color: inherit;
+        }
+
+        .list-history-title {
+            margin-bottom: 2px;
+            font-size: 14px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .list-history-meta {
+            color: #777;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .list-history-delete-btn {
+            width: 30px;
+            min-width: 30px;
+            height: 30px;
+            margin: 4px 6px 4px 0;
+            padding: 0;
+            background: transparent !important;
+            color: #999;
+            border: none !important;
+            border-radius: 50%;
+            font-size: 17px;
+            line-height: 1;
+            box-shadow: none !important;
+        }
+
+        .list-history-delete-btn:hover {
+            background-color: var(--danger-accent-soft) !important;
+            color: var(--danger-accent) !important;
+        }
+
+        .list-history-empty {
+            padding: 10px 12px;
+            color: #777;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .history-footer,
+        .list-history-footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            width: 100%;
+            padding: 8px;
+            background-color: #fafafa;
+            box-sizing: border-box;
+        }
+
+        .history-footer {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .history-footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-left: auto;
+        }
+
+        .list-history-footer {
+            justify-content: space-between;
+        }
+
+        .list-history-footer-left,
+        .list-history-footer-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .list-history-footer-left {
+            justify-content: flex-start;
+        }
+
+        .list-history-footer-right {
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        .history-action-btn,
+        .list-history-menu-action,
+        .list-history-clear-btn,
+        .list-history-save-action {
+            width: auto;
+            margin: 0;
+            padding: 6px 10px;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 6px;
+            box-shadow: none !important;
+            font-size: 13px;
+            line-height: 1.2;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .history-action-btn,
+        .list-history-menu-action,
+        .list-history-menu-action.import-list-history-action,
+        .list-history-menu-action.export-list-history-action {
+            color: #777 !important;
+            font-weight: 400;
+        }
+
+        .history-action-btn:hover,
+        .list-history-menu-action:hover:not(:disabled) {
+            background-color: #f0f0f0 !important;
+            color: #222 !important;
+        }
+
+        .clear-history-btn,
+        .list-history-clear-btn {
+            color: var(--danger-accent) !important;
+            font-weight: 400;
+        }
+
+        .clear-history-btn:hover,
+        .list-history-clear-btn:hover {
+            background-color: var(--danger-accent-soft) !important;
+            color: var(--danger-accent) !important;
+        }
+
+        .list-history-save-action {
+            color: #2e7d32 !important;
+            font-weight: 600;
+        }
+
+        .list-history-save-action:hover:not(:disabled) {
+            background-color: rgba(76, 175, 80, 0.10) !important;
+            color: #1b5e20 !important;
+        }
+
+        .list-history-menu-action:disabled,
+        .list-history-save-action:disabled {
+            background: transparent !important;
+            color: #aaa !important;
+            font-weight: 400;
+            cursor: default;
+            opacity: 0.75;
+        }
+
+        .reset-btn,
+        .reset-btn:hover,
+        .delete-btn,
+        .delete-btn:hover {
+            color: #ffffff !important;
+        }
+
+        .reset-btn {
+            background-color: #d9534f !important;
+        }
+
+        .reset-btn:hover {
+            background-color: #c9302c !important;
+        }
+
+        .delete-btn {
+            background-color: #d9534f !important;
+        }
+
+        .delete-btn:hover {
+            background-color: #c9302c !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .product-history-panel,
+            .list-history-panel {
+                background-color: #2d2d2d;
+                border-color: #555;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+            }
+
+            .history-row,
+            .list-history-row {
+                border-bottom-color: #444;
+            }
+
+            .history-use-btn,
+            .list-history-item-btn {
+                background: transparent !important;
+                color: #e0e0e0;
+                border: none !important;
+            }
+
+            .history-use-btn:hover,
+            .list-history-item-btn:hover {
+                background-color: #383838 !important;
+                color: #e0e0e0;
+            }
+
+            .history-footer,
+            .list-history-footer {
+                background-color: #262626;
+            }
+
+            .history-action-btn,
+            .list-history-menu-action,
+            .list-history-menu-action.import-list-history-action,
+            .list-history-menu-action.export-list-history-action {
+                background: transparent !important;
+                color: #aaa !important;
+                border: none !important;
+            }
+
+            .history-action-btn:hover,
+            .list-history-menu-action:hover:not(:disabled) {
+                background-color: #444 !important;
+                color: #ffffff !important;
+            }
+
+            .clear-history-btn,
+            .list-history-clear-btn {
+                background: transparent !important;
+                color: var(--danger-accent) !important;
+                border: none !important;
+            }
+
+            .clear-history-btn:hover,
+            .list-history-clear-btn:hover,
+            .list-history-delete-btn:hover,
+            .history-delete-btn:hover {
+                background-color: var(--danger-accent-soft) !important;
+                color: var(--danger-accent) !important;
+            }
+
+            .list-history-save-action {
+                background: transparent !important;
+                color: #81c784 !important;
+                border: none !important;
+            }
+
+            .list-history-save-action:hover:not(:disabled) {
+                background-color: rgba(76, 175, 80, 0.16) !important;
+                color: #a5d6a7 !important;
+            }
+
+            .list-history-menu-action:disabled,
+            .list-history-save-action:disabled {
+                background: transparent !important;
+                color: #777 !important;
+            }
+        }
+
+
+        .list-history-panel {
+            width: min(800px, calc(100vw - 40px));
+            min-width: 0;
+            max-width: calc(100vw - 40px);
+        }
+
+        .product-history-panel,
+        .list-history-panel {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-action-btn,
+        .list-history-menu-action,
+        .list-history-clear-btn {
+            width: auto;
+            margin: 0;
+            padding: 6px 10px;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 6px !important;
+            box-shadow: none !important;
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: 400;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .history-action-btn,
+        .list-history-menu-action,
+        .list-history-menu-action.import-list-history-action,
+        .list-history-menu-action.export-list-history-action {
+            color: #777 !important;
+        }
+
+        .history-action-btn:hover:not(:disabled),
+        .list-history-menu-action:hover:not(:disabled) {
+            background-color: #f0f0f0 !important;
+            color: #222 !important;
+        }
+
+        .clear-history-btn,
+        .list-history-clear-btn {
+            color: var(--danger-accent) !important;
+        }
+
+        .clear-history-btn:hover:not(:disabled),
+        .list-history-clear-btn:hover:not(:disabled) {
+            background-color: var(--danger-accent-soft) !important;
+            color: var(--danger-accent) !important;
+        }
+
+        .list-history-save-action {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 6px !important;
+            box-shadow: none !important;
+            color: #2e7d32 !important;
+            font-weight: 600;
+        }
+
+        .list-history-save-action:hover:not(:disabled) {
+            background-color: rgba(76, 175, 80, 0.10) !important;
+            color: #1b5e20 !important;
+        }
+
+        .list-history-menu-action:disabled,
+        .list-history-menu-action.export-list-history-action:disabled,
+        .list-history-save-action:disabled {
+            background: transparent !important;
+            color: #aaa !important;
+            font-weight: 400;
+            opacity: 0.75;
+            cursor: default;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .history-action-btn,
+            .list-history-menu-action,
+            .list-history-menu-action.import-list-history-action,
+            .list-history-menu-action.export-list-history-action {
+                background: transparent !important;
+                color: #aaa !important;
+            }
+
+            .history-action-btn:hover:not(:disabled),
+            .list-history-menu-action:hover:not(:disabled) {
+                background-color: #444 !important;
+                color: #ffffff !important;
+            }
+
+            .clear-history-btn,
+            .list-history-clear-btn {
+                color: var(--danger-accent) !important;
+            }
+
+            .clear-history-btn:hover:not(:disabled),
+            .list-history-clear-btn:hover:not(:disabled) {
+                background-color: var(--danger-accent-soft) !important;
+                color: var(--danger-accent) !important;
+            }
+
+            .list-history-save-action {
+                background: transparent !important;
+                color: #81c784 !important;
+            }
+
+            .list-history-save-action:hover:not(:disabled) {
+                background-color: rgba(76, 175, 80, 0.16) !important;
+                color: #a5d6a7 !important;
+            }
+
+            .list-history-menu-action:disabled,
+            .list-history-menu-action.export-list-history-action:disabled,
+            .list-history-save-action:disabled {
+                background: transparent !important;
+                color: #777 !important;
+            }
+        }
+
+    
+
+        .container {
+            position: relative;
+        }
+
+        .list-history-panel {
+            position: absolute;
+            z-index: 1000;
+        }
+
+        .list-history-panel.is-open {
+            display: block;
+        }
+
+        .history-footer {
+            justify-content: flex-start !important;
+            text-align: left !important;
+        }
+
+        .history-footer-actions {
+            justify-content: flex-start !important;
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        }
+
+        .list-history-footer-left {
+            justify-content: flex-start !important;
+            margin-right: auto !important;
+        }
+
+        .list-history-footer-right {
+            justify-content: flex-end !important;
+            margin-left: auto !important;
+        }
+
+        .list-history-clear-btn {
+            color: var(--danger-accent) !important;
+        }
+
+        .history-footer {
+            justify-content: space-between !important;
+            text-align: left !important;
+        }
+
+        .history-footer-left,
+        .history-footer-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .history-footer-left {
+            justify-content: flex-start !important;
+            margin-right: auto !important;
+        }
+
+        .history-footer-right {
+            justify-content: flex-end !important;
+            margin-left: auto !important;
+        }
+
+        .history-footer-actions {
+            width: auto !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+
+        .history-toggle-btn,
+        .history-toggle-btn.has-history,
+        .list-history-toggle-btn,
+        .list-history-toggle-btn.has-list-history {
+            background: transparent !important;
+            color: #777 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .history-toggle-btn:hover,
+        .list-history-toggle-btn:hover {
+            background: transparent !important;
+            color: #222 !important;
+        }
+
+        .history-toggle-btn svg,
+        .list-history-toggle-btn svg {
+            color: currentColor !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .history-toggle-btn,
+            .history-toggle-btn.has-history,
+            .list-history-toggle-btn,
+            .list-history-toggle-btn.has-list-history {
+                background: transparent !important;
+                color: #bdbdbd !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .history-toggle-btn:hover,
+            .list-history-toggle-btn:hover {
+                background: transparent !important;
+                color: #ffffff !important;
+            }
+        }
+
+    
+        .history-toggle-btn,
+        .history-toggle-btn.has-history {
+            color: #777 !important;
+            font-weight: 400 !important;
+            background: transparent !important;
+        }
+
+        .history-toggle-btn:hover {
+            background: transparent !important;
+            color: #222 !important;
+        }
+
+        .list-history-toggle-btn,
+        .list-history-toggle-btn.has-list-history {
+            color: #444 !important;
+            font-weight: 600 !important;
+            background: transparent !important;
+        }
+
+        .list-history-toggle-btn:hover {
+            background-color: #f0f0f0 !important;
+            color: #222 !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .history-toggle-btn,
+            .history-toggle-btn.has-history {
+                color: #aaa !important;
+                font-weight: 400 !important;
+                background: transparent !important;
+            }
+
+            .history-toggle-btn:hover {
+                background: transparent !important;
+                color: #ffffff !important;
+            }
+
+            .list-history-toggle-btn,
+            .list-history-toggle-btn.has-list-history {
+                color: #e0e0e0 !important;
+                font-weight: 600 !important;
+                background: transparent !important;
+            }
+
+            .list-history-toggle-btn:hover {
+                background-color: #444 !important;
+                color: #ffffff !important;
+            }
+        }
+
+
+        .list-history-header-cell {
+            min-width: 72px;
+            padding: 4px 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .list-history-header-cell .product-list-history-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .list-history-header-cell .list-history-toggle-btn {
+            width: auto;
+            min-width: 0;
+            height: 28px;
+            padding: 0 6px;
+            border-radius: 14px;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .list-history-header-cell {
+                min-width: 38px;
+                padding: 2px 3px;
+            }
+
+            .list-history-header-cell .list-history-toggle-btn {
+                width: 30px;
+                height: 30px;
+                padding: 0;
+                border-radius: 50%;
+            }
+
+            .list-history-header-cell .list-history-toggle-text {
+                display: none;
+            }
+        }
+
+
+        .list-history-header-cell .list-history-toggle-btn {
+            gap: 3px;
+            padding: 0 5px;
+        }
+
+        .list-history-chevron {
+            width: 14px !important;
+            height: 14px !important;
+        }
+
+        @media (max-width: 600px) {
+            .list-history-chevron {
+                width: 18px !important;
+                height: 18px !important;
+            }
+        }
+
+
+        .history-desktop-chevron {
+            width: 14px !important;
+            height: 14px !important;
+            display: block !important;
+            flex: 0 0 auto;
+        }
+
+        .history-mobile-clock {
+            display: none !important;
+        }
+
+        @media (max-width: 600px) {
+            .history-desktop-chevron {
+                display: none !important;
+            }
+
+            .history-mobile-clock {
+                width: 18px !important;
+                height: 18px !important;
+                display: block !important;
+                flex: 0 0 auto;
+            }
+        }
+
+
+        .history-toggle-btn,
+        .list-history-header-cell .list-history-toggle-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            line-height: 1 !important;
+        }
+
+        .history-toggle-text,
+        .list-history-toggle-text {
+            display: inline-flex !important;
+            align-items: center !important;
+            line-height: 1 !important;
+        }
+
+        .list-history-header-cell .list-history-toggle-btn {
+            height: 30px !important;
+            padding: 0 6px !important;
+            font-size: 13px !important;
+        }
+
+        .menu-chevron {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 12px !important;
+            height: 12px !important;
+            flex: 0 0 12px !important;
+            margin-left: 1px;
+            color: currentColor !important;
+        }
+
+        .menu-chevron::before {
+            content: "";
+            display: block;
+            width: 6px;
+            height: 6px;
+            border-right: 1.8px solid currentColor;
+            border-bottom: 1.8px solid currentColor;
+            transform: rotate(45deg);
+            margin-top: -3px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 600px) {
+            .history-desktop-chevron {
+                display: none !important;
+            }
+
+            .list-history-header-cell .list-history-toggle-btn {
+                width: 30px !important;
+                height: 30px !important;
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+
+            .list-history-chevron {
+                width: 14px !important;
+                height: 14px !important;
+                flex-basis: 14px !important;
+                margin-left: 0;
+            }
+
+            .list-history-chevron::before {
+                width: 7px;
+                height: 7px;
+                border-right-width: 2px;
+                border-bottom-width: 2px;
+                margin-top: -3px;
+            }
+        }
+
+
+        .list-history-mobile-icon {
+            display: none !important;
+            color: currentColor !important;
+        }
+
+        @media (max-width: 600px) {
+            .history-toggle-btn,
+            .history-toggle-btn.has-history {
+                width: 32px !important;
+                min-width: 32px !important;
+                height: 32px !important;
+                padding: 0 !important;
+                gap: 0 !important;
+                border-radius: 50% !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .history-toggle-btn .history-toggle-text,
+            .history-toggle-btn .history-desktop-chevron {
+                display: none !important;
+            }
+
+            .history-toggle-btn .history-mobile-clock {
+                display: block !important;
+                width: 18px !important;
+                height: 18px !important;
+                flex: 0 0 18px !important;
+            }
+
+            .list-history-header-cell {
+                width: 34px !important;
+                min-width: 34px !important;
+                max-width: 34px !important;
+                padding: 2px !important;
+            }
+
+            .list-history-header-cell .product-list-history-wrapper {
+                width: 30px !important;
+                min-width: 30px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .list-history-header-cell .list-history-toggle-btn,
+            .list-history-header-cell .list-history-toggle-btn.has-list-history {
+                width: 30px !important;
+                min-width: 30px !important;
+                height: 30px !important;
+                padding: 0 !important;
+                gap: 0 !important;
+                border-radius: 50% !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .list-history-header-cell .list-history-toggle-text,
+            .list-history-header-cell .list-history-chevron {
+                display: none !important;
+            }
+
+            .list-history-header-cell .list-history-mobile-icon {
+                display: block !important;
+                width: 18px !important;
+                height: 18px !important;
+                flex: 0 0 18px !important;
+            }
+        }
+
+
+        @media (max-width: 600px) {
+            .history-mobile-clock {
+                display: block !important;
+            }
+
+            .history-desktop-chevron {
+                display: none !important;
+            }
+
+            .list-history-header-cell .list-history-toggle-text,
+            .list-history-header-cell .list-history-mobile-icon {
+                display: none !important;
+            }
+
+            .list-history-header-cell .list-history-chevron {
+                display: inline-flex !important;
+                width: 14px !important;
+                height: 14px !important;
+                flex: 0 0 14px !important;
+                margin-left: 0 !important;
+            }
+
+            .list-history-header-cell .list-history-toggle-btn {
+                width: 30px !important;
+                min-width: 30px !important;
+                height: 30px !important;
+                padding: 0 !important;
+                gap: 0 !important;
+                border-radius: 50% !important;
+            }
+        }
+
+</style>
+</head>
+<body>
+    <a href="index.html" class="side-back-zone" aria-label="Вернуться на главную" onclick="window.location.replace('index.html'); return false;">
+        <span class="side-back-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18L9 12L15 6"></path>
+            </svg>
+        </span>
+    </a>
+
+    <div class="container">
+        <h1>Калькулятор КБЖУ на 100 грамм</h1>
+
+        <div class="form-group">
+            <label for="productName">Название продукта:</label>
+            <div class="product-name-wrapper" id="productNameWrapper">
+                <input type="text" id="productName" placeholder="Введите название продукта" autocomplete="off">
+                <button id="historyToggleBtn" class="history-toggle-btn" type="button" title="Недавние продукты" aria-label="Недавние продукты">
+                    <span class="history-toggle-text">Недавние</span>
+                    <span class="menu-chevron history-desktop-chevron" aria-hidden="true"></span>
+                    <svg class="history-mobile-clock" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="8"></circle>
+                        <path d="M12 8v5l3 2"></path>
+                    </svg>
+                </button>
+                <div id="productHistoryPanel" class="product-history-panel"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="weight">Вес порции (г):</label>
+            <input type="number" id="weight" placeholder="Введите вес порции" min="0" step="any">
+        </div>
+        <div class="form-group">
+            <label for="calories">Калории (ккал) на 100 г:</label>
+            <input type="number" id="calories" placeholder="Калории на 100 г" min="0" step="any">
+        </div>
+        <div class="form-group">
+            <label for="proteins">Белки (г) на 100 г:</label>
+            <input type="number" id="proteins" placeholder="Белки на 100 г" min="0" step="any">
+        </div>
+        <div class="form-group">
+            <label for="fats">Жиры (г) на 100 г:</label>
+            <input type="number" id="fats" placeholder="Жиры на 100 г" min="0" step="any">
+        </div>
+        <div class="form-group">
+            <label for="carbs">Углеводы (г) на 100 г:</label>
+            <input type="number" id="carbs" placeholder="Углеводы на 100 г" min="0" step="any">
+        </div>
+
+        <div class="button-row">
+            <button id="addBtn" type="button">Добавить продукт</button>
+            <button id="resetBtn" type="button" class="reset-btn">Сбросить всё</button>
+        </div>
+
+        <div class="product-list-heading-row">
+            <h3>Список продуктов</h3>
+        </div>
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>Продукт</th>
+                    <th>Вес (г)</th>
+                    <th>Ккал</th>
+                    <th>Белки</th>
+                    <th>Жиры</th>
+                    <th>Углеводы</th>
+                    <th class="list-history-header-cell">
+                        <div class="product-list-history-wrapper" id="productListHistoryWrapper">
+                            <button id="productListHistoryToggleBtn" type="button" class="list-history-toggle-btn" title="Мои списки" aria-label="Мои списки" aria-expanded="false">
+                                <span class="list-history-toggle-text">Мои списки</span>
+                                <span class="menu-chevron list-history-chevron" aria-hidden="true"></span>
+                                <svg class="list-history-mobile-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8 6h13"></path>
+                                    <path d="M8 12h13"></path>
+                                    <path d="M8 18h13"></path>
+                                    <path d="M3 6h.01"></path>
+                                    <path d="M3 12h.01"></path>
+                                    <path d="M3 18h.01"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div id="productListHistoryPanel" class="list-history-panel"></div>
+
+        <h3>Общий расчет КБЖУ:</h3>
+        <div class="total-table">
+            <h4>Итоговое КБЖУ для всех продуктов</h4>
+            <table class="on-gram-table">
+                <tr><th>Итоговый вес порции (г)</th><td id="totalWeight">0</td></tr>
+                <tr><th>Итоговые калории (ккал)</th><td id="totalCalories">0</td></tr>
+                <tr><th>Итоговые белки (г)</th><td id="totalProteins">0</td></tr>
+                <tr><th>Итоговые жиры (г)</th><td id="totalFats">0</td></tr>
+                <tr><th>Итоговые углеводы (г)</th><td id="totalCarbs">0</td></tr>
+            </table>
+
+            <h4>КБЖУ на 100 грамм</h4>
+            <table class="on-100g-table">
+                <tr><th>Калории (ккал)</th><td id="totalCaloriesPer100g">0</td></tr>
+                <tr><th>Белки (г)</th><td id="totalProteinsPer100g">0</td></tr>
+                <tr><th>Жиры (г)</th><td id="totalFatsPer100g">0</td></tr>
+                <tr><th>Углеводы (г)</th><td id="totalCarbsPer100g">0</td></tr>
+            </table>
+        </div>
+
+        <div class="about-project">
+            <p style="font-weight: bold; font-size: 21px">О калькуляторе</p>
+            <p>Этот калькулятор КБЖУ поможет вам быстро рассчитать количество калорий, белков, жиров и углеводов на 100 грамм продукта.</p>
+            <p>Разработано для удобства спортсменов, людей на диете и всех, кто следит за питанием.</p>
+            <footer style="
+              text-align: center;
+              margin-top: 30px;
+              padding: 15px;
+              color: #666;
+              font-size: 14px;
+              font-family: Arial, sans-serif;
+            ">
+              © Andrey30
+              <span aria-hidden="true"> · </span>
+              <a href="privacy.html" style="
+                color: inherit;
+                text-decoration: underline;
+                text-underline-offset: 3px;
+              ">
+                Политика конфиденциальности
+              </a>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "kbju_products_v1";
+        const HISTORY_STORAGE_KEY = "kbju_product_history_v1";
+        const HISTORY_LIMIT = 50;
+        const LIST_HISTORY_STORAGE_KEY = "kbju_product_lists_history_v1";
+        const LIST_HISTORY_LIMIT = 30;
+        let products = [];
+        let productHistory = [];
+        let productListHistory = [];
+        let showFullHistory = false;
+        let showProductListHistory = false;
+
+        function loadProducts() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) products = JSON.parse(raw);
+            } catch (e) {
+                products = [];
+            }
+            render();
+        }
+
+        function saveProducts() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            } catch (e) { /* ignore */ }
+        }
+
+        function loadProductHistory() {
+            try {
+                const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+                if (raw) productHistory = JSON.parse(raw);
+            } catch (e) {
+                productHistory = [];
+            }
+            renderHistory();
+        }
+
+        function saveProductHistory() {
+            try {
+                localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(productHistory));
+            } catch (e) { /* ignore */ }
+        }
+
+
+        function loadProductListHistory() {
+            try {
+                const raw = localStorage.getItem(LIST_HISTORY_STORAGE_KEY);
+                if (raw) productListHistory = JSON.parse(raw);
+            } catch (e) {
+                productListHistory = [];
+            }
+            renderProductListHistory();
+        }
+
+        function saveProductListHistory() {
+            try {
+                localStorage.setItem(LIST_HISTORY_STORAGE_KEY, JSON.stringify(productListHistory));
+            } catch (e) { /* ignore */ }
+        }
+
+        function setProductListHistoryToggleSaved(isSaved) {
+            const toggleBtn = document.getElementById("productListHistoryToggleBtn");
+            if (!toggleBtn) return;
+            toggleBtn.classList.toggle("is-saved", Boolean(isSaved));
+        }
+
+        function createListHistoryMenuButton(text, onClick, isDisabled) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "list-history-menu-action";
+            btn.textContent = text;
+            btn.disabled = Boolean(isDisabled);
+            btn.addEventListener("click", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!btn.disabled) onClick();
+            });
+            return btn;
+        }
+
+        function getCleanProductsForList(items) {
+            if (!Array.isArray(items)) return [];
+
+            return items.map(item => {
+                if (!item || typeof item.name !== "string") return null;
+
+                const name = item.name.trim();
+                const weight = Number(item.weight);
+                const caloriesPer100g = Number(item.caloriesPer100g);
+                const proteinsPer100g = Number(item.proteinsPer100g);
+                const fatsPer100g = Number(item.fatsPer100g);
+                const carbsPer100g = Number(item.carbsPer100g);
+
+                if (!name || weight <= 0) return null;
+                if ([weight, caloriesPer100g, proteinsPer100g, fatsPer100g, carbsPer100g].some(value => !Number.isFinite(value) || value < 0)) {
+                    return null;
+                }
+
+                return {
+                    name,
+                    weight,
+                    caloriesPer100g,
+                    proteinsPer100g,
+                    fatsPer100g,
+                    carbsPer100g
+                };
+            }).filter(Boolean);
+        }
+
+        function getProductListSignature(savedList) {
+            const cleanProducts = getCleanProductsForList(savedList && savedList.products);
+            return JSON.stringify(cleanProducts);
+        }
+
+        function getCleanProductListHistoryItems(items) {
+            if (!Array.isArray(items)) return [];
+
+            const cleaned = [];
+            const seen = new Set();
+
+            items.forEach(item => {
+                if (!item) return;
+
+                const productsFromItem = Array.isArray(item.products) ? item.products : item;
+                const cleanProducts = getCleanProductsForList(productsFromItem);
+                if (cleanProducts.length === 0) return;
+
+                const title = typeof item.title === "string" && item.title.trim()
+                    ? item.title.trim()
+                    : "Сохранённый список";
+                const createdAtDate = item.createdAt ? new Date(item.createdAt) : new Date();
+                const createdAt = Number.isNaN(createdAtDate.getTime())
+                    ? new Date().toISOString()
+                    : createdAtDate.toISOString();
+
+                const normalized = {
+                    id: typeof item.id === "string" && item.id
+                        ? item.id
+                        : `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    title,
+                    createdAt,
+                    products: cleanProducts
+                };
+
+                const signature = `${normalizeProductName(title)}|${getProductListSignature(normalized)}`;
+                if (seen.has(signature)) return;
+                seen.add(signature);
+                cleaned.push(normalized);
+            });
+
+            return cleaned;
+        }
+
+        function exportProductListHistory() {
+            if (productListHistory.length === 0) {
+                alert("Сохранённых списков пока нет — экспортировать нечего.");
+                return;
+            }
+
+            const data = {
+                type: "kbju_product_lists_history",
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                items: productListHistory
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            const date = new Date().toISOString().slice(0, 10);
+
+            link.href = url;
+            link.download = `kbju-product-lists-${date}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function importProductListHistory() {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "application/json,.json";
+
+            fileInput.addEventListener("change", () => {
+                const file = fileInput.files && fileInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    try {
+                        const parsed = JSON.parse(reader.result);
+                        const sourceItems = Array.isArray(parsed)
+                            ? parsed
+                            : (parsed.items || parsed.lists || parsed.productListHistory || parsed.productLists);
+                        const importedItems = getCleanProductListHistoryItems(sourceItems);
+
+                        if (importedItems.length === 0) {
+                            alert("В этом файле не найдены подходящие списки продуктов.");
+                            return;
+                        }
+
+                        const merged = [...importedItems, ...productListHistory];
+                        productListHistory = getCleanProductListHistoryItems(merged).slice(0, LIST_HISTORY_LIMIT);
+                        saveProductListHistory();
+                        renderProductListHistory();
+                        openProductListHistory();
+                        alert(`Списки импортированы. Загружено: ${importedItems.length}`);
+                    } catch (e) {
+                        alert("Не получилось импортировать списки. Проверьте, что выбран правильный JSON-файл.");
+                    }
+                };
+
+                reader.readAsText(file);
+            });
+
+            fileInput.click();
+        }
+
+        function getTotalsForProducts(items) {
+            return items.reduce((totals, p) => {
+                totals.weight += Number(p.weight) || 0;
+                totals.calories += ((Number(p.caloriesPer100g) || 0) / 100) * (Number(p.weight) || 0);
+                totals.proteins += ((Number(p.proteinsPer100g) || 0) / 100) * (Number(p.weight) || 0);
+                totals.fats += ((Number(p.fatsPer100g) || 0) / 100) * (Number(p.weight) || 0);
+                totals.carbs += ((Number(p.carbsPer100g) || 0) / 100) * (Number(p.weight) || 0);
+                return totals;
+            }, { weight: 0, calories: 0, proteins: 0, fats: 0, carbs: 0 });
+        }
+
+        function getDefaultProductListTitle() {
+            return `Список ${new Date().toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" })}`;
+        }
+
+        function saveCurrentProductListToHistory() {
+            const cleanProducts = getCleanProductsForList(products);
+
+            if (cleanProducts.length === 0) {
+                alert("Список продуктов пустой — сохранять нечего.");
+                return;
+            }
+
+            const defaultTitle = getDefaultProductListTitle();
+            const title = (prompt("Название для этого списка:", defaultTitle) || "").trim();
+
+            if (!title) return;
+
+            productListHistory.unshift({
+                id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                title,
+                createdAt: new Date().toISOString(),
+                products: cleanProducts
+            });
+
+            productListHistory = productListHistory.slice(0, LIST_HISTORY_LIMIT);
+            saveProductListHistory();
+
+            renderProductListHistory();
+            closeProductListHistory();
+
+            setProductListHistoryToggleSaved(true);
+            window.setTimeout(() => setProductListHistoryToggleSaved(false), 900);
+        }
+
+        function positionProductListHistoryPanel() {
+            const panel = document.getElementById("productListHistoryPanel");
+            const toggleBtn = document.getElementById("productListHistoryToggleBtn");
+            const reference = document.getElementById("productNameWrapper") || document.querySelector(".container");
+            const container = document.querySelector(".container");
+            if (!panel || !toggleBtn || !reference || !container) return;
+
+            const referenceRect = reference.getBoundingClientRect();
+            const anchorRect = toggleBtn.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const viewportPadding = 20;
+            const panelWidth = Math.min(
+                referenceRect.width,
+                Math.max(0, window.innerWidth - viewportPadding * 2)
+            );
+
+            const left = Math.max(0, Math.min(
+                referenceRect.left - containerRect.left,
+                containerRect.width - panelWidth
+            ));
+            const topGap = 10;
+            const top = anchorRect.bottom - containerRect.top + topGap;
+
+            panel.style.position = "absolute";
+            panel.style.left = `${Math.round(left)}px`;
+            panel.style.top = `${Math.round(top)}px`;
+            panel.style.width = `${Math.round(panelWidth)}px`;
+            panel.style.minWidth = `${Math.round(panelWidth)}px`;
+            panel.style.maxWidth = `${Math.round(panelWidth)}px`;
+            panel.style.right = "auto";
+            panel.style.boxSizing = "border-box";
+        }
+
+        function openProductListHistory() {
+            const panel = document.getElementById("productListHistoryPanel");
+            const toggleBtn = document.getElementById("productListHistoryToggleBtn");
+            positionProductListHistoryPanel();
+            if (panel) panel.classList.add("is-open");
+            if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "true");
+            showProductListHistory = true;
+        }
+
+        function closeProductListHistory() {
+            const panel = document.getElementById("productListHistoryPanel");
+            const toggleBtn = document.getElementById("productListHistoryToggleBtn");
+            if (panel) panel.classList.remove("is-open");
+            if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "false");
+            showProductListHistory = false;
+        }
+
+        function loadProductListFromHistory(index) {
+            const savedList = productListHistory[index];
+            if (!savedList) return;
+
+            const cleanProducts = getCleanProductsForList(savedList.products);
+            if (cleanProducts.length === 0) {
+                alert("В этом сохранённом списке нет подходящих продуктов.");
+                return;
+            }
+
+            if (products.length > 0 && !confirm("Заменить текущий список продуктов сохранённым списком?")) {
+                return;
+            }
+
+            products = cleanProducts;
+            saveProducts();
+            render();
+            closeProductListHistory();
+
+            const productTable = document.getElementById("productTable");
+            if (productTable && productTable.scrollIntoView) {
+                productTable.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
+
+        function deleteProductListFromHistory(index) {
+            if (!productListHistory[index]) return;
+            if (!confirm("Удалить этот сохранённый список?")) return;
+
+            productListHistory.splice(index, 1);
+            saveProductListHistory();
+            renderProductListHistory();
+
+            if (productListHistory.length === 0) {
+                closeProductListHistory();
+            }
+        }
+
+        function clearProductListHistory() {
+            if (productListHistory.length === 0) return;
+            if (!confirm("Очистить все сохранённые списки?")) return;
+
+            productListHistory = [];
+            saveProductListHistory();
+            renderProductListHistory();
+            closeProductListHistory();
+        }
+
+        function appendProductListHistoryFooter(panel) {
+            const footer = document.createElement("div");
+            footer.className = "list-history-footer";
+
+            const left = document.createElement("div");
+            left.className = "list-history-footer-left";
+
+            const importListBtn = createListHistoryMenuButton("Импорт", importProductListHistory);
+            importListBtn.classList.add("history-action-btn", "import-list-history-action");
+            left.appendChild(importListBtn);
+
+            const exportListBtn = createListHistoryMenuButton("Экспорт", exportProductListHistory, productListHistory.length === 0);
+            exportListBtn.classList.add("history-action-btn", "export-list-history-action");
+            left.appendChild(exportListBtn);
+
+            const right = document.createElement("div");
+            right.className = "list-history-footer-right";
+
+            if (productListHistory.length > 0) {
+                const clearBtn = document.createElement("button");
+                clearBtn.type = "button";
+                clearBtn.className = "history-action-btn clear-history-btn list-history-clear-btn";
+                clearBtn.textContent = "Очистить";
+                clearBtn.addEventListener("click", clearProductListHistory);
+                right.appendChild(clearBtn);
+            }
+
+            const saveBtn = createListHistoryMenuButton("Сохранить", saveCurrentProductListToHistory, products.length === 0);
+            saveBtn.classList.add("list-history-save-action");
+            right.appendChild(saveBtn);
+
+            footer.appendChild(left);
+            footer.appendChild(right);
+            panel.appendChild(footer);
+        }
+
+        function renderProductListHistory() {
+            const panel = document.getElementById("productListHistoryPanel");
+            const toggleBtn = document.getElementById("productListHistoryToggleBtn");
+            if (!panel || !toggleBtn) return;
+
+            panel.innerHTML = "";
+            setProductListHistoryToggleSaved(false);
+            toggleBtn.title = productListHistory.length > 0
+                ? `Списки продуктов. Сохранено списков: ${productListHistory.length}`
+                : "Мои списки";
+            toggleBtn.classList.toggle("has-list-history", productListHistory.length > 0);
+
+            if (productListHistory.length === 0) {
+                const empty = document.createElement("div");
+                empty.className = "list-history-empty";
+                empty.textContent = "Мои списки пока пустые. Добавьте продукты и нажмите «Сохранить».";
+                panel.appendChild(empty);
+                appendProductListHistoryFooter(panel);
+                return;
+            }
+
+            productListHistory.forEach((savedList, index) => {
+                const cleanProducts = getCleanProductsForList(savedList.products);
+                const totals = getTotalsForProducts(cleanProducts);
+
+                const row = document.createElement("div");
+                row.className = "list-history-row";
+
+                const itemBtn = document.createElement("button");
+                itemBtn.type = "button";
+                itemBtn.className = "list-history-item-btn";
+                itemBtn.addEventListener("click", () => loadProductListFromHistory(index));
+
+                const title = document.createElement("div");
+                title.className = "list-history-title";
+                title.textContent = savedList.title || "Сохранённый список";
+
+                const meta = document.createElement("div");
+                meta.className = "list-history-meta";
+                const createdAt = savedList.createdAt
+                    ? new Date(savedList.createdAt).toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" })
+                    : "";
+                meta.textContent = `${createdAt} • ${cleanProducts.length} продукт(ов) • ${totals.weight.toFixed(0)} г • ${totals.calories.toFixed(0)} ккал`;
+
+                itemBtn.appendChild(title);
+                itemBtn.appendChild(meta);
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.type = "button";
+                deleteBtn.className = "list-history-delete-btn";
+                deleteBtn.textContent = "×";
+                deleteBtn.title = "Удалить список";
+                deleteBtn.setAttribute("aria-label", "Удалить список");
+                deleteBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteProductListFromHistory(index);
+                });
+
+                row.appendChild(itemBtn);
+                row.appendChild(deleteBtn);
+                panel.appendChild(row);
+            });
+
+            appendProductListHistoryFooter(panel);
+            if (showProductListHistory) positionProductListHistoryPanel();
+        }
+
+        function updateProductNamePlaceholder() {
+            const input = document.getElementById("productName");
+            if (!input) return;
+
+            input.placeholder = productHistory.length > 0
+                ? "Введите название или выберите из истории"
+                : "Введите название продукта";
+        }
+
+        function normalizeProductName(name) {
+            return name.trim().toLowerCase();
+        }
+
+        function upsertProductHistory(product) {
+            const normalizedName = normalizeProductName(product.name);
+
+            productHistory = productHistory.filter(item =>
+                normalizeProductName(item.name) !== normalizedName
+            );
+
+            productHistory.unshift({
+                name: product.name,
+                caloriesPer100g: product.caloriesPer100g,
+                proteinsPer100g: product.proteinsPer100g,
+                fatsPer100g: product.fatsPer100g,
+                carbsPer100g: product.carbsPer100g
+            });
+
+            productHistory = productHistory.slice(0, HISTORY_LIMIT);
+            saveProductHistory();
+            renderHistory();
+        }
+
+        function findProductInHistory(name) {
+            const normalizedName = normalizeProductName(name);
+            return productHistory.find(item => normalizeProductName(item.name) === normalizedName);
+        }
+
+        function fillFormFromHistory(item) {
+            if (!item) return;
+
+            document.getElementById("productName").value = item.name;
+            document.getElementById("calories").value = item.caloriesPer100g;
+            document.getElementById("proteins").value = item.proteinsPer100g;
+            document.getElementById("fats").value = item.fatsPer100g;
+            document.getElementById("carbs").value = item.carbsPer100g;
+            document.getElementById("weight").value = '';
+
+            const weightInput = document.getElementById("weight");
+            if (weightInput && weightInput.focus) weightInput.focus();
+        }
+
+        function openProductHistory() {
+            const panel = document.getElementById("productHistoryPanel");
+            if (panel && (productHistory.length > 0 || showFullHistory)) {
+                panel.classList.add("is-open");
+            }
+        }
+
+        function closeProductHistory() {
+            const panel = document.getElementById("productHistoryPanel");
+            showFullHistory = false;
+            if (panel) panel.classList.remove("is-open");
+        }
+
+        function getFilteredHistory() {
+            if (showFullHistory) return productHistory;
+
+            const query = normalizeProductName(document.getElementById("productName").value || "");
+            if (!query) return [];
+            return productHistory.filter(item => normalizeProductName(item.name).includes(query));
+        }
+
+        function deleteProductFromHistory(index) {
+            productHistory.splice(index, 1);
+            saveProductHistory();
+            renderHistory();
+
+            if (productHistory.length === 0 || getFilteredHistory().length === 0) {
+                closeProductHistory();
+            }
+        }
+
+        function clearProductHistory() {
+            if (productHistory.length === 0) return;
+            if (!confirm("Очистить все недавние продукты?")) return;
+            productHistory = [];
+            saveProductHistory();
+            renderHistory();
+            closeProductHistory();
+        }
+
+        function getCleanHistoryItems(items) {
+            if (!Array.isArray(items)) return [];
+
+            const cleaned = [];
+            const seen = new Set();
+
+            items.forEach(item => {
+                if (!item || typeof item.name !== "string") return;
+
+                const name = item.name.trim();
+                const key = normalizeProductName(name);
+                if (!name || seen.has(key)) return;
+
+                const caloriesPer100g = Number(item.caloriesPer100g);
+                const proteinsPer100g = Number(item.proteinsPer100g);
+                const fatsPer100g = Number(item.fatsPer100g);
+                const carbsPer100g = Number(item.carbsPer100g);
+
+                if ([caloriesPer100g, proteinsPer100g, fatsPer100g, carbsPer100g].some(value => !Number.isFinite(value) || value < 0)) {
+                    return;
+                }
+
+                seen.add(key);
+                cleaned.push({
+                    name,
+                    caloriesPer100g,
+                    proteinsPer100g,
+                    fatsPer100g,
+                    carbsPer100g
+                });
+            });
+
+            return cleaned;
+        }
+
+        function exportProductHistory() {
+            if (productHistory.length === 0) {
+                alert("Недавние продукты пустые — экспортировать нечего.");
+                return;
+            }
+
+            const data = {
+                type: "kbju_product_history",
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                items: productHistory
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            const date = new Date().toISOString().slice(0, 10);
+
+            link.href = url;
+            link.download = `kbju-history-${date}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function importProductHistory() {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "application/json,.json";
+
+            fileInput.addEventListener("change", () => {
+                const file = fileInput.files && fileInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    try {
+                        const parsed = JSON.parse(reader.result);
+                        const sourceItems = Array.isArray(parsed)
+                            ? parsed
+                            : (parsed.items || parsed.history || parsed.productHistory);
+                        const importedItems = getCleanHistoryItems(sourceItems);
+
+                        if (importedItems.length === 0) {
+                            alert("В этом файле не найдены подходящие недавние продукты.");
+                            return;
+                        }
+
+                        const merged = [...importedItems, ...productHistory];
+                        productHistory = getCleanHistoryItems(merged).slice(0, HISTORY_LIMIT);
+                        saveProductHistory();
+
+                        showFullHistory = true;
+                        renderHistory();
+                        openProductHistory();
+                        alert(`Недавние продукты импортированы. Загружено: ${importedItems.length}`);
+                    } catch (e) {
+                        alert("Не получилось импортировать недавние продукты. Проверьте, что выбран правильный JSON-файл.");
+                    }
+                };
+
+                reader.readAsText(file);
+            });
+
+            fileInput.click();
+        }
+
+        function appendHistoryFooter(panel) {
+            const footer = document.createElement("div");
+            footer.className = "history-footer";
+
+            const leftActions = document.createElement("div");
+            leftActions.className = "history-footer-left";
+
+            const rightActions = document.createElement("div");
+            rightActions.className = "history-footer-right";
+
+            const importBtn = document.createElement("button");
+            importBtn.type = "button";
+            importBtn.className = "history-action-btn import-history-btn";
+            importBtn.textContent = "Импорт";
+            importBtn.addEventListener("click", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                importProductHistory();
+            });
+
+            leftActions.appendChild(importBtn);
+
+            if (productHistory.length > 0) {
+                const exportBtn = document.createElement("button");
+                exportBtn.type = "button";
+                exportBtn.className = "history-action-btn export-history-btn";
+                exportBtn.textContent = "Экспорт";
+                exportBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    exportProductHistory();
+                });
+
+                const clearBtn = document.createElement("button");
+                clearBtn.type = "button";
+                clearBtn.className = "history-action-btn clear-history-btn";
+                clearBtn.textContent = "Очистить";
+                clearBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearProductHistory();
+                });
+
+                leftActions.appendChild(exportBtn);
+                rightActions.appendChild(clearBtn);
+            }
+
+            footer.appendChild(leftActions);
+            footer.appendChild(rightActions);
+            panel.appendChild(footer);
+        }
+
+        function renderHistory() {
+            const panel = document.getElementById("productHistoryPanel");
+            const toggleBtn = document.getElementById("historyToggleBtn");
+            if (!panel || !toggleBtn) return;
+
+            updateProductNamePlaceholder();
+            toggleBtn.classList.toggle("has-history", productHistory.length > 0);
+            toggleBtn.disabled = false;
+            panel.innerHTML = '';
+
+            const filteredHistory = getFilteredHistory();
+
+            if (productHistory.length === 0) {
+                if (showFullHistory) {
+                    const empty = document.createElement("div");
+                    empty.className = "history-empty";
+                    empty.textContent = "Недавние пока пустые. Можно импортировать файл.";
+                    panel.appendChild(empty);
+                    appendHistoryFooter(panel);
+                }
+                return;
+            }
+
+            if (filteredHistory.length === 0) {
+                return;
+            }
+
+            filteredHistory.forEach(item => {
+                const originalIndex = productHistory.findIndex(historyItem =>
+                    normalizeProductName(historyItem.name) === normalizeProductName(item.name)
+                );
+
+                const row = document.createElement("div");
+                row.className = "history-row";
+
+                const useBtn = document.createElement("button");
+                useBtn.type = "button";
+                useBtn.className = "history-use-btn";
+                useBtn.textContent = item.name;
+                useBtn.addEventListener("click", () => {
+                    fillFormFromHistory(item);
+                    closeProductHistory();
+                });
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.type = "button";
+                deleteBtn.className = "history-delete-btn";
+                deleteBtn.textContent = "×";
+                deleteBtn.title = "Удалить из истории";
+                deleteBtn.setAttribute("aria-label", "Удалить из истории");
+                deleteBtn.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteProductFromHistory(originalIndex);
+                });
+
+                row.appendChild(useBtn);
+                row.appendChild(deleteBtn);
+                panel.appendChild(row);
+            });
+
+            appendHistoryFooter(panel);
+        }
+
+        function addProduct() {
+            const productName = document.getElementById("productName").value.trim();
+            const weight = parseFloat(document.getElementById("weight").value);
+            const caloriesPer100g = parseFloat(document.getElementById("calories").value);
+            const proteinsPer100g = parseFloat(document.getElementById("proteins").value);
+            const fatsPer100g = parseFloat(document.getElementById("fats").value);
+            const carbsPer100g = parseFloat(document.getElementById("carbs").value);
+
+            if (!productName || isNaN(weight) || isNaN(caloriesPer100g) ||
+                isNaN(proteinsPer100g) || isNaN(fatsPer100g) || isNaN(carbsPer100g)) {
+                alert("Пожалуйста, заполните все поля.");
+                return;
+            }
+            if (weight <= 0 || caloriesPer100g < 0 || proteinsPer100g < 0 ||
+                fatsPer100g < 0 || carbsPer100g < 0) {
+                alert("Значения не могут быть отрицательными, а вес должен быть больше 0.");
+                return;
+            }
+
+            const newProduct = {
+                name: productName,
+                weight,
+                caloriesPer100g,
+                proteinsPer100g,
+                fatsPer100g,
+                carbsPer100g
+            };
+
+            products.push(newProduct);
+            upsertProductHistory(newProduct);
+
+            saveProducts();
+            render();
+
+            document.getElementById("productName").value = '';
+            document.getElementById("weight").value = '';
+            document.getElementById("calories").value = '';
+            document.getElementById("proteins").value = '';
+            document.getElementById("fats").value = '';
+            document.getElementById("carbs").value = '';
+            closeProductHistory();
+            if (document.activeElement && document.activeElement.blur) {
+                document.activeElement.blur();
+            }
+        }
+
+        function deleteProduct(index) {
+            products.splice(index, 1);
+            saveProducts();
+            render();
+        }
+
+        function resetAll() {
+            if (products.length === 0) {
+                alert("Список уже пуст.");
+                return;
+            }
+            if (!confirm("Удалить все продукты?")) return;
+            products = [];
+            saveProducts();
+            render();
+        }
+
+        function render() {
+            const tbody = document.getElementById("productTable").getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+
+            let totalCalories = 0, totalProteins = 0, totalFats = 0, totalCarbs = 0, totalWeight = 0;
+
+            products.forEach((p, idx) => {
+                const cal = (p.caloriesPer100g / 100) * p.weight;
+                const pro = (p.proteinsPer100g / 100) * p.weight;
+                const fat = (p.fatsPer100g / 100) * p.weight;
+                const car = (p.carbsPer100g / 100) * p.weight;
+
+                totalCalories += cal;
+                totalProteins += pro;
+                totalFats += fat;
+                totalCarbs += car;
+                totalWeight += p.weight;
+
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = p.name;
+                row.insertCell(1).textContent = p.weight;
+                row.insertCell(2).textContent = cal.toFixed(2);
+                row.insertCell(3).textContent = pro.toFixed(2);
+                row.insertCell(4).textContent = fat.toFixed(2);
+                row.insertCell(5).textContent = car.toFixed(2);
+
+                const delCell = row.insertCell(6);
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "✕";
+                delBtn.className = "delete-btn";
+                delBtn.onclick = () => deleteProduct(idx);
+                delCell.appendChild(delBtn);
+            });
+
+            document.getElementById("totalWeight").textContent = totalWeight.toFixed(2);
+            document.getElementById("totalCalories").textContent = totalCalories.toFixed(2);
+            document.getElementById("totalProteins").textContent = totalProteins.toFixed(2);
+            document.getElementById("totalFats").textContent = totalFats.toFixed(2);
+            document.getElementById("totalCarbs").textContent = totalCarbs.toFixed(2);
+
+            if (totalWeight > 0) {
+                document.getElementById("totalCaloriesPer100g").textContent = ((totalCalories / totalWeight) * 100).toFixed(2);
+                document.getElementById("totalProteinsPer100g").textContent = ((totalProteins / totalWeight) * 100).toFixed(2);
+                document.getElementById("totalFatsPer100g").textContent = ((totalFats / totalWeight) * 100).toFixed(2);
+                document.getElementById("totalCarbsPer100g").textContent = ((totalCarbs / totalWeight) * 100).toFixed(2);
+            } else {
+                document.getElementById("totalCaloriesPer100g").textContent = "0";
+                document.getElementById("totalProteinsPer100g").textContent = "0";
+                document.getElementById("totalFatsPer100g").textContent = "0";
+                document.getElementById("totalCarbsPer100g").textContent = "0";
+            }
+
+            if (showProductListHistory) renderProductListHistory();
+        }
+
+        document.querySelectorAll("#productName, #weight, #calories, #proteins, #fats, #carbs").forEach(el => {
+            el.addEventListener("keydown", e => {
+                if (e.key === "Enter") addProduct();
+            });
+        });
+
+        const productNameInput = document.getElementById("productName");
+        const productNameWrapper = document.getElementById("productNameWrapper");
+        const historyToggleBtn = document.getElementById("historyToggleBtn");
+
+        productNameInput.addEventListener("input", e => {
+            showFullHistory = false;
+            const item = findProductInHistory(e.target.value);
+            renderHistory();
+
+            if (item) {
+                fillFormFromHistory(item);
+                closeProductHistory();
+            } else if (getFilteredHistory().length > 0) {
+                openProductHistory();
+            } else {
+                closeProductHistory();
+            }
+        });
+
+        productNameInput.addEventListener("focus", () => {
+            showFullHistory = false;
+            renderHistory();
+            closeProductHistory();
+        });
+
+        historyToggleBtn.addEventListener("click", e => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const panel = document.getElementById("productHistoryPanel");
+            if (panel.classList.contains("is-open")) {
+                closeProductHistory();
+            } else {
+                showFullHistory = true;
+                renderHistory();
+                openProductHistory();
+            }
+        });
+
+        document.addEventListener("click", e => {
+            if (!productNameWrapper.contains(e.target)) closeProductHistory();
+
+            const productListHistoryWrapper = document.getElementById("productListHistoryWrapper");
+            const productListHistoryPanel = document.getElementById("productListHistoryPanel");
+            const clickedInsideListHistory =
+                (productListHistoryWrapper && productListHistoryWrapper.contains(e.target)) ||
+                (productListHistoryPanel && productListHistoryPanel.contains(e.target));
+
+            if (!clickedInsideListHistory) {
+                closeProductListHistory();
+            }
+        });
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") {
+                closeProductHistory();
+                closeProductListHistory();
+            }
+        });
+
+        window.addEventListener("resize", () => {
+            if (showProductListHistory) positionProductListHistoryPanel();
+        });
+
+        window.addEventListener("scroll", () => {
+            if (showProductListHistory) positionProductListHistoryPanel();
+        }, { passive: true });
+
+        document.getElementById("addBtn").addEventListener("click", addProduct);
+        document.getElementById("resetBtn").addEventListener("click", resetAll);
+        document.getElementById("productListHistoryToggleBtn").addEventListener("click", e => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (showProductListHistory) {
+                closeProductListHistory();
+            } else {
+                renderProductListHistory();
+                openProductListHistory();
+            }
+        });
+
+        document.getElementById("year").textContent = new Date().getFullYear();
+        loadProductListHistory();
+        loadProductHistory();
+        loadProducts();
+    </script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор Расхода Топлива</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ccc;
+            --button-bg: #e98001;
+            --button-text: #fff;
+            --link-color: rgb(153, 153, 153);
+            --accent-color: #e98001;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            padding-bottom: 60px;
+        }
+
+        .calculator {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        h2 { margin-bottom: 10px; }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover { background: #af6103; }
+
+        .result {
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .result p {
+            display: flex;
+            align-items: baseline;
+            font-weight: normal;
+            color: #777;
+            padding: 4px 0;
+        }
+
+        .result p .label {
+            white-space: nowrap;
+        }
+
+        .result p .dots {
+            flex: 1;
+            border-bottom: 1px dotted #999;
+            margin: 0 6px;
+        }
+
+        .result p b {
+            font-weight: bold;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        .price-row {
+            display: flex;
+            gap: 8px;
+        }
+        .price-row input { flex: 2; }
+        .price-row .custom-select { flex: 0 0 90px; }
+
+        .custom-select {
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .custom-select .cs-trigger {
+            width: 100%;
+            padding: 12px;
+            padding-right: 30px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: normal;
+            position: relative;
+        }
+        .custom-select .cs-trigger:hover { background: var(--input-bg); }
+        .custom-select .cs-trigger::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-70%) rotate(45deg);
+            opacity: 0.6;
+            transition: transform 0.2s;
+        }
+        .custom-select.open .cs-trigger::after {
+            transform: translateY(-30%) rotate(-135deg);
+        }
+        .custom-select .cs-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            overflow: hidden;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .custom-select.open .cs-menu { display: block; }
+        .custom-select .cs-option {
+            padding: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+        .custom-select .cs-option:hover,
+        .custom-select .cs-option.selected {
+            background: rgba(233, 128, 1, 0.12);
+        }
+
+        .unit-toggle {
+            font-style: italic;
+            user-select: none;
+        }
+
+        .unit-toggle span {
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--link-color);
+        }
+
+        .unit-toggle span.active {
+            color: var(--accent-color);
+            cursor: default;
+        }
+
+
+
+        .side-back-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: calc((100vw - 400px) / 2);
+            display: none;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .side-back-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+            opacity: 0.45;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+        }
+
+        .side-back-arrow svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .side-back-zone:hover .side-back-arrow {
+            opacity: 0.85;
+            transform: translate(-50%, -50%) translateX(-4px);
+            background-color: rgba(128, 128, 128, 0.10);
+        }
+
+        @media (min-width: 769px) {
+            .side-back-zone {
+                display: block;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f2f5;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            color: gray;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator { max-width: 100%; }
+            input, button { font-size: 14px; padding: 10px; }
+            .price-row .custom-select { flex: 0 0 80px; }
+            .custom-select .cs-trigger { padding: 10px; padding-right: 28px; font-size: 14px; }
+            .custom-select .cs-option { padding: 10px; font-size: 14px; }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1e1e1e;
+                --text-color: #f4f4f9;
+                --input-bg: #333;
+                --input-border: #555;
+                --button-bg: #e98001;
+                --button-text: #fff;
+                --link-color: rgb(165, 165, 165);
+                --accent-color: #ffb55a;
+            }
+            footer {
+                background-color: #1e1e1e;
+                color: gray;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="side-back-zone" aria-label="Вернуться на главную" onclick="goHomeWithoutHistory(event)">
+        <span class="side-back-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18L9 12L15 6"></path>
+            </svg>
+        </span>
+    </a>
+
+    <div class="calculator">
+        <h2>Калькулятор расхода топлива</h2>
+        <div class="unit-toggle">
+            <span id="metricToggle" class="active" onclick="setSystem('metric')">Метрические</span>
+            &nbsp;&nbsp;
+            <span id="imperialToggle" onclick="setSystem('imperial')">Английские</span>
+        </div>
+
+        <input type="text" inputmode="decimal" id="distance" placeholder="Расстояние (км)" />
+        <input type="number" id="fuelConsumption" placeholder="Расход топлива на 100 км (л)" min="0" step="any" />
+
+        <div class="price-row">
+            <input type="text" inputmode="decimal" id="fuelPrice" placeholder="Цена топлива за 1 л" />
+            <div class="custom-select" id="currencySelect" data-value="RUB">
+                <button type="button" class="cs-trigger">₽</button>
+                <div class="cs-menu">
+                    <div class="cs-option selected" data-value="RUB">₽ RUB</div>
+                    <div class="cs-option" data-value="USD">$ USD</div>
+                    <div class="cs-option" data-value="EUR">€ EUR</div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="calculateFuelCost()">Рассчитать</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function goHomeWithoutHistory(event) {
+            if (event) event.preventDefault();
+            window.location.replace("index.html");
+        }
+
+        let system = "metric";
+
+        const CURRENCY_SYMBOLS = { RUB: "₽", USD: "$", EUR: "€" };
+
+        function setCurrencyInSelect(code) {
+            const sel = document.getElementById("currencySelect");
+            const trigger = sel.querySelector(".cs-trigger");
+            sel.dataset.value = code;
+            trigger.textContent = CURRENCY_SYMBOLS[code];
+            sel.querySelectorAll(".cs-option").forEach(o => {
+                o.classList.toggle("selected", o.dataset.value === code);
+            });
+        }
+
+        function getCurrency() {
+            return document.getElementById("currencySelect").dataset.value;
+        }
+
+        function setSystem(newSystem) {
+            if (system === newSystem) return;
+            system = newSystem;
+
+            document.getElementById("metricToggle").classList.toggle("active", system === "metric");
+            document.getElementById("imperialToggle").classList.toggle("active", system === "imperial");
+
+            const distance = document.getElementById("distance");
+            const fuel = document.getElementById("fuelConsumption");
+            const price = document.getElementById("fuelPrice");
+
+            if (system === "metric") {
+                distance.placeholder = "Расстояние (км)";
+                fuel.placeholder = "Расход топлива на 100 км (л)";
+                price.placeholder = "Цена топлива за 1 л";
+                setCurrencyInSelect("RUB");
+            } else {
+                distance.placeholder = "Расстояние (мили)";
+                fuel.placeholder = "Расход топлива (MPG)";
+                price.placeholder = "Цена за 1 галлон";
+                setCurrencyInSelect("USD");
+            }
+
+            distance.value = "";
+            fuel.value = "";
+            price.value = "";
+            document.getElementById("result").innerHTML = "";
+        }
+
+        function initCustomSelects() {
+            document.querySelectorAll(".custom-select").forEach(sel => {
+                const trigger = sel.querySelector(".cs-trigger");
+                const options = sel.querySelectorAll(".cs-option");
+
+                trigger.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll(".custom-select.open").forEach(o => {
+                        if (o !== sel) o.classList.remove("open");
+                    });
+                    sel.classList.toggle("open");
+                });
+
+                options.forEach(opt => {
+                    opt.addEventListener("click", () => {
+                        const value = opt.dataset.value;
+                        sel.dataset.value = value;
+                        if (sel.id === "currencySelect") {
+                            trigger.textContent = CURRENCY_SYMBOLS[value];
+                        } else {
+                            trigger.textContent = opt.textContent;
+                        }
+                        options.forEach(o => o.classList.remove("selected"));
+                        opt.classList.add("selected");
+                        sel.classList.remove("open");
+                    });
+                });
+            });
+
+            document.addEventListener("click", () => {
+                document.querySelectorAll(".custom-select.open").forEach(o => o.classList.remove("open"));
+            });
+        }
+        initCustomSelects();
+
+        const fmt = n => {
+            const hasKopecks = Math.round(n * 100) % 100 !== 0;
+            return n.toLocaleString("ru-RU", {
+                minimumFractionDigits: hasKopecks ? 2 : 0,
+                maximumFractionDigits: 2
+            });
+        };
+
+        function calculateFuelCost() {
+            const distance = parseFloat(document.getElementById("distance").value.replace(/\s/g, "").replace(",", "."));
+            const fuelConsumption = parseFloat(document.getElementById("fuelConsumption").value);
+            const fuelPrice = parseFloat(document.getElementById("fuelPrice").value.replace(/\s/g, "").replace(",", "."));
+
+            if (isNaN(distance) || isNaN(fuelConsumption) || isNaN(fuelPrice) ||
+                distance <= 0 || fuelConsumption <= 0 || fuelPrice <= 0) {
+                document.getElementById("result").innerText = "Введите корректные данные";
+                return;
+            }
+
+            const currency = getCurrency();
+            const currencySymbol = CURRENCY_SYMBOLS[currency];
+            let html;
+
+            if (system === "metric") {
+                const totalFuelUsed = (distance * fuelConsumption) / 100;
+                const totalCost = totalFuelUsed * fuelPrice;
+                const costPerKm = totalCost / distance;
+
+                html = `
+                    <p><span class="label">Общий расход топлива:</span><span class="dots"></span><b>${fmt(totalFuelUsed)} л</b></p>
+                    <p><span class="label">Общая стоимость:</span><span class="dots"></span><b>${fmt(totalCost)} ${currencySymbol}</b></p>
+                    <p><span class="label">Стоимость за 1 км:</span><span class="dots"></span><b>${fmt(costPerKm)} ${currencySymbol}</b></p>
+                `;
+            } else {
+                const totalFuelUsed = distance / fuelConsumption;
+                const totalCost = totalFuelUsed * fuelPrice;
+                const costPerMile = totalCost / distance;
+
+                html = `
+                    <p><span class="label">Общий расход топлива:</span><span class="dots"></span><b>${fmt(totalFuelUsed)} галлонов</b></p>
+                    <p><span class="label">Общая стоимость:</span><span class="dots"></span><b>${fmt(totalCost)} ${currencySymbol}</b></p>
+                    <p><span class="label">Стоимость за 1 милю:</span><span class="dots"></span><b>${fmt(costPerMile)} ${currencySymbol}</b></p>
+                `;
+            }
+
+            document.getElementById("result").innerHTML = html;
+        }
+
+        document.querySelectorAll("#distance, #fuelConsumption, #fuelPrice").forEach(el => {
+            el.addEventListener("keydown", e => {
+                if (e.key === "Enter") calculateFuelCost();
+            });
+        });
+
+        function attachThousandFormatter(input) {
+            input.addEventListener("input", () => {
+                const oldValue = input.value;
+                const cursorPos = input.selectionStart;
+
+                let raw = oldValue.replace(/[^\d.,]/g, "").replace(",", ".");
+                const parts = raw.split(".");
+                if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+
+                const spacesBeforeOld = (oldValue.slice(0, cursorPos).match(/\s/g) || []).length;
+                const digitsBeforeCursor = cursorPos - spacesBeforeOld;
+
+                const dotIdx = raw.indexOf(".");
+                let intPart = dotIdx >= 0 ? raw.slice(0, dotIdx) : raw;
+                const fracPart = dotIdx >= 0 ? raw.slice(dotIdx) : "";
+                intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                const newValue = intPart + fracPart;
+
+                input.value = newValue;
+
+                let newCursor = 0;
+                let digitCount = 0;
+                for (let i = 0; i < newValue.length && digitCount < digitsBeforeCursor; i++) {
+                    if (/\d/.test(newValue[i])) digitCount++;
+                    newCursor = i + 1;
+                }
+                if (digitsBeforeCursor === 0) newCursor = 0;
+                try { input.setSelectionRange(newCursor, newCursor); } catch (e) {}
+            });
+        }
+        attachThousandFormatter(document.getElementById("distance"));
+        attachThousandFormatter(document.getElementById("fuelPrice"));
+    </script>
+
+    <footer style="
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    ">
+      © Andrey30
+      <span aria-hidden="true"> · </span>
+      <a href="privacy.html" style="
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      ">
+        Политика конфиденциальности
+      </a>
+    </footer>
+    <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

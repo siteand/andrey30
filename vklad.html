@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор Вклада</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ccc;
+            --button-bg: #007bff;
+            --button-text: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            padding-bottom: 60px;
+        }
+
+        .calculator {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .custom-select {
+            position: relative;
+            width: 100%;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .custom-select .cs-trigger {
+            width: 100%;
+            padding: 12px;
+            padding-right: 36px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: normal;
+            position: relative;
+        }
+        .custom-select .cs-trigger::after {
+            content: "";
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-70%) rotate(45deg);
+            opacity: 0.6;
+            transition: transform 0.2s;
+        }
+        .custom-select.open .cs-trigger::after {
+            transform: translateY(-30%) rotate(-135deg);
+        }
+        .custom-select .cs-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            overflow: hidden;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .custom-select.open .cs-menu {
+            display: block;
+        }
+        .custom-select .cs-option {
+            padding: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+        .custom-select .cs-option:hover,
+        .custom-select .cs-option.selected {
+            background: rgba(0, 123, 255, 0.12);
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .result p {
+            display: flex;
+            align-items: baseline;
+            font-weight: normal;
+            color: #777;
+            padding: 4px 0;
+        }
+
+        .result p .label {
+            white-space: nowrap;
+        }
+
+        .result p .dots {
+            flex: 1;
+            border-bottom: 1px dotted #999;
+            margin: 0 6px;
+        }
+
+        .result p b {
+            font-weight: bold;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        .term-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .term-row input {
+            flex: 2;
+        }
+
+        .term-row select,
+        .term-row .custom-select {
+            flex: 1;
+        }
+
+        .input-with-button {
+            position: relative;
+        }
+
+        .input-with-button input {
+            padding-right: 78px;
+        }
+
+        .input-with-button .icon-btn {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 36px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+            text-decoration: none;
+        }
+
+        .input-with-button .icon-btn:hover,
+        .input-with-button .icon-btn:active {
+            opacity: 1;
+            background: transparent;
+        }
+
+        .input-with-button .icon-btn svg {
+            display: block;
+        }
+
+        .input-with-button .reset-btn {
+            right: 38px;
+        }
+
+        .input-with-button .info-btn {
+            right: 2px;
+        }
+
+        .input-with-button .reset-btn[hidden] {
+            display: none;
+        }
+
+        .keyrate-status {
+            font-size: 12px;
+            color: gray;
+            text-align: left;
+            margin-top: -4px;
+            min-height: 16px;
+        }
+
+
+
+        .side-back-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: calc((100vw - 400px) / 2);
+            display: none;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .side-back-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+            opacity: 0.45;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+        }
+
+        .side-back-arrow svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .side-back-zone:hover .side-back-arrow {
+            opacity: 0.85;
+            transform: translate(-50%, -50%) translateX(-4px);
+            background-color: rgba(128, 128, 128, 0.10);
+        }
+
+        @media (min-width: 769px) {
+            .side-back-zone {
+                display: block;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f2f5;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            color: gray;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator { max-width: 100%; }
+            input, select, button { font-size: 14px; padding: 10px; }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1e1e1e;
+                --text-color: #f4f4f9;
+                --input-bg: #333;
+                --input-border: #555;
+                --button-bg: #0d6efd;
+                --button-text: #fff;
+            }
+            footer {
+                background-color: #1e1e1e;
+                color: gray;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="side-back-zone" aria-label="Вернуться на главную" onclick="goHomeWithoutHistory(event)">
+        <span class="side-back-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18L9 12L15 6"></path>
+            </svg>
+        </span>
+    </a>
+
+
+    <div class="calculator">
+        <h2>Калькулятор Вклада</h2>
+        <input type="text" inputmode="decimal" id="deposit" placeholder="Сумма вклада (₽)" />
+        <input type="number" id="rate" placeholder="Процентная ставка годовых (%)" min="0" step="any" />
+
+        <div class="term-row">
+            <input type="number" id="term" placeholder="Срок вклада" min="0" step="any" />
+            <div class="custom-select" id="termType" data-value="months">
+                <button type="button" class="cs-trigger">мес.</button>
+                <div class="cs-menu">
+                    <div class="cs-option selected" data-value="months">мес.</div>
+                    <div class="cs-option" data-value="years">лет</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-select" id="capitalization" data-value="none">
+            <button type="button" class="cs-trigger">Без капитализации</button>
+            <div class="cs-menu">
+                <div class="cs-option selected" data-value="none">Без капитализации</div>
+                <div class="cs-option" data-value="monthly">Капитализация ежемесячно</div>
+                <div class="cs-option" data-value="quarterly">Капитализация ежеквартально</div>
+                <div class="cs-option" data-value="yearly">Капитализация ежегодно</div>
+            </div>
+        </div>
+
+        <div class="input-with-button">
+            <input type="number" id="keyRate" placeholder="Ключевая ставка ЦБ РФ (%)" min="0" step="any" />
+            <button type="button" id="resetKeyRateBtn" class="icon-btn reset-btn" hidden title="Вернуть ставку ЦБ РФ" aria-label="Вернуть ставку ЦБ РФ">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </button>
+            <a href="https://cbr.ru/hd_base/KeyRate/" target="_blank" rel="noopener" class="icon-btn info-btn" title="Узнать ключевую ставку на сайте ЦБ РФ" aria-label="Узнать ключевую ставку на сайте ЦБ РФ">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+            </a>
+        </div>
+        <div id="keyRateStatus" class="keyrate-status"></div>
+
+        <button onclick="calculateDeposit()">Рассчитать</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+
+        function goHomeWithoutHistory(event) {
+            if (event) event.preventDefault();
+            window.location.replace("index.html");
+        }
+
+        function initCustomSelects() {
+            document.querySelectorAll(".custom-select").forEach(sel => {
+                const trigger = sel.querySelector(".cs-trigger");
+                const options = sel.querySelectorAll(".cs-option");
+
+                trigger.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll(".custom-select.open").forEach(o => {
+                        if (o !== sel) o.classList.remove("open");
+                    });
+                    sel.classList.toggle("open");
+                });
+
+                options.forEach(opt => {
+                    opt.addEventListener("click", () => {
+                        const value = opt.dataset.value;
+                        const label = opt.textContent;
+                        sel.dataset.value = value;
+                        trigger.textContent = label;
+                        options.forEach(o => o.classList.remove("selected"));
+                        opt.classList.add("selected");
+                        sel.classList.remove("open");
+                    });
+                });
+            });
+
+            document.addEventListener("click", () => {
+                document.querySelectorAll(".custom-select.open").forEach(o => o.classList.remove("open"));
+            });
+        }
+        initCustomSelects();
+
+        const KEYRATE_API = "https://cbr-keyrate.vercel.app/api/keyrate";
+        const KEYRATE_CACHE_KEY = "vklad_keyrate_v1";
+        const KEYRATE_CACHE_TTL = 6 * 60 * 60 * 1000;
+
+        const keyRateInput = document.getElementById("keyRate");
+        const keyRateStatus = document.getElementById("keyRateStatus");
+        const resetKeyRateBtn = document.getElementById("resetKeyRateBtn");
+
+        let cbrRate = null;
+        let userOverride = false;
+
+        function applyCbrRate(rate, fromCache) {
+            cbrRate = rate;
+            if (!userOverride) {
+                keyRateInput.value = rate;
+                resetKeyRateBtn.hidden = true;
+                keyRateStatus.textContent = `Ставка ЦБ РФ: ${rate}%${fromCache ? " (из кеша)" : ""}`;
+            }
+        }
+
+        function showManualMode() {
+            userOverride = true;
+            resetKeyRateBtn.hidden = !cbrRate;
+            keyRateStatus.textContent = cbrRate
+                ? `Ставка введена вручную (ЦБ РФ: ${cbrRate}%)`
+                : "Ставка введена вручную";
+        }
+
+        function resetToCbr() {
+            if (cbrRate == null) return;
+            userOverride = false;
+            keyRateInput.value = cbrRate;
+            resetKeyRateBtn.hidden = true;
+            keyRateStatus.textContent = `Ставка ЦБ РФ: ${cbrRate}%`;
+        }
+
+        async function loadKeyRate() {
+            keyRateStatus.textContent = "Загрузка ставки ЦБ РФ…";
+
+            try {
+                const raw = localStorage.getItem(KEYRATE_CACHE_KEY);
+                if (raw) {
+                    const cached = JSON.parse(raw);
+                    if (cached.rate && Date.now() - cached.t < KEYRATE_CACHE_TTL) {
+                        applyCbrRate(cached.rate, true);
+                        fetchKeyRate().catch(() => {});
+                        return;
+                    }
+                }
+            } catch (e) {}
+
+            try {
+                await fetchKeyRate();
+            } catch (e) {
+                keyRateStatus.textContent = "Ошибка: " + (e.name || "?") + " — " + (e.message || String(e));
+            }
+        }
+
+        async function fetchKeyRate() {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+            try {
+                const res = await fetch(KEYRATE_API, {
+                    signal: controller.signal,
+                    mode: "cors",
+                    cache: "no-store"
+                });
+                clearTimeout(timeout);
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                if (data && typeof data.rate === "number" && data.rate > 0) {
+                    applyCbrRate(data.rate);
+                    try {
+                        localStorage.setItem(KEYRATE_CACHE_KEY, JSON.stringify({
+                            rate: data.rate, t: Date.now()
+                        }));
+                    } catch (e) {}
+                    return data.rate;
+                }
+                throw new Error("bad response: " + JSON.stringify(data).slice(0, 100));
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        keyRateInput.addEventListener("input", () => {
+            if (cbrRate != null && parseFloat(keyRateInput.value) === cbrRate) {
+                userOverride = false;
+                resetKeyRateBtn.hidden = true;
+                keyRateStatus.textContent = `Ставка ЦБ РФ: ${cbrRate}%`;
+            } else {
+                showManualMode();
+            }
+        });
+
+        resetKeyRateBtn.addEventListener("click", resetToCbr);
+
+        loadKeyRate();
+
+        function calculateDeposit() {
+            const deposit = parseFloat(document.getElementById("deposit").value.replace(/\s/g, "").replace(",", "."));
+            const rate = parseFloat(document.getElementById("rate").value);
+            const keyRate = parseFloat(document.getElementById("keyRate").value);
+            const term = parseFloat(document.getElementById("term").value);
+            const termType = document.getElementById("termType").dataset.value;
+            const cap = document.getElementById("capitalization").dataset.value;
+
+            if (isNaN(deposit) || isNaN(rate) || isNaN(keyRate) || isNaN(term) ||
+                deposit <= 0 || rate <= 0 || keyRate <= 0 || term <= 0) {
+                document.getElementById("result").innerText = "Введите корректные данные";
+                return;
+            }
+
+            const termMonths = termType === "years" ? term * 12 : term;
+            const termYears = termMonths / 12;
+
+            let totalAmount;
+            if (cap === "none") {
+                totalAmount = deposit * (1 + (rate / 100) * termYears);
+            } else {
+                const periodsPerYear = cap === "monthly" ? 12 : cap === "quarterly" ? 4 : 1;
+                const n = periodsPerYear * termYears;
+                totalAmount = deposit * Math.pow(1 + rate / 100 / periodsPerYear, n);
+            }
+
+            const income = totalAmount - deposit;
+            const taxFreeLimit = 1000000 * (keyRate / 100) * termYears;
+            const taxableAmount = Math.max(income - taxFreeLimit, 0);
+            const tax = taxableAmount * 0.13;
+
+            const fmt = n => {
+                const hasKopecks = Math.round(n * 100) % 100 !== 0;
+                return n.toLocaleString("ru-RU", {
+                    minimumFractionDigits: hasKopecks ? 2 : 0,
+                    maximumFractionDigits: 2
+                });
+            };
+
+            function plural(n, forms) {
+                const abs = Math.abs(n) % 100;
+                const n1 = abs % 10;
+                if (abs > 10 && abs < 20) return forms[2];
+                if (n1 > 1 && n1 < 5) return forms[1];
+                if (n1 === 1) return forms[0];
+                return forms[2];
+            }
+
+            function formatTerm(months) {
+                months = Math.round(months);
+                const y = Math.floor(months / 12);
+                const m = months % 12;
+                const parts = [];
+                if (y > 0) parts.push(`${y} ${plural(y, ["год", "года", "лет"])}`);
+                if (m > 0) parts.push(`${m} ${plural(m, ["месяц", "месяца", "месяцев"])}`);
+                if (parts.length === 0) parts.push(`0 ${plural(0, ["месяц", "месяца", "месяцев"])}`);
+                return parts.join(" ");
+            }
+
+            document.getElementById("result").innerHTML = `
+                <p><span class="label">Срок:</span><span class="dots"></span><b>${formatTerm(termMonths)} (${Math.round(termMonths)} мес.)</b></p>
+                <p><span class="label">Сумма в конце срока:</span><span class="dots"></span><b>${fmt(totalAmount)} ₽</b></p>
+                <p><span class="label">Доход по вкладу:</span><span class="dots"></span><b>${fmt(income)} ₽</b></p>
+                <p><span class="label">Необлагаемая сумма:</span><span class="dots"></span><b>${fmt(taxFreeLimit)} ₽</b></p>
+                <p><span class="label">Облагаемая сумма:</span><span class="dots"></span><b>${fmt(taxableAmount)} ₽</b></p>
+                <p><span class="label">Налог 13%:</span><span class="dots"></span><b>${fmt(tax)} ₽</b></p>
+                <p><span class="label">Чистый доход:</span><span class="dots"></span><b>${fmt(income - tax)} ₽</b></p>
+            `;
+        }
+
+        document.querySelectorAll("#deposit, #rate, #term, #keyRate").forEach(el => {
+            el.addEventListener("keydown", e => {
+                if (e.key === "Enter") calculateDeposit();
+            });
+        });
+
+        const depositInput = document.getElementById("deposit");
+
+        function formatDepositValue(raw) {
+            raw = raw.replace(/[^\d.,]/g, "").replace(",", ".");
+            const parts = raw.split(".");
+            if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join("");
+            const dotIdx = raw.indexOf(".");
+            let intPart = dotIdx >= 0 ? raw.slice(0, dotIdx) : raw;
+            const fracPart = dotIdx >= 0 ? raw.slice(dotIdx) : "";
+            intPart = intPart.replace(/^0+(?=\d)/, "");
+            intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            return intPart + fracPart;
+        }
+
+        depositInput.addEventListener("input", () => {
+            const el = depositInput;
+            const oldValue = el.value;
+            const oldCursor = el.selectionStart;
+
+            const digitsBeforeCursor = (oldValue.slice(0, oldCursor).match(/[\d.,]/g) || []).length;
+
+            const newValue = formatDepositValue(oldValue);
+            el.value = newValue;
+
+            let newCursor = newValue.length;
+            let digitCount = 0;
+            for (let i = 0; i < newValue.length; i++) {
+                if (/[\d.]/.test(newValue[i])) {
+                    digitCount++;
+                    if (digitCount === digitsBeforeCursor) {
+                        newCursor = i + 1;
+                        break;
+                    }
+                }
+            }
+            try { el.setSelectionRange(newCursor, newCursor); } catch (e) {}
+        });
+    </script>
+
+    <footer style="
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    ">
+      © Andrey30
+      <span aria-hidden="true"> · </span>
+      <a href="privacy.html" style="
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      ">
+        Политика конфиденциальности
+      </a>
+    </footer>
+    <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+
+</body>
+</html>

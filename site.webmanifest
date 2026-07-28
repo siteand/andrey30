@@ -1,0 +1,32 @@
+{
+  "name": "Формула-1 2026",
+  "short_name": "F1 2026",
+  "start_url": "./f12026.html",
+  "scope": "./f12026.html",
+  "icons": [
+    {
+      "src": "icons/favicon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#fa1900",
+  "background_color": "#fa1900",
+  "display": "standalone",
+  "id": "./f12026.html"
+}

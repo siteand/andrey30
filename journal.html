@@ -1,0 +1,3415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" id="themeColorMeta" content="#f4f7fb" />
+  <link rel="manifest" href="./journal.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./journal-icons/journal-icon-192.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="./journal-icons/journal-icon-192.png" />
+  <meta name="application-name" content="Торговый дневник трейдинга" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Торговый дневник" />
+  <title>Торговый дневник трейдинга</title>
+  <script>
+    (()=>{
+      try{
+        const saved = JSON.parse(localStorage.getItem("forexJournal_settings_v1") || "{}");
+        const mode = ["system","light","dark"].includes(saved.theme) ? saved.theme : "system";
+        document.documentElement.lang = saved.language === "en" ? "en" : "ru";
+        const dark = mode === "dark" || (mode === "system" && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.preTheme = dark ? "dark" : "light";
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+      }catch(error){
+        const dark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.preTheme = dark ? "dark" : "light";
+      }
+    })();
+  </script>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#172033;
+      --muted:#64748b;
+      --line:#dbe3ef;
+      --primary:#0f766e;
+      --primary-2:#115e59;
+      --primary-soft:#dff7f3;
+      --blue:#1d4ed8;
+      --green:#15803d;
+      --green-soft:#dcfce7;
+      --red:#b91c1c;
+      --red-soft:#fee2e2;
+      --amber:#b45309;
+      --amber-soft:#fef3c7;
+      --shadow:0 18px 45px rgba(15,23,42,.08);
+      --radius:18px;
+      --mobile-nav-bg:#0f172a;
+      --mobile-nav-text:#e2e8f0;
+      --mobile-nav-border:rgba(255,255,255,.18);
+    }
+
+    body.dark,
+    html[data-pre-theme="dark"] body{
+      --bg:#0b1220;
+      --card:#111b2e;
+      --text:#e5edf7;
+      --muted:#94a3b8;
+      --line:#26344b;
+      --primary:#2dd4bf;
+      --primary-2:#14b8a6;
+      --primary-soft:#123b3a;
+      --blue:#60a5fa;
+      --green:#4ade80;
+      --green-soft:#12351f;
+      --red:#f87171;
+      --red-soft:#3f1f25;
+      --amber:#fbbf24;
+      --amber-soft:#3a2c0f;
+      --shadow:0 18px 45px rgba(0,0,0,.28);
+      --mobile-nav-bg:#172033;
+      --mobile-nav-text:#f1f5f9;
+      --mobile-nav-border:#334155;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;max-width:100%;overflow-x:hidden;scrollbar-gutter:stable}
+    body{max-width:100%;overflow-x:hidden}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    button,input,select,textarea{font:inherit}
+    button{-webkit-appearance:none;appearance:none}
+    button{cursor:pointer}
+    .app{max-width:1560px;margin:0 auto;padding:24px clamp(28px,3vw,48px)}
+    .topbar{
+      display:flex;gap:16px;align-items:center;justify-content:space-between;
+      margin-bottom:18px;flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;align-items:flex-start;gap:14px;width:100%;
+    }
+    .logo{
+      width:48px;height:48px;border-radius:15px;
+      background:linear-gradient(135deg,#0f766e,#2563eb);
+      display:grid;place-items:center;color:#fff;font-weight:900;font-size:22px;
+      box-shadow:var(--shadow);
+    }
+    h1{margin:0;font-size:clamp(24px,3vw,36px)}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:4px}
+    .brand-copy{min-width:0;flex:1}
+    .title-row{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;min-width:0;
+    }
+    .title-row h1{min-width:0}
+    .header-settings{
+      position:relative;margin:0;flex:0 0 auto;
+    }
+    .settings-trigger{
+      width:42px;height:42px;padding:0;border:1px solid var(--line);
+      border-radius:12px;background:var(--card);color:var(--text);
+      display:grid;place-items:center;
+      box-shadow:0 5px 16px rgba(15,23,42,.07);
+    }
+    .settings-trigger:hover,.settings-trigger:focus-visible{
+      border-color:var(--primary);color:var(--primary);outline:none;
+      box-shadow:0 0 0 3px var(--primary-soft);
+    }
+    .settings-trigger svg{width:22px;height:22px;display:block}
+    .settings-menu{
+      position:absolute;right:0;left:auto;top:calc(100% + 8px);z-index:70;
+      width:280px;max-width:calc(100vw - 90px);
+      padding:8px;border:1px solid var(--line);border-radius:15px;
+      background:var(--card);box-shadow:0 20px 55px rgba(2,6,23,.22);
+    }
+    .settings-menu-title{
+      padding:7px 9px 9px;color:var(--muted);font-size:12px;font-weight:900;
+      text-transform:uppercase;letter-spacing:.05em;
+    }
+    .settings-option{
+      width:100%;display:grid;grid-template-columns:28px minmax(0,1fr) auto;
+      align-items:center;gap:9px;padding:11px 10px;border:0;border-radius:11px;
+      background:transparent;color:var(--text);text-align:left;font-weight:800;
+    }
+    .settings-option:hover,.settings-option:focus-visible{
+      background:var(--primary-soft);color:var(--primary);outline:none;
+    }
+    .settings-option .option-icon{
+      width:28px;height:28px;display:grid;place-items:center;
+      border-radius:8px;background:var(--bg);font-size:16px;
+    }
+    .settings-option .option-value{
+      color:var(--muted);font-size:12px;font-weight:800;
+    }
+    .settings-option.text-only-option{
+      grid-template-columns:minmax(0,1fr) auto;
+      padding-left:12px;
+    }
+    .settings-divider{height:1px;background:var(--line);margin:5px 4px}
+    .fab-trade{
+      position:fixed;right:max(24px,env(safe-area-inset-right));
+      bottom:max(24px,env(safe-area-inset-bottom));z-index:40;
+      width:62px;height:62px;border:0;border-radius:50%;
+      padding:0;margin:0;overflow:hidden;
+      display:block;background:linear-gradient(135deg,var(--primary),var(--blue));
+      color:#fff;line-height:1;
+      box-shadow:0 15px 34px rgba(15,118,110,.42),0 4px 12px rgba(2,6,23,.22);
+      transition:transform .2s,box-shadow .2s;
+    }
+    .fab-trade:hover,.fab-trade:focus-visible{
+      transform:translateY(-2px) scale(1.04);outline:none;
+      box-shadow:0 19px 40px rgba(15,118,110,.5),0 5px 14px rgba(2,6,23,.25);
+    }
+    .fab-trade:active{transform:scale(.96)}
+    .fab-trade svg{display:none}
+    .fab-trade::before,
+    .fab-trade::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:24px;
+      height:3px;
+      border-radius:999px;
+      background:#fff;
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+    }
+    .fab-trade::after{
+      transform:translate(-50%,-50%) rotate(90deg);
+    }
+    .btn{
+      border:1px solid var(--line);
+      background:var(--card);color:var(--text);
+      padding:10px 14px;border-radius:12px;font-weight:700;
+      transition:.2s;box-shadow:0 4px 14px rgba(15,23,42,.04);
+    }
+    .btn:hover{transform:translateY(-1px);border-color:var(--primary)}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+    .btn.ghost{background:transparent;box-shadow:none}
+    .layout{
+      display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;
+    }
+    .sidebar{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      padding:14px;box-shadow:var(--shadow);height:fit-content;position:sticky;top:18px;
+    }
+    .nav-btn{
+      width:100%;display:flex;align-items:center;gap:13px;
+      min-height:52px;
+      border:0;background:transparent;color:var(--muted);
+      padding:12px 14px;border-radius:13px;text-align:left;
+      font-size:16px;font-weight:850;line-height:1.2;
+      margin-bottom:7px;
+    }
+    .nav-btn .nav-icon{
+      flex:0 0 28px;
+      width:28px;
+      height:28px;
+      display:grid;
+      place-items:center;
+      line-height:0;
+    }
+    .nav-btn .nav-icon svg{
+      display:block;
+      width:24px;
+      height:24px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      overflow:visible;
+    }
+    .nav-btn .nav-label{min-width:0}
+    .nav-btn.active{background:var(--primary-soft);color:var(--primary)}
+    .side-card{
+      margin-top:16px;padding:14px;border-radius:14px;background:var(--bg);
+      border:1px solid var(--line);
+    }
+    .side-card label{font-size:12px;color:var(--muted);font-weight:800}
+    .side-card input,.side-card select{
+      width:100%;margin-top:7px;padding:10px 11px;border-radius:10px;
+      border:1px solid var(--line);background:var(--card);color:var(--text);
+      font-weight:800;
+    }
+    .side-card .setting-gap{margin-top:12px}
+    .mobile-account-settings{display:none}
+    .content{min-width:0}
+    .page{display:none}
+    .page.active{display:block}
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:18px;margin-bottom:18px;
+    }
+    .card-title{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:15px;flex-wrap:wrap;
+    }
+    .card-title h2,.card-title h3{margin:0}
+    .hint{color:var(--muted);font-size:13px}
+    .kpis{
+      display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;
+      margin-bottom:18px;
+    }
+    .kpi{
+      background:var(--card);border:1px solid var(--line);border-radius:16px;
+      padding:16px;box-shadow:var(--shadow);min-height:110px;
+    }
+    .kpi .label{color:var(--muted);font-size:13px;font-weight:800;margin-bottom:10px}
+    .kpi .value{font-size:clamp(23px,2.3vw,34px);font-weight:900;letter-spacing:-.5px}
+    .kpi .small{font-size:12px;color:var(--muted);margin-top:6px}
+    .kpi.editable{position:relative;padding-right:48px}
+    .kpi-edit{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:34px;
+      height:34px;
+      padding:0;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:var(--bg);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+      line-height:0;
+      box-shadow:0 4px 12px rgba(15,23,42,.08);
+    }
+    .kpi-edit svg{
+      display:block;
+      width:18px;
+      height:18px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .kpi-edit{
+      -webkit-tap-highlight-color:transparent;
+      transition:opacity .12s ease,visibility .12s ease;
+    }
+    .kpi-edit:hover{
+      border-color:var(--line);
+      background:var(--card);
+      color:var(--text);
+      box-shadow:0 4px 12px rgba(15,23,42,.08);
+    }
+    .kpi-edit:focus,
+    .kpi-edit:focus-visible,
+    .kpi-edit:active{
+      outline:none;
+      border-color:var(--line);
+      background:var(--bg);
+      color:var(--text);
+      box-shadow:0 4px 12px rgba(15,23,42,.08);
+    }
+    body.account-modal-open .kpi-edit{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+    .account-modal-card{width:min(520px,100%)}
+    .account-edit-grid{
+      display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+      gap:12px;
+    }
+    .account-preview{
+      margin-top:14px;padding:13px 14px;border-radius:13px;
+      background:var(--primary-soft);border:1px solid var(--line);
+    }
+    .currency-select-wrap{
+      position:relative;
+      width:100%;
+      min-width:0;
+    }
+    .currency-select-wrap select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right:42px;
+      line-height:1.25;
+      min-height:42px;
+      background-image:none;
+    }
+    .currency-select-wrap::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      right:15px;
+      width:9px;
+      height:9px;
+      border-right:1.8px solid var(--muted);
+      border-bottom:1.8px solid var(--muted);
+      transform:translateY(-68%) rotate(45deg);
+      transform-origin:center;
+      pointer-events:none;
+      opacity:.9;
+    }
+    .currency-select-wrap:focus-within::after{
+      border-color:var(--primary);
+    }
+    .positive{color:var(--green)!important}
+    .negative{color:var(--red)!important}
+    .neutral{color:var(--muted)!important}
+    .dashboard-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}
+    .equity-card{min-width:0}
+    .equity-card .card-title{margin-bottom:12px}
+    .chart-wrap{
+      width:100%;
+      height:clamp(270px,25vw,340px);
+      position:relative;
+      padding:10px 8px 6px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:linear-gradient(180deg,var(--card),var(--bg));
+      overflow:hidden;
+    }
+    #equityChart{
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:visible;
+      shape-rendering:geometricPrecision;
+    }
+    .stat-list{display:grid;gap:10px}
+    .stat-row{
+      display:flex;justify-content:space-between;gap:12px;padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .stat-row:last-child{border-bottom:0}
+    .stat-row span:first-child{color:var(--muted)}
+    .stat-row strong{font-size:16px}
+    .filters{
+      display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px;
+      margin-bottom:14px;
+    }
+    .field{display:grid;gap:6px}
+    .field label{font-size:12px;color:var(--muted);font-weight:800}
+    input,select,textarea{
+      width:100%;
+      min-width:0;
+      border:1px solid var(--line);
+      background-color:var(--card);
+      color:var(--text);
+      border-radius:11px;
+      padding:10px 11px;
+      outline:none;
+    }
+    select{
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      appearance:none;
+      padding-right:42px;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.25 7 9l4-3.75' fill='none' stroke='%2364748b' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 14px center;
+      background-size:14px 14px;
+    }
+    body.dark select,
+    html[data-pre-theme="dark"] body select{
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.25 7 9l4-3.75' fill='none' stroke='%2394a3b8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    input[type="number"]{
+      -moz-appearance:textfield;
+      appearance:textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button{
+      -webkit-appearance:none;
+      margin:0;
+    }
+    input[type="date"],
+    input[type="time"]{
+      min-height:42px;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator{
+      width:18px;
+      height:18px;
+      margin:0;
+      padding:1px;
+      opacity:.68;
+      cursor:pointer;
+    }
+    body.dark input[type="date"]::-webkit-calendar-picker-indicator,
+    body.dark input[type="time"]::-webkit-calendar-picker-indicator,
+    html[data-pre-theme="dark"] body input[type="date"]::-webkit-calendar-picker-indicator,
+    html[data-pre-theme="dark"] body input[type="time"]::-webkit-calendar-picker-indicator{
+      filter:invert(1);
+      opacity:.72;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px var(--primary-soft);
+    }
+    textarea{resize:vertical;min-height:90px}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+    table{width:100%;border-collapse:collapse;min-width:1400px}
+    th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-size:13px}
+    th{
+      position:sticky;top:0;background:var(--primary);color:#fff;z-index:2;
+      font-size:12px;letter-spacing:.2px;
+    }
+    tbody tr:hover{background:var(--primary-soft)}
+    .badge{
+      display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;
+      font-size:12px;font-weight:900;
+    }
+    .badge.buy{background:var(--green-soft);color:var(--green)}
+    .badge.sell{background:var(--red-soft);color:var(--red)}
+    .badge.yes{background:var(--green-soft);color:var(--green)}
+    .badge.no{background:var(--red-soft);color:var(--red)}
+    .icon-btn{
+      border:1px solid var(--line);background:var(--card);color:var(--text);
+      width:34px;height:34px;border-radius:10px;margin-right:4px;
+    }
+    .icon-btn:hover{border-color:var(--primary)}
+    .icon-btn svg{
+      display:block;
+      width:17px;
+      height:17px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .edit-icon-btn{
+      display:inline-grid;
+      place-items:center;
+      padding:0;
+      vertical-align:middle;
+    }
+    a.icon-btn{display:inline-grid;place-items:center;text-decoration:none;vertical-align:middle}
+    .empty{
+      text-align:center;padding:38px;color:var(--muted);
+    }
+    .form-grid{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+    }
+    .span-2{grid-column:span 2}
+    .span-4{grid-column:span 4}
+    .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+    .plan-create-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:18px;
+    }
+    .plan-create-actions .btn{
+      min-height:46px;
+      padding-left:20px;
+      padding-right:20px;
+      font-size:15px;
+    }
+    .info-strip{
+      display:flex;gap:10px;align-items:center;
+      border:1px solid var(--line);background:var(--primary-soft);color:var(--text);
+      border-radius:14px;padding:13px 14px;margin-bottom:16px;
+    }
+    .review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .review-box{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg)}
+    .review-box h4{margin:0 0 10px}
+    .progress{
+      height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:8px;
+    }
+    .progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--blue));width:0}
+    .toast{
+      position:fixed;right:20px;bottom:20px;background:#0f172a;color:#fff;
+      padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;
+      transform:translateY(20px);pointer-events:none;transition:.25s;z-index:100;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:50;
+      background:rgba(2,6,23,.65);
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transition:opacity .18s ease,visibility .18s ease;
+    }
+    .modal.show{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+    .modal-card{
+      width:min(1050px,100%);
+      max-width:100%;
+      max-height:92vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      min-width:0;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:0 25px 80px rgba(0,0,0,.35);
+      padding:20px;
+      opacity:0;
+      transform:translateY(10px) scale(.985);
+      transition:opacity .18s ease,transform .18s ease;
+    }
+    .modal.show .modal-card{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+    #accountModal{align-items:center}
+    .account-modal-card{
+      width:min(520px,100%);
+      max-height:calc(100dvh - 36px);
+    }
+    .trade-modal-card,
+    .trade-modal-card form,
+    .trade-modal-card .form-grid,
+    .trade-modal-card .field,
+    .trade-modal-card .summary-inline{
+      min-width:0;
+      max-width:100%;
+    }
+    .trade-modal-card input,
+    .trade-modal-card select,
+    .trade-modal-card textarea{
+      display:block;
+      min-width:0;
+      max-width:100%;
+      width:100%;
+    }
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+    .modal-head h2{margin:0}
+    .close{
+      flex:0 0 38px;
+      width:38px;
+      height:38px;
+      padding:0;
+      margin:0;
+      border:1px solid transparent;
+      border-radius:11px;
+      background:var(--bg);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+      line-height:0;
+    }
+    .close svg{
+      display:block;
+      width:19px;
+      height:19px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.9;
+      stroke-linecap:round;
+    }
+    .close:hover,.close:focus-visible{
+      border-color:var(--line);
+      color:var(--primary);
+      outline:none;
+      box-shadow:0 0 0 3px var(--primary-soft);
+    }
+    .summary-inline{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px;
+    }
+    .summary-inline div{
+      background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px;
+    }
+    .summary-inline small{display:block;color:var(--muted);margin-bottom:5px}
+    .summary-inline strong{font-size:18px}
+    .footer{color:var(--muted);font-size:12px;text-align:center;padding:6px 0 24px}
+    
+    .mobile-nav{display:none}
+    .wheel-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+    .wheel-card{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:minmax(220px,280px) minmax(0,1fr);
+      gap:18px;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      background:linear-gradient(180deg,var(--card),var(--bg));
+      overflow:hidden;
+    }
+    .donut{
+      width:230px;height:230px;border-radius:50%;
+      margin:auto;position:relative;
+      background:conic-gradient(var(--line) 0 360deg);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .donut-hole{
+      position:absolute;inset:17px;border-radius:50%;background:var(--card);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;border:1px solid var(--line);
+    }
+    .donut-hole strong{font-size:34px;line-height:1}
+    .donut-hole small{margin-top:6px;color:var(--muted);font-weight:700}
+    .wheel-legend{
+      width:100%;
+      min-width:0;
+      display:grid;
+      gap:10px;
+    }
+    .legend-row{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--card);
+      overflow:hidden;
+    }
+    .legend-dot{width:12px;height:12px;border-radius:50%}
+    .legend-label{font-weight:800}
+    .legend-value,.legend-pct{color:var(--muted);font-weight:700}
+    .extra-grid{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+    .mini-card{
+      min-width:0;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      background:linear-gradient(180deg,var(--card),var(--bg));
+    }
+    .mini-card h3{margin:0 0 6px}
+    .mini-card .hint{margin-bottom:14px}
+    .bars-list{
+      width:100%;
+      min-width:0;
+      display:grid;
+      gap:10px;
+    }
+    .bar-row{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:minmax(105px,140px) minmax(56px,1fr) minmax(72px,90px);
+      gap:10px;
+      align-items:center;
+    }
+    .bar-label{
+      min-width:0;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .bar-track{
+      min-width:0;
+      height:14px;
+      background:var(--line);
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .bar-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--blue))}
+    .bar-fill.negative{background:linear-gradient(90deg,#ef4444,#f97316)}
+    .bar-fill.amber{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+    .bar-value{
+      min-width:0;
+      font-weight:800;
+      text-align:right;
+      white-space:nowrap;
+      font-variant-numeric:tabular-nums;
+    }
+    .app,.layout,.content,.page,.card,.kpi,.dashboard-grid,.extra-grid,.mini-card,.wheel-grid,.wheel-card,.wheel-legend,.legend-row,.review-grid,.review-box,.form-grid,.field,.table-wrap{min-width:0;max-width:100%}
+    .brand>div:last-child{min-width:0}
+    .brand h1,.subtitle,.card-title h2,.card-title h3,.hint{overflow-wrap:anywhere}
+    .legend-row{grid-template-columns:auto minmax(0,1fr) auto auto}
+    .legend-label{min-width:0;white-space:normal;overflow-wrap:anywhere}
+    .direction-wheel-card{
+      grid-template-columns:minmax(190px,220px) minmax(0,1fr);
+      padding:0;
+      border:0;
+      background:none;
+      overflow:visible;
+    }
+    .table-wrap{width:100%;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
+
+
+    @media(max-width:1180px){
+      .extra-grid{
+        grid-template-columns:minmax(0,1fr);
+      }
+      .wheel-card,
+      .direction-wheel-card{
+        grid-template-columns:minmax(0,1fr);
+        justify-items:center;
+      }
+      .wheel-legend{
+        width:100%;
+      }
+      .direction-wheel-card .wheel-legend{
+        max-width:620px;
+      }
+      .bar-row{
+        grid-template-columns:minmax(120px,160px) minmax(80px,1fr) minmax(76px,96px);
+      }
+    }
+
+    @media(min-width:821px) and (max-width:980px){
+      .wheel-card{
+        padding:14px;
+        gap:15px;
+      }
+      .donut{
+        width:210px;
+        height:210px;
+      }
+      .direction-wheel-card .donut{
+        width:190px!important;
+        height:190px!important;
+      }
+      .legend-row{
+        grid-template-columns:auto minmax(0,1fr) auto auto;
+      }
+      .bar-row{
+        grid-template-columns:minmax(105px,135px) minmax(60px,1fr) minmax(72px,88px);
+      }
+    }
+
+    @media(max-width:1150px){
+      .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .dashboard-grid{grid-template-columns:1fr}
+      .filters{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .span-4{grid-column:span 2}
+    }
+    @media(max-width:820px){
+      .app{padding:12px 12px 174px}
+      .layout{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .mobile-account-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .mobile-nav{
+        position:fixed;
+        left:50%;
+        right:auto;
+        bottom:22px;
+        z-index:30;
+        width:calc(100vw - 28px);
+        width:min(calc(100svw - 28px),520px);
+        height:70px;
+        transform:translateX(-50%);
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:5px;
+        padding:6px;
+        background:rgba(13,22,38,.94);
+        border:1px solid rgba(255,255,255,.12);
+        border-radius:24px;
+        box-shadow:
+          0 18px 44px rgba(2,6,23,.42),
+          inset 0 1px 0 rgba(255,255,255,.07);
+        backdrop-filter:blur(18px) saturate(135%);
+        -webkit-backdrop-filter:blur(18px) saturate(135%);
+        overflow:hidden;
+        contain:layout paint;
+      }
+      .mobile-nav button{
+        position:relative;
+        box-sizing:border-box;
+        width:100%;
+        min-width:0;
+        height:56px;
+        margin:0;
+        padding:5px 2px 4px;
+        border:1px solid transparent;
+        border-radius:17px;
+        background:transparent;
+        color:#aebbd0;
+        display:grid;
+        grid-template-rows:27px 16px;
+        align-content:center;
+        justify-items:center;
+        row-gap:3px;
+        font-family:inherit;
+        font-weight:700;
+        line-height:1;
+        opacity:1;
+        transition:background .18s,color .18s,border-color .18s,box-shadow .18s;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .mobile-nav-icon{
+        width:27px;
+        height:27px;
+        display:grid;
+        place-items:center;
+        line-height:0;
+      }
+      .mobile-nav-icon svg{
+        display:block;
+        width:25px;
+        height:25px;
+        fill:none;
+        stroke:currentColor;
+        stroke-width:1.8;
+        stroke-linecap:round;
+        stroke-linejoin:round;
+        overflow:visible;
+      }
+      .mobile-nav-label{
+        display:block;
+        width:100%;
+        height:16px;
+        font-size:13px;
+        line-height:16px;
+        text-align:center;
+        white-space:nowrap;
+      }
+      .mobile-nav-icon{
+        border-radius:11px;
+        transition:background .18s,color .18s,box-shadow .18s;
+      }
+      .mobile-nav button.active{
+        background:rgba(255,255,255,.075);
+        border-color:rgba(255,255,255,.09);
+        color:#fff;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+      }
+      .mobile-nav button.active .mobile-nav-icon{
+        color:#fff;
+        background:linear-gradient(135deg,rgba(20,184,166,.92),rgba(59,130,246,.92));
+        box-shadow:0 5px 14px rgba(15,118,110,.24);
+      }
+      .mobile-nav button:not(.active):active{
+        background:rgba(255,255,255,.06);
+      }
+      .mobile-nav button:focus-visible{
+        outline:2px solid rgba(255,255,255,.88);
+        outline-offset:-3px;
+      }
+      .fab-trade{
+        right:18px;
+        bottom:calc(110px + env(safe-area-inset-bottom));
+        width:58px;height:58px;
+      }
+      .settings-menu{max-width:calc(100vw - 78px)}
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .review-grid{grid-template-columns:1fr}
+      .summary-inline{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .wheel-card,.direction-wheel-card{
+        grid-template-columns:minmax(0,1fr);
+        justify-items:center;
+      }
+      .wheel-legend{width:100%}
+      .extra-grid{grid-template-columns:minmax(0,1fr)}
+      .mini-card{overflow:hidden}
+      .bar-row{
+        grid-template-columns:minmax(82px,110px) minmax(46px,1fr) minmax(64px,76px);
+      }
+      .top-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+      .top-actions .btn{padding:9px 8px;min-width:0;white-space:normal}
+      .brand{width:100%;min-width:0}
+      .chart-wrap{height:280px;padding:8px 5px 5px}
+      .account-edit-grid{grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)}
+    }
+    @media(max-width:560px){
+      .kpis{grid-template-columns:1fr 1fr}
+      .kpi{min-height:95px;padding:13px}
+      .kpi.editable{padding-right:44px}
+      .kpi-edit{width:31px;height:31px;top:8px;right:8px;font-size:15px}
+      .filters,.form-grid{grid-template-columns:1fr}
+      .mobile-account-grid{
+        grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
+        gap:8px;
+      }
+      .mobile-account-grid .field{min-width:0}
+      .mobile-account-grid label{font-size:11px;line-height:1.2}
+      .mobile-account-grid input,
+      .mobile-account-grid select{
+        min-width:0;
+        padding:10px 8px;
+        font-size:13px;
+      }
+      .span-2,.span-4{grid-column:span 1}
+      .summary-inline{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+      .topbar{align-items:flex-start}
+      .brand{align-items:flex-start}
+      .logo{width:42px;height:42px;flex:0 0 42px}
+      h1{font-size:22px;line-height:1.15}
+      .subtitle{font-size:12px;line-height:1.35}
+      .card{padding:13px;border-radius:15px}
+      .kpis{gap:8px}
+      .kpi{padding:11px;min-height:92px}
+      .kpi .value{font-size:clamp(19px,6vw,26px);overflow-wrap:anywhere}
+      .donut{width:min(210px,76vw);height:min(210px,76vw)}
+      .donut-hole{inset:16px}
+      .direction-wheel-card .donut{width:min(190px,70vw)!important;height:min(190px,70vw)!important}
+      .wheel-card{padding:12px;gap:14px}
+      .legend-row{padding:9px 9px;gap:7px;font-size:12px}
+      .bar-row{grid-template-columns:minmax(72px,92px) minmax(0,1fr) 64px;gap:7px;font-size:12px}
+      .bar-label{white-space:normal;overflow-wrap:anywhere;line-height:1.15}
+      .bar-value{font-size:11px}
+      .modal{
+        padding:
+          max(12px,env(safe-area-inset-top))
+          max(12px,env(safe-area-inset-right))
+          max(12px,env(safe-area-inset-bottom))
+          max(12px,env(safe-area-inset-left));
+        align-items:flex-start;
+        overflow-y:auto;
+      }
+      .modal-card{
+        width:100%;
+        max-width:calc(100dvw - 24px);
+        margin:auto;
+        padding:14px;
+        border-radius:16px;
+        max-height:none;
+        overflow:visible;
+      }
+      .account-modal-card{
+        width:min(500px,100%);
+        max-width:calc(100dvw - 24px);
+        max-height:calc(100dvh - 32px);
+        overflow-y:auto;
+        overflow-x:hidden;
+        margin:auto;
+      }
+      .trade-modal-card{
+        width:100%;
+        max-width:calc(100dvw - 24px);
+        margin:auto;
+      }
+      .trade-modal-card .modal-head{
+        position:sticky;top:-14px;z-index:4;
+        margin:-14px -14px 14px;
+        padding:14px;
+        background:var(--card);
+        border-bottom:1px solid var(--line);
+        border-radius:16px 16px 0 0;
+      }
+      .plan-create-actions .btn{
+        width:100%;
+        min-height:48px;
+      }
+      .trade-modal-card .form-actions{
+        position:sticky;bottom:-14px;z-index:4;
+        margin:16px -14px -14px;
+        padding:12px 14px;
+        background:var(--card);
+        border-top:1px solid var(--line);
+        border-radius:0 0 16px 16px;
+      }
+      .mobile-nav{
+        left:50%;
+        right:auto;
+        bottom:max(20px,env(safe-area-inset-bottom));
+        width:calc(100vw - 20px);
+        width:calc(100svw - 20px);
+        height:68px;
+        transform:translateX(-50%);
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:4px;
+        padding:5px;
+        border-radius:22px;
+      }
+      .mobile-nav button{
+        height:53px;
+        padding:4px 1px 3px;
+        grid-template-rows:25px 15px;
+        row-gap:3px;
+      }
+      .mobile-nav-icon{width:25px;height:25px}
+      .mobile-nav-icon svg{width:23px;height:23px}
+      .mobile-nav-label{height:15px;font-size:12px;line-height:15px}
+      .fab-trade{
+        right:14px;
+        bottom:calc(106px + env(safe-area-inset-bottom));
+        width:56px;height:56px;
+      }
+      .settings-trigger{width:38px;height:38px}
+      .settings-trigger svg{width:20px;height:20px}
+      .settings-menu{width:270px;max-width:calc(100vw - 40px)}
+    }
+    @media(max-width:390px){
+      .app{padding-left:8px;padding-right:8px}
+      .modal{
+        padding-left:max(10px,env(safe-area-inset-left));
+        padding-right:max(10px,env(safe-area-inset-right));
+      }
+      .modal-card,.trade-modal-card{
+        max-width:calc(100dvw - 20px);
+        padding-left:12px;
+        padding-right:12px;
+      }
+      .trade-modal-card .modal-head{
+        margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px;
+      }
+      .trade-modal-card .form-actions{
+        margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px;
+      }
+      .trade-modal-card input[type="date"],
+      .trade-modal-card input[type="time"]{
+        appearance:none;
+        -webkit-appearance:none;
+      }
+      .mobile-account-grid{
+        grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);
+        gap:6px;
+      }
+      .mobile-account-grid label{font-size:10px}
+      .mobile-account-grid input,
+      .mobile-account-grid select{font-size:12px;padding:9px 6px}
+      .top-actions{gap:7px}
+      .top-actions .btn{font-size:12px}
+      .kpis{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+      .kpi .label{font-size:11px}
+      .kpi .small{font-size:10px}
+      .summary-inline strong{font-size:15px}
+      .legend-row{
+        grid-template-columns:auto minmax(0,1fr) auto;
+        padding-left:8px;
+        padding-right:8px;
+      }
+      .legend-pct{display:none}
+      .chart-wrap{height:245px}
+    }
+  
+    @media(min-width:821px){
+      h1{font-weight:700}
+      h2,h3,h4{font-weight:650}
+      strong{font-weight:700}
+      .logo{font-weight:750}
+      .nav-btn{font-weight:650}
+      .settings-menu-title{font-weight:700}
+      .settings-option,
+      .settings-option .option-value{font-weight:650}
+      .side-card label,
+      .side-card input,
+      .side-card select{font-weight:650}
+      .kpi .label{font-weight:650}
+      .kpi .value{font-weight:750}
+      .field label{font-weight:650}
+      .legend-label,
+      .bar-label,
+      .bar-value{font-weight:650}
+      .badge{font-weight:650}
+      [style*="font-weight:900"]{font-weight:700!important}
+      [style*="font-weight:800"]{font-weight:650!important}
+    }
+
+  
+    /* Единая нижняя навигация на всех устройствах */
+    .layout{
+      grid-template-columns:minmax(0,1fr);
+    }
+    .sidebar{
+      display:none!important;
+    }
+    .app{
+      padding-bottom:132px;
+    }
+    .mobile-nav{
+      position:fixed;
+      left:50%;
+      right:auto;
+      bottom:24px;
+      z-index:30;
+      width:calc(100% - 56px);
+      max-width:640px;
+      height:72px;
+      transform:translateX(-50%);
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px;
+      padding:7px;
+      background:rgba(13,22,38,.95);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:25px;
+      box-shadow:
+        0 18px 46px rgba(2,6,23,.43),
+        inset 0 1px 0 rgba(255,255,255,.07);
+      backdrop-filter:blur(18px) saturate(135%);
+      -webkit-backdrop-filter:blur(18px) saturate(135%);
+      overflow:hidden;
+      contain:layout paint;
+    }
+    .mobile-nav button{
+      position:relative;
+      box-sizing:border-box;
+      width:100%;
+      min-width:0;
+      height:56px;
+      margin:0;
+      padding:5px 5px 4px;
+      border:1px solid transparent;
+      border-radius:18px;
+      background:transparent;
+      color:#aebbd0;
+      display:grid;
+      grid-template-rows:27px 16px;
+      align-content:center;
+      justify-items:center;
+      row-gap:3px;
+      font-family:inherit;
+      font-weight:700;
+      line-height:1;
+      opacity:1;
+      transition:background .18s,color .18s,border-color .18s,box-shadow .18s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .mobile-nav-icon{
+      width:27px;
+      height:27px;
+      display:grid;
+      place-items:center;
+      border-radius:11px;
+      line-height:0;
+      transition:background .18s,color .18s,box-shadow .18s;
+    }
+    .mobile-nav-icon svg{
+      display:block;
+      width:25px;
+      height:25px;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      overflow:visible;
+    }
+    .mobile-nav-label{
+      display:block;
+      width:100%;
+      height:16px;
+      font-size:13px;
+      line-height:16px;
+      text-align:center;
+      white-space:nowrap;
+    }
+    .mobile-nav button.active{
+      background:rgba(255,255,255,.075);
+      border-color:rgba(255,255,255,.09);
+      color:#fff;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .mobile-nav button.active .mobile-nav-icon{
+      color:#fff;
+      background:linear-gradient(135deg,rgba(20,184,166,.92),rgba(59,130,246,.92));
+      box-shadow:0 5px 14px rgba(15,118,110,.24);
+    }
+    .mobile-nav button:not(.active):active{
+      background:rgba(255,255,255,.06);
+    }
+    .mobile-nav button:focus-visible{
+      outline:2px solid rgba(255,255,255,.88);
+      outline-offset:-3px;
+    }
+    .fab-trade{
+      bottom:112px;
+      right:28px;
+    }
+
+    @media(max-width:820px){
+      .app{
+        padding:12px 12px 174px;
+      }
+      .mobile-nav{
+        bottom:max(20px,env(safe-area-inset-bottom));
+        width:calc(100% - 28px);
+        max-width:520px;
+        height:70px;
+        gap:5px;
+        padding:6px;
+        border-radius:24px;
+      }
+      .mobile-nav button{
+        height:56px;
+        padding:5px 2px 4px;
+      }
+      .fab-trade{
+        right:18px;
+        bottom:calc(110px + env(safe-area-inset-bottom));
+        width:58px;
+        height:58px;
+      }
+    }
+
+    @media(max-width:560px){
+      .mobile-nav{
+        width:calc(100% - 20px);
+        height:68px;
+        gap:4px;
+        padding:5px;
+        border-radius:22px;
+      }
+      .mobile-nav button{
+        height:53px;
+        padding:4px 1px 3px;
+        grid-template-rows:25px 15px;
+      }
+      .mobile-nav-icon{
+        width:25px;
+        height:25px;
+      }
+      .mobile-nav-icon svg{
+        width:23px;
+        height:23px;
+      }
+      .mobile-nav-label{
+        height:15px;
+        font-size:12px;
+        line-height:15px;
+      }
+      .fab-trade{
+        right:14px;
+        bottom:calc(106px + env(safe-area-inset-bottom));
+        width:56px;
+        height:56px;
+      }
+    }
+
+  
+    .capital-setup-hint{
+      width:100%;
+      margin-top:10px;
+      padding:9px 10px;
+      border:1px solid color-mix(in srgb,var(--primary) 30%,var(--line));
+      border-radius:10px;
+      background:var(--primary-soft);
+      color:var(--primary);
+      font-size:12px;
+      font-weight:650;
+      line-height:1.35;
+      text-align:left;
+    }
+    .capital-setup-hint:hover{
+      border-color:var(--primary);
+    }
+    .account-modal-card.onboarding{
+      width:min(560px,100%);
+    }
+    .account-modal-card.onboarding .account-preview{
+      border-color:color-mix(in srgb,var(--primary) 32%,var(--line));
+      background:var(--primary-soft);
+    }
+    @media(max-width:560px){
+      .capital-setup-hint{
+        font-size:11.5px;
+        padding:8px 9px;
+      }
+    }
+
+  
+    .required-mark{
+      color:var(--red);
+      font-weight:900;
+      line-height:1;
+    }
+
+    .trade-modal-scroll{
+      min-width:0;
+      max-width:100%;
+    }
+
+    @media(max-width:560px){
+      #tradeModal{
+        align-items:center;
+        justify-content:center;
+        overflow:hidden;
+        padding:
+          max(10px,env(safe-area-inset-top))
+          max(10px,env(safe-area-inset-right))
+          max(10px,env(safe-area-inset-bottom))
+          max(10px,env(safe-area-inset-left));
+      }
+
+      #tradeModal .trade-modal-card{
+        width:100%;
+        max-width:100%;
+        height:auto;
+        max-height:calc(100vh - 20px);
+        max-height:calc(100dvh - 20px);
+        margin:0;
+        padding:0;
+        border-radius:16px;
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+      }
+
+      #tradeModal .trade-modal-card .modal-head{
+        position:static;
+        flex:0 0 auto;
+        min-width:0;
+        margin:0;
+        padding:13px 14px;
+        border-bottom:1px solid var(--line);
+        border-radius:16px 16px 0 0;
+        background:var(--card);
+      }
+
+      #tradeModal .trade-modal-card .modal-head h2{
+        min-width:0;
+        font-size:20px;
+        line-height:1.2;
+        overflow-wrap:anywhere;
+      }
+
+      #tradeModal .trade-modal-card form{
+        flex:1 1 auto;
+        min-height:0;
+        min-width:0;
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;
+      }
+
+      #tradeModal .trade-modal-scroll{
+        flex:1 1 auto;
+        min-height:0;
+        min-width:0;
+        max-width:100%;
+        overflow-y:auto;
+        overflow-x:hidden;
+        overscroll-behavior:contain;
+        -webkit-overflow-scrolling:touch;
+        padding:14px;
+      }
+
+      #tradeModal .trade-modal-card .form-grid{
+        width:100%;
+        min-width:0;
+        max-width:100%;
+      }
+
+      #tradeModal .trade-modal-card .field,
+      #tradeModal .trade-modal-card input,
+      #tradeModal .trade-modal-card select,
+      #tradeModal .trade-modal-card textarea{
+        min-width:0;
+        max-width:100%;
+        width:100%;
+      }
+
+      #tradeModal .trade-modal-card input[type="date"],
+      #tradeModal .trade-modal-card input[type="time"]{
+        appearance:none;
+        -webkit-appearance:none;
+      }
+
+      #tradeModal .trade-modal-card .summary-inline{
+        width:100%;
+        min-width:0;
+        max-width:100%;
+      }
+
+      #tradeModal .trade-modal-card .form-actions{
+        position:static;
+        flex:0 0 auto;
+        display:grid;
+        grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+        gap:8px;
+        width:100%;
+        min-width:0;
+        margin:0;
+        padding:
+          11px
+          14px
+          max(11px,env(safe-area-inset-bottom));
+        border-top:1px solid var(--line);
+        border-radius:0 0 16px 16px;
+        background:var(--card);
+      }
+
+      #tradeModal .trade-modal-card .form-actions .btn{
+        width:100%;
+        min-width:0;
+        padding:10px 8px;
+        white-space:normal;
+        line-height:1.2;
+      }
+    }
+
+    @media(max-width:390px){
+      #tradeModal{
+        padding:
+          max(8px,env(safe-area-inset-top))
+          max(8px,env(safe-area-inset-right))
+          max(8px,env(safe-area-inset-bottom))
+          max(8px,env(safe-area-inset-left));
+      }
+
+      #tradeModal .trade-modal-card{
+        max-height:calc(100vh - 16px);
+        max-height:calc(100dvh - 16px);
+      }
+
+      #tradeModal .trade-modal-scroll{
+        padding:12px;
+      }
+
+      #tradeModal .trade-modal-card .modal-head{
+        padding-left:12px;
+        padding-right:12px;
+      }
+
+      #tradeModal .trade-modal-card .form-actions{
+        padding-left:12px;
+        padding-right:12px;
+      }
+    }
+
+  
+    #tradeModal .trade-save-actions{
+      justify-content:flex-end;
+    }
+
+    #tradeModal .trade-save-actions .primary{
+      min-width:220px;
+    }
+
+    @media(max-width:560px){
+      #tradeModal .trade-modal-card .trade-save-actions{
+        display:block;
+      }
+
+      #tradeModal .trade-modal-card .trade-save-actions .primary{
+        width:100%;
+        min-width:0;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">FX</div>
+        <div class="brand-copy">
+          <div class="title-row">
+            <h1>Торговый дневник трейдинга</h1>
+
+            <div class="header-settings">
+              <button class="settings-trigger" id="settingsBtn" type="button"
+                      aria-label="Настройки"
+                      title="Настройки"
+                      aria-expanded="false" aria-controls="settingsMenu">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"
+                        fill="none" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M19.4 13.5a7.8 7.8 0 0 0 .05-1.5 7.8 7.8 0 0 0-.05-1.5l2-1.55-2-3.46-2.48 1a7.4 7.4 0 0 0-2.6-1.5L14 2.35h-4L9.68 5a7.4 7.4 0 0 0-2.6 1.5l-2.48-1-2 3.46 2 1.55a7.8 7.8 0 0 0-.05 1.5 7.8 7.8 0 0 0 .05 1.5l-2 1.55 2 3.46 2.48-1a7.4 7.4 0 0 0 2.6 1.5l.32 2.65h4l.32-2.65a7.4 7.4 0 0 0 2.6-1.5l2.48 1 2-3.46-2-1.55Z"
+                        fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <div class="settings-menu" id="settingsMenu" hidden>
+              <div class="settings-menu-title">Настройки дневника</div>
+
+              <button class="settings-option" id="themeBtn" type="button">
+                <span class="option-icon">🌓</span>
+                <span>Тема</span>
+                <span class="option-value" id="themeModeText">Система</span>
+              </button>
+
+              <button class="settings-option" id="languageBtn" type="button">
+                <span class="option-icon">🌐</span>
+                <span>Язык</span>
+                <span class="option-value" id="languageModeText">Русский</span>
+              </button>
+
+              <div class="settings-divider"></div>
+
+              <button class="settings-option text-only-option" id="exportBtn" type="button">
+                <span>Экспорт JSON</span>
+                <span class="option-value">Сохранить</span>
+              </button>
+
+              <button class="settings-option text-only-option" id="importBtn" type="button">
+                <span>Импорт JSON</span>
+                <span class="option-value">Восстановить</span>
+              </button>
+
+              <input id="importFile" type="file" accept=".json" hidden>
+              </div>
+            </div>
+          </div>
+
+          <div class="subtitle">Сделки, статистика, ошибки, дисциплина и рост баланса</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <button class="nav-btn active" data-page="dashboard" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+            </svg>
+          </span>
+          <span class="nav-label">Главная</span>
+        </button>
+
+        <button class="nav-btn" data-page="trades" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 3h12a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/>
+              <path d="M8 7h8M8 11h8M8 15h5"/>
+            </svg>
+          </span>
+          <span class="nav-label">Сделки</span>
+        </button>
+
+        <button class="nav-btn" data-page="plan" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="m15.5 8.5-2.1 4.9-4.9 2.1 2.1-4.9 4.9-2.1Z"/>
+            </svg>
+          </span>
+          <span class="nav-label">План сделки</span>
+        </button>
+
+        <button class="nav-btn" data-page="review" type="button">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M9.5 4.5A3.5 3.5 0 0 0 6 8v1a3 3 0 0 0-1 5.83V16a3 3 0 0 0 3 3h1.5"/>
+              <path d="M14.5 4.5A3.5 3.5 0 0 1 18 8v1a3 3 0 0 1 1 5.83V16a3 3 0 0 1-3 3h-1.5"/>
+              <path d="M12 4v16M8 10h2M14 10h2M8 15h2M14 15h2"/>
+            </svg>
+          </span>
+          <span class="nav-label">Разбор</span>
+        </button>
+
+        <div class="side-card">
+          <div style="font-weight:900;margin-bottom:7px">Данные сохраняются автоматически</div>
+          <div class="hint">Все сделки хранятся в браузере на этом устройстве.</div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section id="dashboard" class="page active">
+          <div class="kpis">
+            <div class="kpi"><div class="label">Текущий баланс</div><div class="value" id="kpiBalance">$10 000</div><div class="small" id="kpiBalanceSub">Изменение: $0</div></div>
+            <div class="kpi"><div class="label">Чистая прибыль</div><div class="value" id="kpiNet">$0</div><div class="small" id="kpiReturn">Доходность: 0%</div></div>
+            <div class="kpi"><div class="label">Винрейт</div><div class="value" id="kpiWinrate">0%</div><div class="small" id="kpiWins">0 прибыльных</div></div>
+            <div class="kpi"><div class="label">Profit Factor</div><div class="value" id="kpiPF">0.00</div><div class="small">Валовая прибыль / убыток</div></div>
+            <div class="kpi"><div class="label">Макс. просадка</div><div class="value" id="kpiDD">$0</div><div class="small" id="kpiDDPct">0%</div></div>
+            <div class="kpi editable">
+              <button class="kpi-edit" id="editAccountBtn" type="button" aria-label="Редактировать начальный капитал и валюту" title="Редактировать">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 19h4l9.2-9.2a2.1 2.1 0 0 0-3-3L6 16v3Z"/>
+                  <path d="m13.8 8.2 3 3"/>
+                </svg>
+              </button>
+              <div class="label">Начальный капитал</div>
+              <div class="value" id="kpiCapital">$0</div>
+              <div class="small" id="kpiCapitalCurrency">Валюта: USD</div>
+              <button class="capital-setup-hint" id="capitalSetupHint" type="button" hidden>
+                Укажите капитал для правильного расчёта баланса и просадки
+              </button>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card equity-card">
+              <div class="card-title">
+                <div>
+                  <h2>График баланса</h2>
+                  <div class="hint">Изменение баланса после каждой закрытой сделки</div>
+                </div>
+              </div>
+              <div class="chart-wrap">
+                <svg id="equityChart" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet" aria-label="График изменения баланса"></svg>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><h2>Ключевая статистика</h2></div>
+              <div class="stat-list">
+                <div class="stat-row"><span>Всего сделок</span><strong id="statTrades">0</strong></div>
+                <div class="stat-row"><span>Средняя сделка</span><strong id="statAvg">$0</strong></div>
+                <div class="stat-row"><span>Средний R</span><strong id="statAvgR">0.00R</strong></div>
+                <div class="stat-row"><span>Лучший результат</span><strong id="statBest">$0</strong></div>
+                <div class="stat-row"><span>Худший результат</span><strong id="statWorst">$0</strong></div>
+                <div class="stat-row"><span>Сделки по плану</span><strong id="statPlan">0%</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Круговая диаграмма результатов</h2>
+                <div class="hint">Распределение сделок по исходу: прибыль, убыток и безубыток</div>
+              </div>
+            </div>
+            <div class="wheel-grid">
+              <div class="wheel-card">
+                <div class="donut" id="outcomeWheel">
+                  <div class="donut-hole">
+                    <strong id="outcomeTotal">0</strong>
+                    <small>сделок</small>
+                  </div>
+                </div>
+                <div class="wheel-legend" id="outcomeLegend"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Дополнительные диаграммы</h2>
+                <div class="hint">Статистика по направлениям, инструментам и сессиям</div>
+              </div>
+            </div>
+
+            <div class="extra-grid">
+              <div class="mini-card">
+                <h3>Колесо BUY / SELL</h3>
+                <div class="hint">Сколько у вас покупок и продаж</div>
+                <div class="wheel-card direction-wheel-card">
+                  <div class="donut" id="directionWheel" style="width:200px;height:200px">
+                    <div class="donut-hole">
+                      <strong id="directionTotal">0</strong>
+                      <small>сделок</small>
+                    </div>
+                  </div>
+                  <div class="wheel-legend" id="directionLegend"></div>
+                </div>
+              </div>
+
+              <div class="mini-card">
+                <h3>Результат по сессиям</h3>
+                <div class="hint">Где вы зарабатываете лучше</div>
+                <div class="bars-list" id="sessionBars"></div>
+              </div>
+
+              <div class="mini-card">
+                <h3>Результат по инструментам</h3>
+                <div class="hint">Лучшие и худшие инструменты</div>
+                <div class="bars-list" id="symbolBars"></div>
+              </div>
+
+              <div class="mini-card">
+                <h3>Частые ошибки</h3>
+                <div class="hint">Какие нарушения повторяются чаще всего</div>
+                <div class="bars-list" id="mistakeBars"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Последние сделки</h2>
+                <div class="hint">Пять последних записей</div>
+              </div>
+            </div>
+            <div id="recentTrades"></div>
+          </div>
+        </section>
+
+        <section id="trades" class="page">
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Журнал сделок</h2>
+                <div class="hint">Фильтруйте, редактируйте и анализируйте сделки</div>
+              </div>
+
+            </div>
+
+            <div class="filters">
+              <div class="field">
+                <label>Поиск</label>
+                <input id="filterSearch" placeholder="EUR/USD, пробой, ошибка...">
+              </div>
+              <div class="field">
+                <label>Инструмент</label>
+                <select id="filterSymbol"><option value="">Все</option></select>
+              </div>
+              <div class="field">
+                <label>Направление</label>
+                <select id="filterDirection">
+                  <option value="">Все</option>
+                  <option>BUY</option>
+                  <option>SELL</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Сессия</label>
+                <select id="filterSession">
+                  <option value="">Все сессии</option>
+                  <optgroup label="Основные сессии">
+                    <option>Сидней</option>
+                    <option>Токио (Азия)</option>
+                    <option>Франкфурт</option>
+                    <option>Лондон</option>
+                    <option>Нью-Йорк</option>
+                  </optgroup>
+                  <optgroup label="Перекрытия">
+                    <option>Сидней–Токио</option>
+                    <option>Франкфурт–Лондон</option>
+                    <option>Лондон–Нью-Йорк</option>
+                  </optgroup>
+                  <optgroup label="Другое">
+                    <option>Вне основных сессий</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="field">
+                <label>Результат</label>
+                <select id="filterResult">
+                  <option value="">Все</option>
+                  <option value="win">Прибыль</option>
+                  <option value="loss">Убыток</option>
+                  <option value="be">Безубыток</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Дата</th><th>Инструмент</th><th>Направление</th><th>Сессия</th>
+                    <th>Таймфрейм</th><th>Тип входа</th><th>Риск</th><th>Чистый результат</th>
+                    <th>R</th><th>По плану</th><th>Причина</th><th>Ошибка</th><th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="tradesBody"></tbody>
+              </table>
+            </div>
+            <div id="tradesEmpty" class="empty" style="display:none">Сделок пока нет.</div>
+          </div>
+        </section>
+
+        <section id="plan" class="page">
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>План сделки</h2>
+                <div class="hint">Заполняйте до входа в рынок</div>
+              </div>
+              <button class="btn" id="clearPlanBtn">Очистить план</button>
+            </div>
+
+            <div class="info-strip">🧭 Хорошая сделка начинается не с кнопки BUY или SELL, а с заранее понятного сценария.</div>
+
+            <div class="form-grid">
+              <div class="field"><label>Дата и время</label><input id="planDate" type="datetime-local"></div>
+              <div class="field"><label>Инструмент</label><input id="planSymbol" list="instrumentList" placeholder="Выберите или введите, например EUR/USD"></div>
+              <div class="field"><label>Направление</label><select id="planDirection"><option>BUY</option><option>SELL</option></select></div>
+              <div class="field"><label>Таймфрейм</label><select id="planTimeframe"><option>M1</option><option>M5</option><option selected>M15</option><option>M30</option><option>H1</option><option>H4</option><option>D1</option></select></div>
+
+              <div class="field"><label>Цена входа</label><input id="planEntry" type="number" step="any"></div>
+              <div class="field"><label>Stop Loss</label><input id="planSL" type="number" step="any"></div>
+              <div class="field"><label>Take Profit</label><input id="planTP" type="number" step="any"></div>
+              <div class="field"><label>Риск, <span class="currency-code">USD</span></label><input id="planRisk" type="number" step="0.01"></div>
+
+              <div class="field span-2"><label>Причина входа</label><textarea id="planReason" placeholder="Тренд, уровень, подтверждение, свечная модель..."></textarea></div>
+              <div class="field span-2"><label>Условие отмены</label><textarea id="planCancel" placeholder="Когда сделку нельзя открывать"></textarea></div>
+              <div class="field span-2"><label>Сценарий движения</label><textarea id="planScenario" placeholder="Что должно произойти после входа"></textarea></div>
+              <div class="field span-2"><label>Что может пойти не так?</label><textarea id="planRiskText" placeholder="Новости, ложный пробой, низкая ликвидность..."></textarea></div>
+            </div>
+
+            <div class="card" style="margin-top:18px;margin-bottom:0;background:var(--bg)">
+              <div class="card-title"><h3>Чек-лист перед входом</h3></div>
+              <div class="review-grid" id="checklist"></div>
+            </div>
+
+            <div class="plan-create-actions">
+              <button class="btn primary" id="createTradeFromPlanBtn" type="button">
+                Создать сделку из плана
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="review" class="page">
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Разбор торговли</h2>
+                <div class="hint">Автоматическая сводка по всем сделкам</div>
+              </div>
+            </div>
+
+            <div class="review-grid">
+              <div class="review-box">
+                <h4>Дисциплина</h4>
+                <div class="hint">Доля сделок, выполненных по плану</div>
+                <div class="progress"><span id="disciplineBar"></span></div>
+                <div style="margin-top:8px;font-weight:900" id="disciplineText">0%</div>
+              </div>
+              <div class="review-box">
+                <h4>Самый прибыльный инструмент</h4>
+                <div class="hint">По сумме чистого результата</div>
+                <div style="margin-top:10px;font-size:24px;font-weight:900" id="bestSymbol">—</div>
+              </div>
+              <div class="review-box">
+                <h4>Самая частая ошибка</h4>
+                <div class="hint">Повторяющаяся запись в поле «Ошибка»</div>
+                <div style="margin-top:10px;font-size:20px;font-weight:900" id="topMistake" data-no-i18n>—</div>
+              </div>
+              <div class="review-box">
+                <h4>Лучшее состояние</h4>
+                <div class="hint">Эмоция до сделки с лучшим средним результатом</div>
+                <div style="margin-top:10px;font-size:20px;font-weight:900" id="bestEmotion">—</div>
+              </div>
+            </div>
+
+            <div style="margin-top:18px" class="form-grid">
+              <div class="field span-2"><label>Что получилось хорошо?</label><textarea id="reviewGood"></textarea></div>
+              <div class="field span-2"><label>Какие ошибки повторялись?</label><textarea id="reviewErrors"></textarea></div>
+              <div class="field span-2"><label>Что изменить?</label><textarea id="reviewChange"></textarea></div>
+              <div class="field span-2"><label>Главное правило на следующую неделю</label><textarea id="reviewRule"></textarea></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Навигация по разделам">
+      <button class="active" data-page="dashboard" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Главная</span>
+      </button>
+
+      <button data-page="trades" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 3h12a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/>
+            <path d="M8 7h8M8 11h8M8 15h5"/>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Сделки</span>
+      </button>
+
+      <button data-page="plan" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="m15.5 8.5-2.1 4.9-4.9 2.1 2.1-4.9 4.9-2.1Z"/>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">План</span>
+      </button>
+
+      <button data-page="review" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M9.5 4.5A3.5 3.5 0 0 0 6 8v1a3 3 0 0 0-1 5.83V16a3 3 0 0 0 3 3h1.5"/>
+            <path d="M14.5 4.5A3.5 3.5 0 0 1 18 8v1a3 3 0 0 1 1 5.83V16a3 3 0 0 1-3 3h-1.5"/>
+            <path d="M12 4v16M8 10h2M14 10h2M8 15h2M14 15h2"/>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Разбор</span>
+      </button>
+    </nav>
+
+    <footer style="
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    ">
+      © Andrey30
+      <span aria-hidden="true"> · </span>
+      <a href="privacy.html" style="
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      ">
+        Политика конфиденциальности
+      </a>
+    </footer>
+  </div>
+
+  <datalist id="instrumentList">
+    <option value="EUR/USD"></option><option value="GBP/USD"></option><option value="USD/JPY"></option>
+    <option value="USD/CHF"></option><option value="AUD/USD"></option><option value="NZD/USD"></option>
+    <option value="USD/CAD"></option><option value="EUR/GBP"></option><option value="EUR/JPY"></option>
+    <option value="GBP/JPY"></option><option value="EUR/CHF"></option><option value="EUR/AUD"></option>
+    <option value="EUR/CAD"></option><option value="EUR/NZD"></option><option value="GBP/CHF"></option>
+    <option value="GBP/AUD"></option><option value="GBP/CAD"></option><option value="GBP/NZD"></option>
+    <option value="AUD/JPY"></option><option value="AUD/CAD"></option><option value="AUD/CHF"></option>
+    <option value="AUD/NZD"></option><option value="CAD/JPY"></option><option value="CAD/CHF"></option>
+    <option value="CHF/JPY"></option><option value="NZD/JPY"></option><option value="NZD/CAD"></option>
+    <option value="NZD/CHF"></option><option value="USD/TRY"></option><option value="USD/ZAR"></option>
+    <option value="USD/MXN"></option><option value="USD/PLN"></option><option value="USD/CNH"></option>
+    <option value="USD/SEK"></option><option value="USD/NOK"></option><option value="EUR/TRY"></option>
+    <option value="EUR/PLN"></option><option value="EUR/SEK"></option><option value="EUR/NOK"></option>
+    <option value="XAU/USD"></option><option value="XAG/USD"></option><option value="XPT/USD"></option>
+    <option value="WTI"></option><option value="BRENT"></option><option value="NAS100"></option>
+    <option value="US30"></option><option value="SPX500"></option><option value="GER40"></option>
+    <option value="UK100"></option><option value="FRA40"></option><option value="JP225"></option>
+    <option value="BTC/USD"></option><option value="ETH/USD"></option><option value="SOL/USD"></option>
+    <option value="XRP/USD"></option>
+  </datalist>
+
+
+
+  <button class="fab-trade" id="addTradeFab" type="button"
+          aria-label="Новая сделка" title="Новая сделка">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5v14M5 12h14"
+            fill="none" stroke="currentColor" stroke-width="2.4"
+            stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <div class="modal" id="accountModal">
+    <div class="modal-card account-modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 id="accountModalTitle">Начальный капитал</h2>
+          <div class="hint" id="accountModalHint">Измените валюту счёта и начальную сумму</div>
+        </div>
+        <button class="close" id="closeAccountModal" type="button" aria-label="Закрыть" title="Закрыть">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <form id="accountForm">
+        <div class="account-edit-grid">
+          <div class="field">
+            <label for="accountCurrencyInput">Валюта</label>
+            <div class="currency-select-wrap">
+              <select id="accountCurrencyInput">
+            <option value="USD">USD — доллар США</option>
+            <option value="EUR">EUR — евро</option>
+            <option value="GBP">GBP — фунт стерлингов</option>
+            <option value="RUB">RUB — российский рубль</option>
+            <option value="CHF">CHF — швейцарский франк</option>
+            <option value="JPY">JPY — японская иена</option>
+            <option value="PLN">PLN — польский злотый</option>
+            <option value="TRY">TRY — турецкая лира</option>
+            <option value="CAD">CAD — канадский доллар</option>
+            <option value="AUD">AUD — австралийский доллар</option>
+            <option value="NZD">NZD — новозеландский доллар</option>
+            <option value="CNY">CNY — китайский юань</option>
+            <option value="UAH">UAH — украинская гривна</option>
+            <option value="KZT">KZT — казахстанский тенге</option>
+            <option value="AED">AED — дирхам ОАЭ</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="accountCapitalInput">Начальный капитал</label>
+            <input id="accountCapitalInput" type="number" min="0" step="0.01" inputmode="decimal" required>
+          </div>
+        </div>
+
+        <div class="account-preview" id="accountPreviewText">
+          Текущий баланс пересчитается как: <strong>начальный капитал + результаты сделок</strong>.
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn" id="cancelAccountModal">Отмена</button>
+          <button type="submit" class="btn primary" id="saveAccountBtn">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="tradeModal">
+    <div class="modal-card trade-modal-card">
+      <div class="modal-head">
+        <h2 id="modalTitle">Новая сделка</h2>
+        <button class="close" id="closeModal" type="button" aria-label="Закрыть" title="Закрыть">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <form id="tradeForm">
+        <input type="hidden" id="tradeId">
+
+        <div class="trade-modal-scroll">
+          <div class="form-grid">
+          <div class="field"><label>Дата <span class="required-mark" aria-hidden="true">*</span></label><input id="date" type="date" required></div>
+          <div class="field"><label>Время</label><input id="time" type="time"></div>
+          <div class="field"><label>Инструмент <span class="required-mark" aria-hidden="true">*</span></label><input id="symbol" list="instrumentList" placeholder="Выберите или введите инструмент" required></div>
+          <div class="field"><label>Направление <span class="required-mark" aria-hidden="true">*</span></label><select id="direction" required><option>BUY</option><option>SELL</option></select></div>
+
+          <div class="field">
+            <label>Сессия</label>
+            <select id="session">
+              <optgroup label="Основные сессии">
+                <option>Сидней</option>
+                <option>Токио (Азия)</option>
+                <option>Франкфурт</option>
+                <option selected>Лондон</option>
+                <option>Нью-Йорк</option>
+              </optgroup>
+              <optgroup label="Перекрытия">
+                <option>Сидней–Токио</option>
+                <option>Франкфурт–Лондон</option>
+                <option>Лондон–Нью-Йорк</option>
+              </optgroup>
+              <optgroup label="Другое">
+                <option>Вне основных сессий</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field"><label>Таймфрейм</label><select id="timeframe"><option>M1</option><option>M5</option><option selected>M15</option><option>M30</option><option>H1</option><option>H4</option><option>D1</option></select></div>
+          <div class="field"><label>Тип входа</label><select id="entryType"><option>Пробой</option><option>Отбой</option><option selected>Ретест</option><option>Продолжение тренда</option><option>Разворот</option><option>По уровню</option><option>По индикатору</option><option>Новостной импульс</option><option>Другое</option></select></div>
+          <div class="field"><label>Объём, лот</label><input id="lot" type="number" min="0" step="0.01"></div>
+
+          <div class="field"><label>Цена входа</label><input id="entryPrice" type="number" step="any"></div>
+          <div class="field"><label>Stop Loss</label><input id="stopLoss" type="number" step="any"></div>
+          <div class="field"><label>Take Profit</label><input id="takeProfit" type="number" step="any"></div>
+          <div class="field"><label>Цена выхода</label><input id="exitPrice" type="number" step="any"></div>
+
+          <div class="field"><label>Риск, <span class="currency-code">USD</span> <span class="required-mark" aria-hidden="true">*</span></label><input id="risk" type="number" min="0" step="0.01" required></div>
+          <div class="field"><label>Результат до расходов, <span class="currency-code">USD</span> <span class="required-mark" aria-hidden="true">*</span></label><input id="gross" type="number" step="0.01" required></div>
+          <div class="field"><label>Комиссия и своп, <span class="currency-code">USD</span></label><input id="fees" type="number" min="0" step="0.01" value="0"></div>
+          <div class="field"><label>Результат, пипсы/пункты</label><input id="points" type="number" step="0.1"></div>
+
+          <div class="field"><label>Эмоции до</label><select id="emotionBefore"><option>Без эмоций</option><option>Спокойствие</option><option>Уверенность</option><option>Страх</option><option>Жадность</option><option>Спешка</option><option>Злость</option><option>Сомнение</option><option>Эйфория</option><option>Усталость</option></select></div>
+          <div class="field"><label>Эмоции после</label><select id="emotionAfter"><option>Без эмоций</option><option>Спокойствие</option><option>Уверенность</option><option>Страх</option><option>Жадность</option><option>Злость</option><option>Разочарование</option><option>Эйфория</option><option>Усталость</option></select></div>
+          <div class="field"><label>Следовал плану?</label><select id="followedPlan"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+          <div class="field"><label>Ссылка на скрин</label><input id="screenshot" type="url" placeholder="https://..."></div>
+
+          <div class="field span-2"><label>Причина входа</label><textarea id="reason" placeholder="Почему вы открыли сделку"></textarea></div>
+          <div class="field span-2"><label>Ошибка / нарушение</label><textarea id="mistake" placeholder="Оставьте пустым, если ошибки не было"></textarea></div>
+          <div class="field span-4"><label>Заметки</label><textarea id="notes" placeholder="Что заметили и чему научились"></textarea></div>
+        </div>
+
+          <div class="summary-inline">
+            <div><small>Чистый результат</small><strong id="liveNet">$0.00</strong></div>
+            <div><small>R-множитель</small><strong id="liveR">0.00R</strong></div>
+            <div><small>Риск от капитала</small><strong id="liveRiskPct">0.00%</strong></div>
+            <div><small>Исход</small><strong id="liveOutcome">Безубыток</strong></div>
+          </div>
+        </div>
+
+        <div class="form-actions trade-save-actions">
+          <button type="submit" class="btn primary">Сохранить сделку</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "forexJournal_v1";
+    const SETTINGS_KEY = "forexJournal_settings_v1";
+    const REVIEW_KEY = "forexJournal_review_v1";
+    const PLAN_KEY = "forexJournal_plan_v1";
+    const ACCOUNT_SETUP_PROMPT_KEY = "forexJournal_account_setup_prompt_v1";
+
+    const $ = id => document.getElementById(id);
+    const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","RUB","CHF","JPY","PLN","TRY","CAD","AUD","NZD","CNY","UAH","KZT","AED"];
+    const money = value => {
+      const currency = SUPPORTED_CURRENCIES.includes(settings?.currency) ? settings.currency : "USD";
+      try{
+        return new Intl.NumberFormat(settings?.language === "en" ? "en-US" : "ru-RU", {
+          style:"currency",
+          currency,
+          currencyDisplay:"symbol",
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        }).format(Number(value)||0);
+      }catch(error){
+        return `${(Number(value)||0).toLocaleString(settings?.language === "en" ? "en-US" : "ru-RU", {minimumFractionDigits:2, maximumFractionDigits:2})} ${currency}`;
+      }
+    };
+    const num = value => Number(value) || 0;
+    const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]));
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    const systemThemeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+    const I18N_EN = {"Торговый дневник трейдинга":"Trading Journal","Настройки":"Settings","Настройки дневника":"Journal settings","Тема":"Theme","Язык":"Language","Русский":"English","Система":"System","Светлая":"Light","Тёмная":"Dark","Экспорт JSON":"Export JSON","Импорт JSON":"Import JSON","Сохранить":"Save","Восстановить":"Restore","Сделки, статистика, ошибки, дисциплина и рост баланса":"Trades, statistics, mistakes, discipline and balance growth","Главная":"Home","Сделки":"Trades","План сделки":"Trade plan","План":"Plan","Разбор":"Review","Разбор торговли":"Trading review","Данные сохраняются автоматически":"Data is saved automatically","Все сделки хранятся в браузере на этом устройстве.":"All trades are stored in this browser on this device.","Текущий баланс":"Current balance","Чистая прибыль":"Net profit","Винрейт":"Win rate","Валовая прибыль / убыток":"Gross profit / loss","Макс. просадка":"Max drawdown","Начальный капитал":"Initial capital","Редактировать начальный капитал и валюту":"Edit initial capital and currency","Редактировать":"Edit","Укажите капитал для правильного расчёта баланса и просадки":"Enter your capital to calculate balance and drawdown correctly","График баланса":"Balance chart","Изменение баланса после каждой закрытой сделки":"Balance change after each closed trade","График изменения баланса":"Balance change chart","Ключевая статистика":"Key statistics","Всего сделок":"Total trades","Средняя сделка":"Average trade","Средний R":"Average R","Лучший результат":"Best result","Худший результат":"Worst result","Сделки по плану":"Trades following plan","Круговая диаграмма результатов":"Outcome chart","Распределение сделок по исходу: прибыль, убыток и безубыток":"Trade outcomes: profit, loss and breakeven","сделок":"trades","Дополнительные диаграммы":"Additional charts","Статистика по направлениям, инструментам и сессиям":"Statistics by direction, instrument and session","Колесо BUY / SELL":"BUY / SELL chart","Сколько у вас покупок и продаж":"Your number of buy and sell trades","Результат по сессиям":"Results by session","Где вы зарабатываете лучше":"Where you perform best","Результат по инструментам":"Results by instrument","Лучшие и худшие инструменты":"Best and worst instruments","Частые ошибки":"Frequent mistakes","Какие нарушения повторяются чаще всего":"Which rule violations occur most often","Последние сделки":"Recent trades","Пять последних записей":"Five most recent entries","Журнал сделок":"Trade journal","Фильтруйте, редактируйте и анализируйте сделки":"Filter, edit and analyse trades","Поиск":"Search","Инструмент":"Instrument","Направление":"Direction","Сессия":"Session","Результат":"Result","Все":"All","Все сессии":"All sessions","Основные сессии":"Main sessions","Перекрытия":"Overlaps","Другое":"Other","Прибыль":"Profit","Убыток":"Loss","Безубыток":"Breakeven","Дата":"Date","Таймфрейм":"Timeframe","Тип входа":"Entry type","Риск":"Risk","Чистый результат":"Net result","По плану":"Plan","Причина":"Reason","Ошибка":"Mistake","Действия":"Actions","Сделок пока нет.":"No trades yet.","Заполняйте до входа в рынок":"Complete before entering the market","Очистить план":"Clear plan","🧭 Хорошая сделка начинается не с кнопки BUY или SELL, а с заранее понятного сценария.":"🧭 A good trade starts not with the BUY or SELL button, but with a clear plan.","Дата и время":"Date and time","Цена входа":"Entry price","Риск,":"Risk,","Причина входа":"Entry reason","Условие отмены":"Cancellation condition","Сценарий движения":"Price scenario","Возможные риски":"Possible risks","Что может пойти не так?":"What could go wrong?","Чек-лист перед входом":"Pre-entry checklist","Создать сделку из плана":"Create trade from plan","Автоматическая сводка по всем сделкам":"Automatic summary of all trades","Дисциплина":"Discipline","Доля сделок, выполненных по плану":"Share of trades following the plan","Самый прибыльный инструмент":"Most profitable instrument","По сумме чистого результата":"By total net result","Самая частая ошибка":"Most frequent mistake","Повторяющаяся запись в поле «Ошибка»":"Most repeated entry in the Mistake field","Лучшее состояние":"Best state","Эмоция до сделки с лучшим средним результатом":"Pre-trade emotion with the best average result","Что получилось хорошо?":"What went well?","Какие ошибки повторялись?":"Which mistakes kept recurring?","Что изменить?":"What should change?","Главное правило на следующую неделю":"Main rule for next week","Сохранить разбор":"Save review","Валюта":"Currency","Измените валюту счёта и начальную сумму":"Change the account currency and initial amount","Текущий баланс пересчитается как:":"Current balance will be recalculated as:","начальный капитал + результаты сделок":"initial capital + trade results","Отмена":"Cancel","Новая сделка":"New trade","Закрыть":"Close","Время":"Time","Объём, лот":"Volume, lots","Цена выхода":"Exit price","Результат до расходов,":"Result before costs,","Комиссия и своп,":"Commission and swap,","Результат, пипсы/пункты":"Result, pips/points","Эмоции до":"Emotion before","Эмоции после":"Emotion after","Следовал плану?":"Followed the plan?","Ссылка на скрин":"Screenshot link","Ошибка / нарушение":"Mistake / rule violation","Заметки":"Notes","R-множитель":"R multiple","Риск от капитала":"Risk as % of capital","Исход":"Outcome","Сохранить сделку":"Save trade","Да":"Yes","Нет":"No","Сидней":"Sydney","Токио (Азия)":"Tokyo (Asia)","Франкфурт":"Frankfurt","Лондон":"London","Нью-Йорк":"New York","Сидней–Токио":"Sydney–Tokyo","Франкфурт–Лондон":"Frankfurt–London","Лондон–Нью-Йорк":"London–New York","Вне основных сессий":"Outside main sessions","Пробой":"Breakout","Отбой":"Rejection","Ретест":"Retest","Продолжение тренда":"Trend continuation","Разворот":"Reversal","По уровню":"Level-based","По индикатору":"Indicator-based","Новостной импульс":"News impulse","Без эмоций":"Neutral","Спокойствие":"Calm","Уверенность":"Confidence","Страх":"Fear","Жадность":"Greed","Спешка":"Haste","Злость":"Anger","Сомнение":"Doubt","Эйфория":"Euphoria","Усталость":"Fatigue","Разочарование":"Disappointment","USD — доллар США":"USD — US dollar","EUR — евро":"EUR — euro","GBP — фунт стерлингов":"GBP — pound sterling","RUB — российский рубль":"RUB — Russian ruble","CHF — швейцарский франк":"CHF — Swiss franc","JPY — японская иена":"JPY — Japanese yen","PLN — польский злотый":"PLN — Polish zloty","TRY — турецкая лира":"TRY — Turkish lira","CAD — канадский доллар":"CAD — Canadian dollar","AUD — австралийский доллар":"AUD — Australian dollar","NZD — новозеландский доллар":"NZD — New Zealand dollar","CNY — китайский юань":"CNY — Chinese yuan","UAH — украинская гривна":"UAH — Ukrainian hryvnia","KZT — казахстанский тенге":"KZT — Kazakhstani tenge","AED — дирхам ОАЭ":"AED — UAE dirham","Укажите начальный капитал":"Enter initial capital","Выберите валюту и укажите сумму на счёте до первой сделки":"Choose a currency and enter the account amount before your first trade","Это нужно для правильного расчёта":"This is needed to calculate","текущего баланса, доходности и максимальной просадки":"current balance, return and maximum drawdown correctly","Настроить позже":"Set up later","Сохранить и начать":"Save and start","Тренд и направление сделки совпадают":"The trend and trade direction match","Уровень входа отмечен заранее":"The entry level was marked in advance","Stop Loss установлен до входа":"Stop Loss is set before entry","Take Profit определён":"Take Profit is defined","Риск не превышает мой лимит":"Risk does not exceed my limit","Нет входа из страха упустить движение":"No entry driven by fear of missing out","Нет важных новостей рядом":"No major news is approaching","Сделка соответствует системе":"The trade follows the system","Пока нет сделок":"No trades yet","Пока нет данных по сессиям":"No session data yet","Пока нет данных по инструментам":"No instrument data yet","Ошибки пока не заполнены":"No mistakes recorded yet","Добавьте первую сделку, и здесь появится статистика.":"Add your first trade to see statistics here.","Добавьте сделку — здесь появится график":"Add a trade to display the chart","Старт":"Start","Открыть скрин":"Open screenshot","Удалить":"Delete","Редактирование сделки":"Edit trade","Новая сделка из плана":"New trade from plan","Сделка обновлена":"Trade updated","Сделка сохранена":"Trade saved","Изменения внесены, но браузер запретил постоянное сохранение":"Changes were applied, but the browser blocked permanent storage","Сделка добавлена, но браузер запретил постоянное сохранение":"Trade was added, but the browser blocked permanent storage","Удалить эту сделку?":"Delete this trade?","Сделка удалена":"Trade deleted","Очистить текущий план сделки?":"Clear the current trade plan?","План очищен":"Plan cleared","Сначала укажите инструмент":"Enter an instrument first","Резервная копия сохранена":"Backup saved","Импорт заменит текущие сделки. Продолжить?":"Import will replace the current trades. Continue?","Не удалось прочитать файл резервной копии.":"Could not read the backup file.","Настройку счёта можно открыть из карточки капитала":"Account setup can be opened from the capital card","Выберите валюту счёта":"Choose the account currency","Введите правильный начальный капитал":"Enter a valid initial capital","Введите начальный капитал больше нуля":"Enter an initial capital greater than zero","Торговый счёт настроен":"Trading account configured","Начальный капитал обновлён":"Initial capital updated","Тема автоматически следует настройке телефона":"Theme follows your device setting","Всегда использовать светлую тему":"Always use light theme","Всегда использовать тёмную тему":"Always use dark theme","Включена системная тема":"System theme enabled","Включена светлая тема":"Light theme enabled","Включена тёмная тема":"Dark theme enabled","Язык изменён на русский":"Language changed to Russian","Язык изменён на английский":"Language changed to English","Выберите или введите, например EUR/USD":"Choose or enter, for example EUR/USD","Тренд, уровень, подтверждение, свечная модель...":"Trend, level, confirmation, candlestick pattern...","Когда сделку нельзя открывать":"When the trade must not be opened","Что должно произойти после входа":"What should happen after entry","Новости, ложный пробой, низкая ликвидность...":"News, false breakout, low liquidity...","EUR/USD, пробой, ошибка...":"EUR/USD, breakout, mistake...","Выберите или введите инструмент":"Choose or enter an instrument","Почему вы открыли сделку":"Why you opened the trade","Оставьте пустым, если ошибки не было":"Leave empty if there was no mistake","Что заметили и чему научились":"What you noticed and learned","© 2026 Торговый дневник трейдинга • Данные хранятся локально в браузере":"© 2026 Trading Journal • Data is stored locally in your browser"};
+    const i18nTextSources = new WeakMap();
+    const i18nAttributeSources = new WeakMap();
+    const I18N_ATTRIBUTES = ["placeholder", "title", "aria-label", "label"];
+    let i18nObserver = null;
+
+    function hasCyrillic(value){
+      return /[А-Яа-яЁё]/.test(String(value || ""));
+    }
+
+    function translateDynamic(source){
+      const value = String(source ?? "");
+      let match = value.match(/^Изменение:\s*(.+)$/);
+      if(match) return `Change: ${match[1]}`;
+      match = value.match(/^Доходность:\s*(.+)$/);
+      if(match) return `Return: ${match[1]}`;
+      match = value.match(/^(\d+) прибыльных\s*\/\s*(\d+) убыточных$/);
+      if(match) return `${match[1]} wins / ${match[2]} losses`;
+      match = value.match(/^(\d+) прибыльных$/);
+      if(match) return `${match[1]} winning`;
+      match = value.match(/^Валюта:\s*(.+)$/);
+      if(match) return `Currency: ${match[1]}`;
+      match = value.match(/^Тема:\s*(.+)$/);
+      if(match) return `Theme: ${translateSource(match[1])}`;
+      match = value.match(/^Условие отмены:\s*(.+)$/s);
+      if(match) return `Cancellation condition: ${match[1]}`;
+      match = value.match(/^Сценарий движения:\s*(.+)$/s);
+      if(match) return `Price scenario: ${match[1]}`;
+      match = value.match(/^Возможные риски:\s*(.+)$/s);
+      if(match) return `Possible risks: ${match[1]}`;
+      return value;
+    }
+
+    function translateSource(source){
+      const value = String(source ?? "");
+      if(settings?.language !== "en") return value;
+      return I18N_EN[value] || translateDynamic(value);
+    }
+
+    function translatePreservingSpace(value){
+      const text = String(value ?? "");
+      const match = text.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      if(!match) return translateSource(text);
+      return match[1] + translateSource(match[2]) + match[3];
+    }
+
+    function isI18nProtected(node){
+      const parent = node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
+      return !!parent?.closest?.("[data-no-i18n], script, style, textarea, input");
+    }
+
+    function ensureCanonicalOptionValues(root = document){
+      const options = [];
+      if(root?.nodeType === Node.ELEMENT_NODE && root.matches?.("option")) options.push(root);
+      if(root?.querySelectorAll) options.push(...root.querySelectorAll("option"));
+      options.forEach(option => {
+        if(!option.hasAttribute("value")) option.setAttribute("value", option.textContent.trim());
+      });
+    }
+
+    function applyI18nTextNode(node){
+      if(!node || node.nodeType !== Node.TEXT_NODE || isI18nProtected(node)) return;
+      const current = node.nodeValue;
+      let source = i18nTextSources.get(node);
+      if(source === undefined || (settings.language === "en" && hasCyrillic(current))){
+        source = current;
+        i18nTextSources.set(node, source);
+      }
+      const translated = settings.language === "en" ? translatePreservingSpace(source) : source;
+      if(node.nodeValue !== translated) node.nodeValue = translated;
+    }
+
+    function applyI18nAttributes(element){
+      if(!element || element.nodeType !== Node.ELEMENT_NODE || isI18nProtected(element)) return;
+      let sources = i18nAttributeSources.get(element);
+      if(!sources){
+        sources = {};
+        i18nAttributeSources.set(element, sources);
+      }
+      I18N_ATTRIBUTES.forEach(attribute => {
+        if(!element.hasAttribute(attribute)) return;
+        const current = element.getAttribute(attribute);
+        if(sources[attribute] === undefined || (settings.language === "en" && hasCyrillic(current))){
+          sources[attribute] = current;
+        }
+        const translated = settings.language === "en" ? translateSource(sources[attribute]) : sources[attribute];
+        if(element.getAttribute(attribute) !== translated) element.setAttribute(attribute, translated);
+      });
+    }
+
+    function applyLanguage(root = document){
+      ensureCanonicalOptionValues(root);
+      document.documentElement.lang = settings.language;
+      const localizedAppName = settings.language === "en" ? "Trading Journal" : "Торговый дневник трейдинга";
+      document.title = settings.language === "en" ? "Trading Journal" : "Торговый дневник трейдинга";
+      const applicationNameMeta = document.querySelector('meta[name="application-name"]');
+      if(applicationNameMeta) applicationNameMeta.content = localizedAppName;
+      if(root?.nodeType === Node.TEXT_NODE){
+        applyI18nTextNode(root);
+        return;
+      }
+      if(root?.nodeType === Node.ELEMENT_NODE) applyI18nAttributes(root);
+      const scope = root?.nodeType === Node.ELEMENT_NODE ? root : document.body;
+      if(!scope) return;
+      const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+      let node;
+      while((node = walker.nextNode())) applyI18nTextNode(node);
+      if(scope.querySelectorAll){
+        scope.querySelectorAll("[placeholder], [title], [aria-label], optgroup[label]").forEach(applyI18nAttributes);
+      }
+    }
+
+    function startLanguageObserver(){
+      if(i18nObserver) return;
+      i18nObserver = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if(mutation.type === "characterData"){
+            applyI18nTextNode(mutation.target);
+            return;
+          }
+          if(mutation.type === "attributes"){
+            applyI18nAttributes(mutation.target);
+            return;
+          }
+          mutation.addedNodes.forEach(node => applyLanguage(node));
+        });
+      });
+      i18nObserver.observe(document.body, {
+        childList:true,
+        subtree:true,
+        characterData:true,
+        attributes:true,
+        attributeFilter:I18N_ATTRIBUTES
+      });
+    }
+
+    function tr(source){
+      return translateSource(source);
+    }
+
+    function storageGet(key){
+      try{ return localStorage.getItem(key); }
+      catch(error){ console.warn("Чтение локального хранилища недоступно:", error); return null; }
+    }
+
+    function storageSet(key, value){
+      try{ localStorage.setItem(key, value); return true; }
+      catch(error){ console.warn("Сохранение в локальное хранилище недоступно:", error); return false; }
+    }
+
+    function storageRemove(key){
+      try{ localStorage.removeItem(key); return true; }
+      catch(error){ console.warn("Удаление из локального хранилища недоступно:", error); return false; }
+    }
+
+    function loadJson(key, fallback){
+      try{
+        const raw = storageGet(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(error){
+        console.warn(`Повреждены сохранённые данные ${key}:`, error);
+        return fallback;
+      }
+    }
+
+    function normalizeSettings(value){
+      const source = value && typeof value === "object" ? value : {};
+      const theme = ["system", "light", "dark"].includes(source.theme) ? source.theme : "system";
+      const capital = Number.isFinite(Number(source.capital)) && Number(source.capital) >= 0 ? Number(source.capital) : 0;
+      const currency = SUPPORTED_CURRENCIES.includes(String(source.currency || "").toUpperCase())
+        ? String(source.currency).toUpperCase()
+        : "USD";
+      const language = ["ru", "en"].includes(source.language) ? source.language : "ru";
+      return { capital, theme, currency, language };
+    }
+
+    const FOREX_SESSIONS = [
+      "Сидней",
+      "Токио (Азия)",
+      "Франкфурт",
+      "Лондон",
+      "Нью-Йорк",
+      "Сидней–Токио",
+      "Франкфурт–Лондон",
+      "Лондон–Нью-Йорк",
+      "Вне основных сессий"
+    ];
+
+    function normalizeSessionName(value){
+      const session = String(value || "").trim();
+      const aliases = {
+        "Азия": "Токио (Азия)",
+        "Токио": "Токио (Азия)",
+        "Перекрытие Сидней–Токио": "Сидней–Токио",
+        "Перекрытие Франкфурт–Лондон": "Франкфурт–Лондон",
+        "Перекрытие Лондон–Нью-Йорк": "Лондон–Нью-Йорк",
+        "Перекрытие Лондон–NY": "Лондон–Нью-Йорк",
+        "Перекрытие Лондон-NY": "Лондон–Нью-Йорк",
+        "Сидней–Токио": "Сидней–Токио",
+        "Франкфурт–Лондон": "Франкфурт–Лондон",
+        "Лондон–Нью-Йорк": "Лондон–Нью-Йорк",
+        "Вне сессии": "Вне основных сессий"
+      };
+      return aliases[session] || (FOREX_SESSIONS.includes(session) ? session : "Вне основных сессий");
+    }
+
+    function normalizeTradeRecord(item){
+      return {
+        ...item,
+        id:String(item.id || uid()),
+        session:normalizeSessionName(item.session)
+      };
+    }
+
+    let trades = loadJson(STORAGE_KEY, []);
+    if(!Array.isArray(trades)) trades = [];
+    trades = trades.filter(item => item && typeof item === "object").map(normalizeTradeRecord);
+    let settings = normalizeSettings(loadJson(SETTINGS_KEY, { capital: 0, theme: "system", currency: "USD", language: "ru" }));
+    const CAPITAL_DEFAULT_MIGRATION_KEY = "forexJournal_capital_default_zero_v1";
+    if(!storageGet(CAPITAL_DEFAULT_MIGRATION_KEY)){
+      if(trades.length === 0 && settings.capital === 10000){
+        settings.capital = 0;
+        storageSet(SETTINGS_KEY, JSON.stringify(settings));
+      }
+      storageSet(CAPITAL_DEFAULT_MIGRATION_KEY, "1");
+    }
+    let editingId = null;
+
+    function saveAll(){
+      const tradesSaved = storageSet(STORAGE_KEY, JSON.stringify(trades));
+      const settingsSaved = storageSet(SETTINGS_KEY, JSON.stringify(settings));
+      return tradesSaved && settingsSaved;
+    }
+
+    function toast(message){
+      const el = $("toast");
+      el.textContent = tr(message);
+      el.classList.add("show");
+      setTimeout(()=>el.classList.remove("show"), 2200);
+    }
+
+    function setPage(page){
+      document.querySelectorAll(".page").forEach(el => el.classList.toggle("active", el.id === page));
+      document.querySelectorAll("[data-page]").forEach(el => el.classList.toggle("active", el.dataset.page === page));
+      if(page === "dashboard") renderDashboard();
+      if(page === "trades") renderTrades();
+      if(page === "review") renderReview();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    document.querySelectorAll("[data-page]").forEach(btn => btn.addEventListener("click", ()=>setPage(btn.dataset.page)));
+
+    function isDarkTheme(){
+      if(settings.theme === "dark") return true;
+      if(settings.theme === "light") return false;
+      return !!systemThemeQuery?.matches;
+    }
+
+    function applyTheme(){
+      const dark = isDarkTheme();
+      document.body.classList.toggle("dark", dark);
+      document.documentElement.removeAttribute("data-pre-theme");
+      document.documentElement.style.colorScheme = dark ? "dark" : "light";
+      $("themeColorMeta").content = dark ? "#0b1220" : "#f4f7fb";
+
+      const labels = {
+        system: tr("Система"),
+        light: tr("Светлая"),
+        dark: tr("Тёмная")
+      };
+      const descriptions = {
+        system: tr("Тема автоматически следует настройке телефона"),
+        light: tr("Всегда использовать светлую тему"),
+        dark: tr("Всегда использовать тёмную тему")
+      };
+      $("themeModeText").textContent = labels[settings.theme];
+      $("themeBtn").title = descriptions[settings.theme];
+      $("themeBtn").setAttribute("aria-label", `${tr("Тема")}: ${labels[settings.theme]}`);
+    }
+
+    function setSettingsMenu(open){
+      const menu = $("settingsMenu");
+      const button = $("settingsBtn");
+      const shouldOpen = typeof open === "boolean" ? open : menu.hidden;
+      menu.hidden = !shouldOpen;
+      button.setAttribute("aria-expanded", String(shouldOpen));
+    }
+
+    $("settingsBtn").addEventListener("click", e=>{
+      e.stopPropagation();
+      setSettingsMenu();
+    });
+
+    $("settingsMenu").addEventListener("click", e=>e.stopPropagation());
+    document.addEventListener("click", ()=>setSettingsMenu(false));
+
+    $("themeBtn").addEventListener("click", ()=>{
+      const order = ["system", "light", "dark"];
+      settings.theme = order[(order.indexOf(settings.theme) + 1) % order.length];
+      saveAll();
+      applyTheme();
+      drawEquity();
+      toast(settings.theme === "system" ? "Включена системная тема" : settings.theme === "light" ? "Включена светлая тема" : "Включена тёмная тема");
+    });
+
+    $("languageBtn").addEventListener("click", ()=>{
+      settings.language = settings.language === "ru" ? "en" : "ru";
+      saveAll();
+      applyTheme();
+      updateCurrencyUI();
+      renderDashboard();
+      renderTrades();
+      renderReview();
+      applyLanguage(document.body);
+      setSettingsMenu(false);
+      toast(settings.language === "en" ? "Язык изменён на английский" : "Язык изменён на русский");
+    });
+
+    const handleSystemThemeChange = ()=>{
+      if(settings.theme !== "system") return;
+      applyTheme();
+      drawEquity();
+    };
+    if(systemThemeQuery){
+      if(typeof systemThemeQuery.addEventListener === "function") systemThemeQuery.addEventListener("change", handleSystemThemeChange);
+      else if(typeof systemThemeQuery.addListener === "function") systemThemeQuery.addListener(handleSystemThemeChange);
+    }
+
+    let accountModalMode = "edit";
+
+    function updateAccountSetupHint(){
+      const hint = $("capitalSetupHint");
+      if(!hint) return;
+      hint.hidden = Number(settings.capital) > 0;
+    }
+
+    function updateCurrencyUI(){
+      const currency = settings.currency || "USD";
+      document.querySelectorAll(".currency-code").forEach(el => el.textContent = currency);
+      if($("accountCurrencyInput")) $("accountCurrencyInput").value = currency;
+      if($("accountCapitalInput")) $("accountCapitalInput").value = settings.capital;
+      if($("kpiCapital")) $("kpiCapital").textContent = money(settings.capital);
+      if($("kpiCapitalCurrency")) $("kpiCapitalCurrency").textContent = `Валюта: ${currency}`;
+      updateAccountSetupHint();
+    }
+
+    function configureAccountModal(mode){
+      accountModalMode = mode === "onboarding" ? "onboarding" : "edit";
+      const onboarding = accountModalMode === "onboarding";
+      const card = $("accountModal").querySelector(".account-modal-card");
+
+      card.classList.toggle("onboarding", onboarding);
+      $("accountModalTitle").textContent = onboarding
+        ? "Укажите начальный капитал"
+        : "Начальный капитал";
+      $("accountModalHint").textContent = onboarding
+        ? "Выберите валюту и укажите сумму на счёте до первой сделки"
+        : "Измените валюту счёта и начальную сумму";
+      $("accountPreviewText").innerHTML = onboarding
+        ? "Это нужно для правильного расчёта <strong>текущего баланса, доходности и максимальной просадки</strong>."
+        : "Текущий баланс пересчитается как: <strong>начальный капитал + результаты сделок</strong>.";
+      $("cancelAccountModal").textContent = onboarding ? "Настроить позже" : "Отмена";
+      $("saveAccountBtn").textContent = onboarding ? "Сохранить и начать" : "Сохранить";
+    }
+
+    function openAccountModal(mode = "edit"){
+      updateCurrencyUI();
+      configureAccountModal(mode);
+
+      const editButton = $("editAccountBtn");
+      if(editButton) editButton.blur();
+      if(document.activeElement && typeof document.activeElement.blur === "function"){
+        document.activeElement.blur();
+      }
+
+      document.body.classList.add("account-modal-open");
+      $("accountModal").classList.add("show");
+    }
+
+    function markAccountSetupSeen(status){
+      storageSet(ACCOUNT_SETUP_PROMPT_KEY, status);
+    }
+
+    function closeAccountModal(options = {}){
+      const {skipOnboarding = false} = options;
+
+      if(accountModalMode === "onboarding" && skipOnboarding){
+        markAccountSetupSeen("later");
+        updateAccountSetupHint();
+      }
+
+      $("accountModal").classList.remove("show");
+      document.body.classList.remove("account-modal-open");
+      accountModalMode = "edit";
+    }
+
+    function skipAccountSetup(){
+      const wasOnboarding = accountModalMode === "onboarding";
+      closeAccountModal({skipOnboarding:wasOnboarding});
+      if(wasOnboarding){
+        toast("Настройку счёта можно открыть из карточки капитала");
+      }
+    }
+
+    const editAccountButton = $("editAccountBtn");
+    editAccountButton.addEventListener("mousedown", event=>{
+      event.preventDefault();
+    });
+    editAccountButton.addEventListener("pointerup", ()=>{
+      editAccountButton.blur();
+    });
+    editAccountButton.addEventListener("click", ()=>openAccountModal("edit"));
+
+    $("capitalSetupHint").addEventListener("click", ()=>{
+      openAccountModal("edit");
+    });
+
+    $("closeAccountModal").addEventListener("click", skipAccountSetup);
+    $("cancelAccountModal").addEventListener("click", skipAccountSetup);
+    $("accountModal").addEventListener("click", e=>{
+      if(e.target.id === "accountModal") skipAccountSetup();
+    });
+
+    $("accountForm").addEventListener("submit", e=>{
+      e.preventDefault();
+      const currency = String($("accountCurrencyInput").value || "").toUpperCase();
+      const capital = Number($("accountCapitalInput").value);
+      const onboarding = accountModalMode === "onboarding";
+
+      if(!SUPPORTED_CURRENCIES.includes(currency)){
+        toast("Выберите валюту счёта");
+        return;
+      }
+      if(!Number.isFinite(capital) || capital < 0){
+        toast("Введите правильный начальный капитал");
+        return;
+      }
+      if(onboarding && capital <= 0){
+        toast("Введите начальный капитал больше нуля");
+        return;
+      }
+
+      settings.currency = currency;
+      settings.capital = capital;
+      saveAll();
+
+      if(onboarding || capital > 0){
+        markAccountSetupSeen("done");
+      }
+
+      updateCurrencyUI();
+      renderDashboard();
+      renderTrades();
+      renderReview();
+      updateLiveCalc();
+      closeAccountModal();
+      toast(onboarding ? "Торговый счёт настроен" : "Начальный капитал обновлён");
+    });
+
+    updateCurrencyUI();
+
+    function tradeNet(t){ return num(t.gross) - num(t.fees); }
+    function tradeR(t){ return num(t.risk) ? tradeNet(t) / num(t.risk) : 0; }
+    function sortedTrades(){ return [...trades].sort((a,b)=>`${a.date} ${a.time||""}`.localeCompare(`${b.date} ${b.time||""}`)); }
+
+    function stats(){
+      const ordered = sortedTrades();
+      const nets = ordered.map(tradeNet);
+      const net = nets.reduce((a,b)=>a+b,0);
+      const wins = nets.filter(v=>v>0);
+      const losses = nets.filter(v=>v<0);
+      const breakeven = nets.filter(v=>v===0).length;
+      const grossProfit = wins.reduce((a,b)=>a+b,0);
+      const grossLoss = Math.abs(losses.reduce((a,b)=>a+b,0));
+      const winrate = wins.length + losses.length ? wins.length/(wins.length+losses.length)*100 : 0;
+      const pf = grossLoss ? grossProfit/grossLoss : (grossProfit ? Infinity : 0);
+      const avg = ordered.length ? net/ordered.length : 0;
+      const avgR = ordered.length ? ordered.reduce((s,t)=>s+tradeR(t),0)/ordered.length : 0;
+      const best = nets.length ? Math.max(...nets) : 0;
+      const worst = nets.length ? Math.min(...nets) : 0;
+      const planCount = ordered.filter(t=>t.followedPlan==="Да").length;
+      const planPct = ordered.length ? planCount/ordered.length*100 : 0;
+
+      let balance = num(settings.capital);
+      let peak = balance;
+      let maxDD = 0;
+      let maxDDPct = 0;
+      const curve = [{label:"Старт", value:balance}];
+      ordered.forEach((t, i)=>{
+        balance += tradeNet(t);
+        if(balance > peak) peak = balance;
+        const dd = balance - peak;
+        const ddPct = peak ? dd/peak*100 : 0;
+        if(dd < maxDD) maxDD = dd;
+        if(ddPct < maxDDPct) maxDDPct = ddPct;
+        curve.push({label:String(i+1), value:balance});
+      });
+
+      return {ordered, net, wins:wins.length, losses:losses.length, breakeven, grossProfit, grossLoss, winrate, pf, avg, avgR, best, worst, planPct, balance, maxDD, maxDDPct, curve};
+    }
+
+    function setSignedClass(el, value){
+      el.classList.remove("positive","negative","neutral");
+      el.classList.add(value>0 ? "positive" : value<0 ? "negative" : "neutral");
+    }
+
+    function renderDashboard(){
+      const s = stats();
+
+      $("kpiBalance").textContent = money(s.balance);
+      $("kpiBalanceSub").textContent = "Изменение: " + money(s.net);
+      setSignedClass($("kpiBalanceSub"), s.net);
+
+      $("kpiNet").textContent = money(s.net);
+      setSignedClass($("kpiNet"), s.net);
+      $("kpiReturn").textContent = `Доходность: ${settings.capital ? (s.net/settings.capital*100).toFixed(2) : "0.00"}%`;
+
+      $("kpiWinrate").textContent = s.winrate.toFixed(1) + "%";
+      $("kpiWins").textContent = `${s.wins} прибыльных / ${s.losses} убыточных`;
+
+      $("kpiPF").textContent = s.pf === Infinity ? "∞" : s.pf.toFixed(2);
+      $("kpiDD").textContent = money(Math.abs(s.maxDD));
+      $("kpiDDPct").textContent = Math.abs(s.maxDDPct).toFixed(2) + "%";
+      $("kpiCapital").textContent = money(settings.capital);
+      $("kpiCapitalCurrency").textContent = `Валюта: ${settings.currency || "USD"}`;
+
+      $("statTrades").textContent = s.ordered.length;
+      $("statAvg").textContent = money(s.avg);
+      setSignedClass($("statAvg"), s.avg);
+      $("statAvgR").textContent = s.avgR.toFixed(2) + "R";
+      setSignedClass($("statAvgR"), s.avgR);
+      $("statBest").textContent = money(s.best);
+      $("statWorst").textContent = money(s.worst);
+      $("statPlan").textContent = s.planPct.toFixed(1) + "%";
+
+      renderRecent(s.ordered.slice(-5).reverse());
+      drawEquity(s.curve);
+      renderOutcomeWheel(s);
+      renderDirectionWheel(s);
+      renderSessionBars(s);
+      renderSymbolBars(s);
+      renderMistakeBars();
+    }
+
+    function renderOutcomeWheel(s = stats()){
+      const total = s.ordered.length;
+      const winCount = s.wins;
+      const lossCount = s.losses;
+      const beCount = s.breakeven;
+
+      $("outcomeTotal").textContent = total;
+
+      const segments = [
+        { label: "Прибыль", count: winCount, color: "#22c55e" },
+        { label: "Убыток", count: lossCount, color: "#ef4444" },
+        { label: "Безубыток", count: beCount, color: "#f59e0b" }
+      ];
+
+      if(!total){
+        $("outcomeWheel").style.background = "conic-gradient(var(--line) 0 360deg)";
+        $("outcomeLegend").innerHTML = `
+          <div class="legend-row">
+            <span class="legend-dot" style="background:var(--line)"></span>
+            <span class="legend-label">Пока нет сделок</span>
+            <span class="legend-value">0</span>
+            <span class="legend-pct">0%</span>
+          </div>`;
+        return;
+      }
+
+      let start = 0;
+      const parts = [];
+      segments.forEach(seg=>{
+        const angle = (seg.count / total) * 360;
+        const end = start + angle;
+        parts.push(`${seg.color} ${start}deg ${end}deg`);
+        start = end;
+      });
+      $("outcomeWheel").style.background = `conic-gradient(${parts.join(",")})`;
+
+      $("outcomeLegend").innerHTML = segments.map(seg=>{
+        const pct = total ? (seg.count / total * 100) : 0;
+        return `
+          <div class="legend-row">
+            <span class="legend-dot" style="background:${seg.color}"></span>
+            <span class="legend-label">${seg.label}</span>
+            <span class="legend-value">${seg.count}</span>
+            <span class="legend-pct">${pct.toFixed(1)}%</span>
+          </div>`;
+      }).join("");
+    }
+
+    function renderDirectionWheel(s = stats()){
+      const total = s.ordered.length;
+      const buyCount = s.ordered.filter(t => t.direction === "BUY").length;
+      const sellCount = s.ordered.filter(t => t.direction === "SELL").length;
+      $("directionTotal").textContent = total;
+
+      if(!total){
+        $("directionWheel").style.background = "conic-gradient(var(--line) 0 360deg)";
+        $("directionLegend").innerHTML = `
+          <div class="legend-row">
+            <span class="legend-dot" style="background:var(--line)"></span>
+            <span class="legend-label">Пока нет сделок</span>
+            <span class="legend-value">0</span>
+            <span class="legend-pct">0%</span>
+          </div>`;
+        return;
+      }
+
+      const buyPct = buyCount / total * 100;
+      const sellPct = sellCount / total * 100;
+      $("directionWheel").style.background = `conic-gradient(#22c55e 0 ${buyPct}%, #ef4444 ${buyPct}% 100%)`;
+
+      $("directionLegend").innerHTML = `
+        <div class="legend-row">
+          <span class="legend-dot" style="background:#22c55e"></span>
+          <span class="legend-label">BUY</span>
+          <span class="legend-value">${buyCount}</span>
+          <span class="legend-pct">${buyPct.toFixed(1)}%</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-dot" style="background:#ef4444"></span>
+          <span class="legend-label">SELL</span>
+          <span class="legend-value">${sellCount}</span>
+          <span class="legend-pct">${sellPct.toFixed(1)}%</span>
+        </div>`;
+    }
+
+    function renderBarList(containerId, rows, emptyText, kind = "money"){
+      const box = $(containerId);
+      if(!rows.length){
+        box.innerHTML = `<div class="legend-row">
+          <span class="legend-dot" style="background:var(--line)"></span>
+          <span class="legend-label">${emptyText}</span>
+          <span class="legend-value">0</span>
+          <span class="legend-pct">—</span>
+        </div>`;
+        return;
+      }
+
+      const maxAbs = Math.max(...rows.map(r => Math.abs(r.value)), 1);
+      box.innerHTML = rows.map(r => {
+        const width = Math.max(6, Math.abs(r.value) / maxAbs * 100);
+        const cls = r.value < 0 ? "negative" : (kind === "count" ? "amber" : "");
+        const valueText = kind === "count"
+          ? String(r.value)
+          : money(r.value);
+        return `
+          <div class="bar-row">
+            <div class="bar-label" ${kind === "count" ? "data-no-i18n" : ""} title="${esc(r.label)}">${esc(r.label)}</div>
+            <div class="bar-track"><div class="bar-fill ${cls}" style="width:${width}%"></div></div>
+            <div class="bar-value ${r.value>0?"positive":r.value<0?"negative":"neutral"}">${valueText}</div>
+          </div>`;
+      }).join("");
+    }
+
+    function renderSessionBars(s = stats()){
+      const rows = FOREX_SESSIONS.map(name => ({
+        label: name,
+        value: trades
+          .filter(t => normalizeSessionName(t.session) === name)
+          .reduce((sum, t) => sum + tradeNet(t), 0)
+      }));
+      renderBarList("sessionBars", rows, "Пока нет данных по сессиям");
+    }
+
+    function renderSymbolBars(s = stats()){
+      const map = {};
+      trades.forEach(t => {
+        if(!t.symbol) return;
+        map[t.symbol] = (map[t.symbol] || 0) + tradeNet(t);
+      });
+      const rows = Object.entries(map)
+        .map(([label, value]) => ({label, value}))
+        .sort((a,b) => b.value - a.value)
+        .slice(0, 8);
+      renderBarList("symbolBars", rows, "Пока нет данных по инструментам");
+    }
+
+    function renderMistakeBars(){
+      const map = {};
+      trades.forEach(t => {
+        const key = (t.mistake || "").trim();
+        if(!key) return;
+        map[key] = (map[key] || 0) + 1;
+      });
+      const rows = Object.entries(map)
+        .map(([label, value]) => ({label, value}))
+        .sort((a,b) => b.value - a.value)
+        .slice(0, 6);
+      renderBarList("mistakeBars", rows, "Ошибки пока не заполнены", "count");
+    }
+
+    function renderRecent(list){
+      const box = $("recentTrades");
+      if(!list.length){
+        box.innerHTML = '<div class="empty">Добавьте первую сделку, и здесь появится статистика.</div>';
+        return;
+      }
+      box.innerHTML = `
+        <div class="table-wrap">
+          <table style="min-width:800px">
+            <thead><tr><th>Дата</th><th>Инструмент</th><th>Направление</th><th>Результат</th><th>R</th><th>План</th></tr></thead>
+            <tbody>
+              ${list.map(t=>{
+                const net = tradeNet(t);
+                return `<tr>
+                  <td>${esc(formatDate(t.date))}</td>
+                  <td><strong>${esc(t.symbol)}</strong></td>
+                  <td><span class="badge ${t.direction==="BUY"?"buy":"sell"}">${esc(t.direction)}</span></td>
+                  <td class="${net>0?"positive":net<0?"negative":"neutral"}"><strong>${money(net)}</strong></td>
+                  <td>${tradeR(t).toFixed(2)}R</td>
+                  <td><span class="badge ${t.followedPlan==="Да"?"yes":"no"}">${esc(t.followedPlan||"—")}</span></td>
+                </tr>`;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function drawEquity(curve = stats().curve){
+      const svg = $("equityChart");
+      const rect = svg.getBoundingClientRect();
+      const width = Math.max(520, Math.round(rect.width || 900));
+      const height = Math.max(240, Math.round(rect.height || 300));
+      const pad = {top:18, right:20, bottom:22, left:78};
+      const ns = "http://www.w3.org/2000/svg";
+
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      svg.innerHTML = "";
+
+      if(!trades.length){
+        const emptyText = document.createElementNS(ns, "text");
+        emptyText.setAttribute("x", width / 2);
+        emptyText.setAttribute("y", height / 2 - 3);
+        emptyText.setAttribute("text-anchor", "middle");
+        emptyText.setAttribute("fill", "currentColor");
+        emptyText.setAttribute("opacity", ".62");
+        emptyText.setAttribute("font-size", width < 650 ? "14" : "15");
+        emptyText.setAttribute("font-family", "Inter, Segoe UI, Arial, sans-serif");
+        emptyText.textContent = "Добавьте сделку — здесь появится график";
+        svg.appendChild(emptyText);
+        return;
+      }
+
+      const formatAxisValue = value => {
+        const absolute = Math.abs(value);
+        if(absolute >= 1000){
+          return new Intl.NumberFormat("ru-RU", {
+            notation:"compact",
+            maximumFractionDigits:1
+          }).format(value);
+        }
+        return new Intl.NumberFormat("ru-RU", {
+          maximumFractionDigits:absolute < 10 ? 1 : 0
+        }).format(value);
+      };
+
+      const values = curve.map(point => Number(point.value) || 0);
+      let min = Math.min(...values);
+      let max = Math.max(...values);
+      const spread = Math.max(1, max - min);
+      const extra = spread * .08;
+
+      if(min === max){
+        const offset = Math.max(1, Math.abs(min) * .03);
+        min -= offset;
+        max += offset;
+      }else{
+        min -= extra;
+        max += extra;
+      }
+
+      const plotCurve = curve.length === 1 ? [curve[0], curve[0]] : curve;
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+      const x = index => pad.left + index * plotWidth / Math.max(1, plotCurve.length - 1);
+      const y = value => pad.top + (max - value) * plotHeight / Math.max(1, max - min);
+
+      for(let index = 0; index < 4; index++){
+        const gridY = pad.top + index * plotHeight / 3;
+
+        const gridLine = document.createElementNS(ns, "line");
+        gridLine.setAttribute("x1", pad.left);
+        gridLine.setAttribute("x2", width - pad.right);
+        gridLine.setAttribute("y1", gridY);
+        gridLine.setAttribute("y2", gridY);
+        gridLine.setAttribute("stroke", "currentColor");
+        gridLine.setAttribute("stroke-width", "1");
+        gridLine.setAttribute("opacity", ".10");
+        gridLine.setAttribute("vector-effect", "non-scaling-stroke");
+        svg.appendChild(gridLine);
+
+        const label = document.createElementNS(ns, "text");
+        label.setAttribute("x", pad.left - 13);
+        label.setAttribute("y", gridY + 4);
+        label.setAttribute("text-anchor", "end");
+        label.setAttribute("fill", "currentColor");
+        label.setAttribute("opacity", ".56");
+        label.setAttribute("font-size", width < 700 ? "10.5" : "11.5");
+        label.setAttribute("font-weight", "500");
+        label.setAttribute("font-family", "Inter, Segoe UI, Arial, sans-serif");
+        const labelValue = max - index * (max - min) / 3;
+        label.textContent = formatAxisValue(labelValue);
+        svg.appendChild(label);
+      }
+
+      const points = plotCurve.map((point, index) => `${x(index)},${y(point.value)}`).join(" ");
+
+      const area = document.createElementNS(ns, "polygon");
+      area.setAttribute(
+        "points",
+        `${x(0)},${height - pad.bottom} ${points} ${x(plotCurve.length - 1)},${height - pad.bottom}`
+      );
+      area.setAttribute("fill", isDarkTheme() ? "rgba(45,212,191,.09)" : "rgba(15,118,110,.07)");
+      svg.appendChild(area);
+
+      const balanceLine = document.createElementNS(ns, "polyline");
+      balanceLine.setAttribute("points", points);
+      balanceLine.setAttribute("fill", "none");
+      balanceLine.setAttribute("stroke", isDarkTheme() ? "#2dd4bf" : "#0f766e");
+      balanceLine.setAttribute("stroke-width", "2.5");
+      balanceLine.setAttribute("stroke-linejoin", "round");
+      balanceLine.setAttribute("stroke-linecap", "round");
+      balanceLine.setAttribute("vector-effect", "non-scaling-stroke");
+      svg.appendChild(balanceLine);
+
+      curve.forEach((point, index) => {
+        const cx = curve.length === 1 ? width / 2 : x(index);
+        const dot = document.createElementNS(ns, "circle");
+        dot.setAttribute("cx", cx);
+        dot.setAttribute("cy", y(point.value));
+        dot.setAttribute("r", curve.length > 60 ? "0" : "3");
+        dot.setAttribute("fill", isDarkTheme() ? "#99f6e4" : "#0f766e");
+        dot.setAttribute("stroke", "var(--card)");
+        dot.setAttribute("stroke-width", "2");
+        dot.setAttribute("vector-effect", "non-scaling-stroke");
+        svg.appendChild(dot);
+      });
+    }
+
+    function renderTrades(){
+      const q = $("filterSearch").value.trim().toLowerCase();
+      const symbol = $("filterSymbol").value;
+      const direction = $("filterDirection").value;
+      const session = $("filterSession").value;
+      const result = $("filterResult").value;
+
+      const list = [...trades].sort((a,b)=>`${b.date} ${b.time||""}`.localeCompare(`${a.date} ${a.time||""}`)).filter(t=>{
+        const text = [t.symbol,t.reason,t.mistake,t.notes,t.entryType,t.session].join(" ").toLowerCase();
+        const net = tradeNet(t);
+        return (!q || text.includes(q))
+          && (!symbol || t.symbol===symbol)
+          && (!direction || t.direction===direction)
+          && (!session || t.session===session)
+          && (!result || (result==="win"&&net>0) || (result==="loss"&&net<0) || (result==="be"&&net===0));
+      });
+
+      $("tradesBody").innerHTML = list.map(t=>{
+        const net = tradeNet(t);
+        return `<tr>
+          <td>${esc(formatDate(t.date))}<br><span class="hint">${esc(t.time||"")}</span></td>
+          <td><strong>${esc(t.symbol)}</strong></td>
+          <td><span class="badge ${t.direction==="BUY"?"buy":"sell"}">${esc(t.direction)}</span></td>
+          <td>${esc(t.session||"—")}</td>
+          <td>${esc(t.timeframe||"—")}</td>
+          <td>${esc(t.entryType||"—")}</td>
+          <td>${money(t.risk)}</td>
+          <td class="${net>0?"positive":net<0?"negative":"neutral"}"><strong>${money(net)}</strong></td>
+          <td>${tradeR(t).toFixed(2)}R</td>
+          <td><span class="badge ${t.followedPlan==="Да"?"yes":"no"}">${esc(t.followedPlan||"—")}</span></td>
+          <td data-no-i18n title="${esc(t.reason)}">${esc(shorten(t.reason,35)||"—")}</td>
+          <td data-no-i18n title="${esc(t.mistake)}">${esc(shorten(t.mistake,35)||"—")}</td>
+          <td>
+            ${safeExternalUrl(t.screenshot) ? `<a class="icon-btn" href="${esc(safeExternalUrl(t.screenshot))}" target="_blank" rel="noopener noreferrer" title="Открыть скрин">🖼</a>`:""}
+            <button class="icon-btn edit-icon-btn" type="button" data-action="edit" data-id="${esc(t.id)}" title="Редактировать" aria-label="Редактировать">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 19h4l9.2-9.2a2.1 2.1 0 0 0-3-3L6 16v3Z"/>
+                <path d="m13.8 8.2 3 3"/>
+              </svg>
+            </button>
+            <button class="icon-btn" type="button" data-action="delete" data-id="${esc(t.id)}" title="Удалить">🗑️</button>
+          </td>
+        </tr>`;
+      }).join("");
+
+      $("tradesEmpty").style.display = list.length ? "none" : "block";
+      refreshSymbolFilter();
+    }
+
+    function refreshSymbolFilter(){
+      const select = $("filterSymbol");
+      const current = select.value;
+      const symbols = [...new Set(trades.map(t=>t.symbol).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Все</option>' + symbols.map(s=>`<option ${s===current?"selected":""}>${esc(s)}</option>`).join("");
+    }
+
+    function formatDate(value){
+      const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(!match) return "—";
+      return settings.language === "en"
+        ? `${match[3]}/${match[2]}/${match[1]}`
+        : `${match[3]}.${match[2]}.${match[1]}`;
+    }
+
+    function localDateInputValue(date = new Date()){
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function safeExternalUrl(value){
+      try{
+        const url = new URL(String(value || "").trim());
+        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+      }catch(error){ return ""; }
+    }
+
+    function shorten(value,len){ const s=String(value||""); return s.length>len?s.slice(0,len-1)+"…":s; }
+
+    ["filterSearch","filterSymbol","filterDirection","filterSession","filterResult"].forEach(id=>{
+      $(id).addEventListener(id==="filterSearch"?"input":"change",renderTrades);
+    });
+
+    $("tradesBody").addEventListener("click", event=>{
+      const button = event.target.closest("button[data-action]");
+      if(!button) return;
+      const id = button.dataset.id;
+      if(button.dataset.action === "edit") editTrade(id);
+      if(button.dataset.action === "delete") deleteTrade(id);
+    });
+
+    function openModal(trade=null){
+      editingId = trade?.id || null;
+      $("modalTitle").textContent = editingId ? "Редактирование сделки" : "Новая сделка";
+      $("tradeForm").reset();
+      $("tradeId").value = editingId || "";
+
+      if(trade){
+        const fields = ["date","time","symbol","direction","session","timeframe","entryType","lot","entryPrice","stopLoss","takeProfit","exitPrice","risk","gross","fees","points","emotionBefore","emotionAfter","followedPlan","screenshot","reason","mistake","notes"];
+        fields.forEach(f=>$(f).value = trade[f] ?? "");
+      }else{
+        const now = new Date();
+        $("date").value = localDateInputValue(now);
+        $("time").value = now.toTimeString().slice(0,5);
+        $("direction").value = "BUY";
+        $("session").value = "Лондон";
+        $("timeframe").value = "M15";
+        $("entryType").value = "Ретест";
+        $("fees").value = "0";
+        $("followedPlan").value = "Да";
+      }
+      updateLiveCalc();
+      $("tradeModal").classList.add("show");
+    }
+
+    function closeModal(){
+      $("tradeModal").classList.remove("show");
+      editingId = null;
+    }
+
+    $("addTradeFab").addEventListener("click",()=>openModal());
+    $("closeModal").addEventListener("click",closeModal);
+    $("tradeModal").addEventListener("click",e=>{if(e.target.id==="tradeModal")closeModal()});
+
+    $("tradeForm").addEventListener("submit",e=>{
+      e.preventDefault();
+
+      const trade = {
+        id: editingId || uid(),
+        date:$("date").value,
+        time:$("time").value,
+        symbol:$("symbol").value.trim().toUpperCase(),
+        direction:$("direction").value,
+        session:normalizeSessionName($("session").value),
+        timeframe:$("timeframe").value,
+        entryType:$("entryType").value,
+        lot:num($("lot").value),
+        entryPrice:$("entryPrice").value,
+        stopLoss:$("stopLoss").value,
+        takeProfit:$("takeProfit").value,
+        exitPrice:$("exitPrice").value,
+        risk:num($("risk").value),
+        gross:num($("gross").value),
+        fees:num($("fees").value),
+        points:num($("points").value),
+        emotionBefore:$("emotionBefore").value,
+        emotionAfter:$("emotionAfter").value,
+        followedPlan:$("followedPlan").value,
+        screenshot:$("screenshot").value.trim(),
+        reason:$("reason").value.trim(),
+        mistake:$("mistake").value.trim(),
+        notes:$("notes").value.trim()
+      };
+
+      const wasEditing = Boolean(editingId);
+      if(wasEditing){
+        const idx = trades.findIndex(t=>String(t.id)===String(editingId));
+        if(idx>=0) trades[idx]=trade;
+        else trades.push(trade);
+      }else{
+        trades.push(trade);
+      }
+
+      const saved = saveAll();
+      closeModal();
+      renderDashboard();
+      renderTrades();
+      renderReview();
+      toast(saved
+        ? (wasEditing ? "Сделка обновлена" : "Сделка сохранена")
+        : (wasEditing ? "Изменения внесены, но браузер запретил постоянное сохранение" : "Сделка добавлена, но браузер запретил постоянное сохранение")
+      );
+    });
+
+    function editTrade(id){
+      const trade = trades.find(t=>String(t.id)===String(id));
+      if(trade) openModal(trade);
+    }
+    window.editTrade = editTrade;
+
+    function deleteTrade(id){
+      if(!confirm(tr("Удалить эту сделку?"))) return;
+      trades = trades.filter(t=>String(t.id)!==String(id));
+      saveAll();
+      renderDashboard();
+      renderTrades();
+      renderReview();
+      toast("Сделка удалена");
+    }
+    window.deleteTrade = deleteTrade;
+
+    function updateLiveCalc(){
+      const gross = num($("gross").value);
+      const fees = num($("fees").value);
+      const risk = num($("risk").value);
+      const net = gross-fees;
+      const r = risk ? net/risk : 0;
+      const pct = settings.capital ? risk/settings.capital*100 : 0;
+      $("liveNet").textContent = money(net);
+      $("liveR").textContent = r.toFixed(2)+"R";
+      $("liveRiskPct").textContent = pct.toFixed(2)+"%";
+      $("liveOutcome").textContent = net>0?"Прибыль":net<0?"Убыток":"Безубыток";
+      setSignedClass($("liveNet"),net);
+      setSignedClass($("liveR"),r);
+      setSignedClass($("liveOutcome"),net);
+    }
+    ["gross","fees","risk"].forEach(id=>$(id).addEventListener("input",updateLiveCalc));
+
+    function renderReview(){
+      const s = stats();
+      $("disciplineBar").style.width = Math.min(100,s.planPct)+"%";
+      $("disciplineText").textContent = s.planPct.toFixed(1)+"%";
+
+      const bySymbol = {};
+      trades.forEach(t=>{ const symbol = String(t.symbol || "").trim(); if(symbol) bySymbol[symbol]=(bySymbol[symbol]||0)+tradeNet(t); });
+      const bestSymbol = Object.entries(bySymbol).sort((a,b)=>b[1]-a[1])[0];
+      $("bestSymbol").textContent = bestSymbol ? `${bestSymbol[0]} · ${money(bestSymbol[1])}` : "—";
+
+      const mistakes = trades.map(t=>String(t.mistake || "").trim()).filter(Boolean);
+      const mistakeCount = {};
+      mistakes.forEach(m=>mistakeCount[m]=(mistakeCount[m]||0)+1);
+      const topMistake = Object.entries(mistakeCount).sort((a,b)=>b[1]-a[1])[0];
+      $("topMistake").textContent = topMistake ? `${topMistake[0]} (${topMistake[1]})` : "—";
+
+      const emo = {};
+      trades.forEach(t=>{
+        const key=t.emotionBefore||"Без эмоций";
+        if(!emo[key]) emo[key]={sum:0,count:0};
+        emo[key].sum+=tradeNet(t); emo[key].count++;
+      });
+      const bestEmotion = Object.entries(emo).map(([k,v])=>[k,v.sum/v.count]).sort((a,b)=>b[1]-a[1])[0];
+      $("bestEmotion").textContent = bestEmotion ? `${bestEmotion[0]} · ${money(bestEmotion[1])}` : "—";
+    }
+
+    const checklistItems = [
+      "Тренд и направление сделки совпадают",
+      "Уровень входа отмечен заранее",
+      "Stop Loss установлен до входа",
+      "Take Profit определён",
+      "Риск не превышает мой лимит",
+      "Нет входа из страха упустить движение",
+      "Нет важных новостей рядом",
+      "Сделка соответствует системе"
+    ];
+    $("checklist").innerHTML = checklistItems.map((item,i)=>`
+      <label class="review-box" style="display:flex;gap:10px;align-items:flex-start">
+        <input type="checkbox" class="check-item" data-index="${i}" style="width:18px;height:18px;margin-top:2px">
+        <span>${esc(item)}</span>
+      </label>`).join("");
+
+    function savePlan(){
+      const plan = {
+        planDate:$("planDate").value, planSymbol:$("planSymbol").value, planDirection:$("planDirection").value,
+        planTimeframe:$("planTimeframe").value, planEntry:$("planEntry").value, planSL:$("planSL").value,
+        planTP:$("planTP").value, planRisk:$("planRisk").value, planReason:$("planReason").value,
+        planCancel:$("planCancel").value, planScenario:$("planScenario").value, planRiskText:$("planRiskText").value,
+        checks:[...document.querySelectorAll(".check-item")].map(c=>c.checked)
+      };
+      storageSet(PLAN_KEY,JSON.stringify(plan));
+    }
+
+    function loadPlan(){
+      const p = loadJson(PLAN_KEY,{});
+      Object.keys(p).filter(k=>k!=="checks" && $(k)).forEach(k=>$(k).value=p[k]||"");
+      (p.checks||[]).forEach((v,i)=>{const el=document.querySelector(`.check-item[data-index="${i}"]`);if(el)el.checked=v});
+    }
+
+    ["planDate","planSymbol","planDirection","planTimeframe","planEntry","planSL","planTP","planRisk","planReason","planCancel","planScenario","planRiskText"].forEach(id=>$(id).addEventListener("input",savePlan));
+    document.querySelectorAll(".check-item").forEach(el=>el.addEventListener("change",savePlan));
+    $("clearPlanBtn").addEventListener("click",()=>{
+      if(!confirm(tr("Очистить текущий план сделки?"))) return;
+      storageRemove(PLAN_KEY);
+      ["planDate","planSymbol","planEntry","planSL","planTP","planRisk","planReason","planCancel","planScenario","planRiskText"].forEach(id=>$(id).value="");
+      document.querySelectorAll(".check-item").forEach(c=>c.checked=false);
+      toast("План очищен");
+    });
+
+    $("createTradeFromPlanBtn").addEventListener("click",()=>{
+      savePlan();
+
+      const symbol = $("planSymbol").value.trim().toUpperCase();
+      if(!symbol){
+        $("planSymbol").focus();
+        toast("Сначала укажите инструмент");
+        return;
+      }
+
+      const planDateTime = $("planDate").value;
+      const planNotes = [
+        $("planCancel").value.trim()
+          ? `${tr("Условие отмены")}: ${$("planCancel").value.trim()}`
+          : "",
+        $("planScenario").value.trim()
+          ? `${tr("Сценарий движения")}: ${$("planScenario").value.trim()}`
+          : "",
+        $("planRiskText").value.trim()
+          ? `${tr("Возможные риски")}: ${$("planRiskText").value.trim()}`
+          : ""
+      ].filter(Boolean).join("\n\n");
+
+      openModal();
+      $("modalTitle").textContent = "Новая сделка из плана";
+
+      if(planDateTime){
+        const [datePart, timePart = ""] = planDateTime.split("T");
+        if(datePart) $("date").value = datePart;
+        if(timePart) $("time").value = timePart.slice(0,5);
+      }
+
+      $("symbol").value = symbol;
+      $("direction").value = $("planDirection").value;
+      $("timeframe").value = $("planTimeframe").value;
+      $("entryPrice").value = $("planEntry").value;
+      $("stopLoss").value = $("planSL").value;
+      $("takeProfit").value = $("planTP").value;
+      $("risk").value = $("planRisk").value;
+      $("reason").value = $("planReason").value.trim();
+      $("notes").value = planNotes;
+      $("followedPlan").value = "Да";
+
+      updateLiveCalc();
+    });
+
+    function saveReview(){
+      const data = {
+        reviewGood:$("reviewGood").value, reviewErrors:$("reviewErrors").value,
+        reviewChange:$("reviewChange").value, reviewRule:$("reviewRule").value
+      };
+      storageSet(REVIEW_KEY,JSON.stringify(data));
+    }
+    ["reviewGood","reviewErrors","reviewChange","reviewRule"].forEach(id=>$(id).addEventListener("input",saveReview));
+    const reviewSaved=loadJson(REVIEW_KEY,{});
+    Object.keys(reviewSaved).forEach(k=>{if($(k))$(k).value=reviewSaved[k]||""});
+
+    $("exportBtn").addEventListener("click",()=>{
+      const data = {version:1, exportedAt:new Date().toISOString(), settings, trades, plan:loadJson(PLAN_KEY,{}), review:loadJson(REVIEW_KEY,{})};
+      downloadFile("trading-journal-backup.json",JSON.stringify(data,null,2),"application/json");
+      setSettingsMenu(false);
+      toast("Резервная копия сохранена");
+    });
+
+    $("importBtn").addEventListener("click",()=>{
+      setSettingsMenu(false);
+      $("importFile").click();
+    });
+    $("importFile").addEventListener("change",async e=>{
+      const file=e.target.files[0];
+      if(!file)return;
+      try{
+        const data=JSON.parse(await file.text());
+        if(!Array.isArray(data.trades)) throw new Error();
+        if(!confirm(tr("Импорт заменит текущие сделки. Продолжить?"))) return;
+        trades=data.trades.filter(item => item && typeof item === "object").map(normalizeTradeRecord);
+        settings=normalizeSettings(data.settings||settings);
+        storageSet(PLAN_KEY,JSON.stringify(data.plan||{}));
+        storageSet(REVIEW_KEY,JSON.stringify(data.review||{}));
+        saveAll();
+        location.reload();
+      }catch(err){
+        console.error(err);
+        alert(tr("Не удалось прочитать файл резервной копии."));
+      }finally{
+        e.target.value = "";
+      }
+    });
+
+    function downloadFile(name,content,type){
+      const blob=new Blob([content],{type});
+      const a=document.createElement("a");
+      const url=URL.createObjectURL(blob);
+      a.href=url;
+      a.download=name;
+      a.style.display="none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+
+    window.addEventListener("resize",()=>drawEquity());
+    window.addEventListener("keydown",e=>{
+      if(e.key==="Escape"){
+        closeModal();
+        if($("accountModal").classList.contains("show")) skipAccountSetup();
+        setSettingsMenu(false);
+      }
+    });
+
+    ensureCanonicalOptionValues(document);
+    applyLanguage(document.body);
+    saveAll();
+    applyTheme();
+    loadPlan();
+    renderDashboard();
+    renderTrades();
+    renderReview();
+    applyLanguage(document.body);
+    startLanguageObserver();
+
+    const accountSetupAlreadySeen = !!storageGet(ACCOUNT_SETUP_PROMPT_KEY);
+    if(!accountSetupAlreadySeen && Number(settings.capital) <= 0){
+      window.setTimeout(()=>openAccountModal("onboarding"), 280);
+    }else if(!accountSetupAlreadySeen && Number(settings.capital) > 0){
+      markAccountSetupSeen("done");
+    }
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js", {
+          scope: "./journal.html",
+          updateViaCache: "none"
+        }).catch((error) => {
+          console.warn("Service Worker не зарегистрирован:", error);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>

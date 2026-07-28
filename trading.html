@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Помощник входа в сделку</title>
+
+  <link rel="stylesheet" href="./trading.css" />
+  <script src="./trading.js" defer></script>
+</head>
+<body>
+
+  <main class="app">
+
+    <header class="header">
+      <div class="badge">Forex Helper</div>
+
+      <h1>Помощник входа в сделку</h1>
+
+      <p>
+        Это не угадайка следующей свечи. Это простой чек-лист, который помогает понять:
+        Long сильнее, Short сильнее или лучше пропустить сделку.
+      </p>
+    </header>
+
+    <details class="info" open>
+      <summary>❓ Как это работает?</summary>
+
+      <p>
+        В простом режиме не нужно ничего чертить на графике. Просто посмотри на свечи
+        и выбери, что больше похоже на твой график.
+      </p>
+
+      <p>
+        В продвинутом режиме можно смотреть уровни, среднюю линию, RSI и силу движения.
+      </p>
+
+      <p>
+        <b>Важно:</b> это не финансовый совет и не точный прогноз.
+      </p>
+    </details>
+
+    <section class="card">
+      <h2>1. Инструмент</h2>
+
+      <div class="field">
+        <label for="category">Категория</label>
+
+        <select id="category">
+          <option value="forex">Валюты</option>
+          <option value="metals">Металлы</option>
+          <option value="indices">Индексы</option>
+          <option value="crypto">Крипто</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="instrument">Инструмент</label>
+
+        <select id="instrument"></select>
+
+        <div class="hint" id="instrumentHint"></div>
+      </div>
+
+      <div class="field">
+        <label for="timeframe">Время графика</label>
+
+        <select id="timeframe">
+          <option value="M5">M5 — очень быстро</option>
+          <option value="M15">M15 — быстро</option>
+          <option value="M30">M30</option>
+          <option value="H1" selected>H1 — спокойнее</option>
+          <option value="H4">H4 — среднесрок</option>
+          <option value="D1">D1 — дневной график</option>
+        </select>
+
+        <div class="hint">
+          Для новичка обычно проще смотреть H1 или H4, потому что там меньше шума.
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Режим анализа</h2>
+
+      <div class="field">
+        <label for="analysisMode">Как будем смотреть график?</label>
+
+        <select id="analysisMode">
+          <option value="simple" selected>Простой — без чертежа</option>
+          <option value="advanced">Продвинутый — с уровнями</option>
+        </select>
+
+        <div class="hint">
+          Для начала лучше выбрать простой режим. Там не нужно рисовать линии и уровни.
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="simpleMode">
+      <h2>3. Простой анализ без рисования</h2>
+
+      <div class="field">
+        <label for="priceMove">Куда сейчас больше идёт цена?</label>
+
+        <select id="priceMove">
+          <option value="unclear">Не понимаю</option>
+          <option value="up">Больше вверх</option>
+          <option value="down">Больше вниз</option>
+          <option value="flat">Туда-сюда, без направления</option>
+        </select>
+
+        <div class="pattern-box" id="priceMovePattern"></div>
+
+        <div class="hint">
+          Просто посмотри: цена чаще поднимается, падает или ходит туда-сюда?
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="candleMix">Каких свечей сейчас больше?</label>
+
+        <select id="candleMix">
+          <option value="mixed">Смешанные</option>
+          <option value="green">Больше зелёных</option>
+          <option value="red">Больше красных</option>
+        </select>
+
+        <div class="pattern-box" id="candleMixPattern"></div>
+
+        <div class="hint">
+          Посмотри последние несколько свечей. Каких визуально больше?
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lastCandleSimple">Какая последняя закрытая свеча?</label>
+
+        <select id="lastCandleSimple">
+          <option value="small">Маленькая или непонятная</option>
+          <option value="bull">Большая зелёная</option>
+          <option value="bear">Большая красная</option>
+          <option value="tailDown">Был хвост вниз, потом цена пошла вверх</option>
+          <option value="tailUp">Был хвост вверх, потом цена пошла вниз</option>
+          <option value="doji">Свеча почти как крестик</option>
+        </select>
+
+        <div class="pattern-box" id="lastCandleSimplePattern"></div>
+
+        <div class="hint">
+          Лучше смотреть закрытую свечу, а не ту, которая ещё двигается.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="priceState">Цена сейчас после сильного движения?</label>
+
+        <select id="priceState">
+          <option value="unknown">Не понимаю</option>
+          <option value="afterRise">Цена уже сильно выросла</option>
+          <option value="afterDrop">Цена уже сильно упала</option>
+          <option value="middle">Ничего особенного</option>
+        </select>
+
+        <div class="pattern-box" id="priceStatePattern"></div>
+
+        <div class="hint">
+          После сильного роста вход в Long может быть поздним. После сильного падения вход в Short может быть поздним.
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="advancedMode">
+      <h2>3. Продвинутый анализ с уровнями</h2>
+
+      <div class="field">
+        <label for="trend">Куда сейчас больше идёт цена?</label>
+
+        <select id="trend">
+          <option value="unclear">Не понимаю</option>
+          <option value="up">Больше вверх</option>
+          <option value="down">Больше вниз</option>
+          <option value="flat">Туда-сюда, без направления</option>
+        </select>
+
+        <div class="pattern-box" id="trendPattern"></div>
+
+        <div class="hint">
+          Посмотри на график: цена чаще поднимается, падает или просто ходит туда-сюда?
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="ema">Цена выше или ниже средней линии?</label>
+
+        <select id="ema">
+          <option value="near">Рядом с линией</option>
+          <option value="above">Выше линии</option>
+          <option value="below">Ниже линии</option>
+        </select>
+
+        <div class="pattern-box" id="emaPattern"></div>
+
+        <div class="hint">
+          Если у тебя нет средней линии на графике, оставь “Рядом с линией”.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="level">Цена возле важного места?</label>
+
+        <select id="level">
+          <option value="middle">Нет, просто посередине</option>
+          <option value="support">Цена снизу оттолкнулась вверх</option>
+          <option value="resistance">Цена сверху оттолкнулась вниз</option>
+          <option value="breakoutUp">Цена пробила вверх</option>
+          <option value="breakoutDown">Цена пробила вниз</option>
+        </select>
+
+        <div class="pattern-box" id="levelPattern"></div>
+
+        <div class="hint">
+          Важное место — это место, где цена раньше часто разворачивалась.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="candle">Какая последняя свеча?</label>
+
+        <select id="candle">
+          <option value="weak">Маленькая или непонятная</option>
+          <option value="bull">Большая зелёная</option>
+          <option value="bear">Большая красная</option>
+          <option value="pinBull">Был хвост вниз, потом цена пошла вверх</option>
+          <option value="pinBear">Был хвост вверх, потом цена пошла вниз</option>
+          <option value="doji">Свеча почти как крестик</option>
+        </select>
+
+        <div class="pattern-box" id="candlePattern"></div>
+
+        <div class="hint">
+          Просто посмотри на последнюю закрытую свечу.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="rsi">RSI</label>
+
+        <select id="rsi">
+          <option value="unknown">Не знаю / не использую</option>
+          <option value="low">Цена уже сильно упала</option>
+          <option value="normal">Ничего особенного</option>
+          <option value="high">Цена уже сильно выросла</option>
+          <option value="bullDiv">Цена падает, но индикатор уже хочет вверх</option>
+          <option value="bearDiv">Цена растёт, но индикатор уже хочет вниз</option>
+        </select>
+
+        <div class="pattern-box" id="rsiPattern"></div>
+
+        <div class="hint">
+          Если не знаешь, что такое RSI, просто оставь “Не знаю / не использую”.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="volume">Сила движения</label>
+
+        <select id="volume">
+          <option value="unknown">Не знаю / не смотрю</option>
+          <option value="normal">Обычное движение</option>
+          <option value="low">Движение слабое</option>
+          <option value="confirmUp">Вверх идёт уверенно</option>
+          <option value="confirmDown">Вниз идёт уверенно</option>
+        </select>
+
+        <div class="pattern-box" id="volumePattern"></div>
+
+        <div class="hint">
+          Если не понимаешь силу движения, оставь “Не знаю / не смотрю”.
+        </div>
+      </div>
+    </section>
+
+    <section class="card danger-card">
+      <h2>4. Опасные условия</h2>
+
+      <div class="field">
+        <label for="news">Есть ли опасные новости?</label>
+
+        <select id="news">
+          <option value="none">Проверил: важных новостей рядом нет</option>
+          <option value="soon">Не проверял / скоро важная новость</option>
+          <option value="high">Цена уже резко прыгает</option>
+        </select>
+
+        <div class="hint">
+          Опасные новости — это важные экономические события: ставка, инфляция, безработица,
+          выступление главы банка. Если не проверял календарь, выбери второй вариант.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="spread">Спред</label>
+
+        <select id="spread">
+          <option value="normal">Спред нормальный</option>
+          <option value="high">Спред высокий</option>
+        </select>
+
+        <div class="hint">
+          Если спред высокий, вход хуже. Стоп может выбить быстрее.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="rr">Риск / прибыль</label>
+
+        <select id="rr">
+          <option value="1">1 к 1 — слабовато</option>
+          <option value="1.5">1 к 1.5 — нормально</option>
+          <option value="2" selected>1 к 2 — хорошо</option>
+          <option value="3">1 к 3 — отлично</option>
+        </select>
+
+        <div class="hint">
+          Лучше, когда возможная прибыль больше возможного убытка.
+        </div>
+      </div>
+    </section>
+
+    <section class="result" id="result">
+      <div class="result-top">
+        <div>
+          <div class="result-small">Подсказка</div>
+          <h2 id="decisionTitle">Заполните данные</h2>
+        </div>
+
+        <div class="score-circle" id="scoreCircle">0</div>
+      </div>
+
+      <p class="decision-text" id="decisionText">
+        Выберите условия на графике, и результат обновится автоматически.
+      </p>
+
+      <div class="score-row">
+        <div>
+          <div class="score-label">Long</div>
+
+          <div class="bar">
+            <div class="bar-fill long" id="longBar"></div>
+          </div>
+
+          <div class="score-number" id="longScore">0 баллов</div>
+        </div>
+
+        <div>
+          <div class="score-label">Short</div>
+
+          <div class="bar">
+            <div class="bar-fill short" id="shortBar"></div>
+          </div>
+
+          <div class="score-number" id="shortScore">0 баллов</div>
+        </div>
+      </div>
+
+      <div class="reasons">
+        <h3>Почему такой результат?</h3>
+
+        <ul id="reasonsList">
+          <li>Пока нет расчёта.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>5. Быстрый расчёт риска</h2>
+
+      <div class="row">
+        <div class="field">
+          <label for="balance">Баланс</label>
+          <input id="balance" type="number" value="1000" min="0" step="1" />
+        </div>
+
+        <div class="field">
+          <label for="riskPercent">Риск %</label>
+          <input id="riskPercent" type="number" value="1" min="0" step="0.1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="stopPoints">Стоп в пунктах</label>
+          <input id="stopPoints" type="number" value="50" min="0" step="1" />
+        </div>
+
+        <div class="field">
+          <label for="pointValue">Стоимость пункта</label>
+          <input id="pointValue" type="number" value="10" min="0" step="0.01" />
+        </div>
+      </div>
+
+      <div class="risk-result">
+        <div>
+          <span>Риск в деньгах</span>
+          <b id="riskMoney">$10.00</b>
+        </div>
+
+        <div>
+          <span>Примерный лот</span>
+          <b id="lotSize">0.02</b>
+        </div>
+      </div>
+    </section>
+
+    <details class="info">
+      <summary>⚠️ Важное предупреждение</summary>
+
+      <p>
+        Этот помощник не знает будущую свечу. Он только помогает не входить совсем наугад.
+      </p>
+
+      <p>
+        Если сигнал слабый, опасные новости рядом или спред высокий — лучше пропустить сделку.
+      </p>
+
+      <p>
+        Всегда используй Stop Loss и не рискуй деньгами, которые нельзя потерять.
+      </p>
+    </details>
+
+    <p class="footer">
+      Расчёт примерный. У разных брокеров могут отличаться стоимость пункта,
+      контракт, комиссия, спред и минимальный лот.
+    </p>
+    
+    <footer style="
+      text-align: center;
+      margin-top: 30px;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    ">
+      © Andrey30
+      <span aria-hidden="true"> · </span>
+      <a href="privacy.html" style="
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      ">
+        Политика конфиденциальности
+      </a>
+    </footer>
+
+  </main>
+
+</body>
+</html>

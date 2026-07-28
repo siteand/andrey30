@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Курсы">
+    <title>Курсы валют</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="icons2/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons2/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons2/apple-touch-icon.png">
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --text-muted: #888;
+            --input-bg: #ffffff;
+            --input-border: #ccc;
+            --button-bg: #007bff;
+            --button-text: #fff;
+            --row-hover: #f5f9ff;
+            --divider: #f0f2f5;
+            --shadow: rgba(0, 60, 150, 0.08);
+            --up-color: #2e7d32;
+            --down-color: #c62828;
+            --neutral-color: #888;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 0;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px 10px;
+        }
+
+        .container {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: none;
+        }
+        body.editing .container {
+            transform: none;
+        }
+
+        h2 {
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .status-btn {
+            flex: 1;
+            min-width: 0;
+            background: var(--input-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            font-weight: normal;
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .status-btn:hover {
+            background: var(--row-hover);
+            border-color: var(--button-bg);
+            color: var(--text-color);
+        }
+        .status-btn .refresh-icon {
+            flex-shrink: 0;
+            display: block;
+            transition: transform 0.2s;
+        }
+        .status-btn:active .refresh-icon { transform: scale(0.9); }
+        .status-btn.spinning .refresh-icon { animation: spin 0.8s linear infinite; }
+        .status-btn .status-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .source-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease, opacity 0.2s ease;
+        }
+        .source-note > span { display: block; padding: 8px 4px 0; }
+        .note-sep {
+            display: inline-block;
+            width: 1px;
+            height: 9px;
+            margin: 0 8px;
+            vertical-align: middle;
+            background: var(--input-border);
+        }
+        body.editing .source-note {
+            max-height: 40px;
+            opacity: 1;
+        }
+
+        .edit-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--button-bg);
+            border-radius: 5px;
+            width: 46px;
+            align-self: stretch;
+            flex-shrink: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+        .edit-btn:hover {
+            background: var(--row-hover);
+            border-color: var(--button-bg);
+        }
+        .edit-btn svg { display: block; transition: transform 0.2s; }
+        .edit-btn:active svg { transform: scale(0.9); }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--button-bg);
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .action-btn:hover {
+            background: var(--row-hover);
+            border-color: var(--button-bg);
+        }
+
+        .btn-base {
+            position: relative;
+            flex: 0 0 auto;
+            font-weight: 600;
+        }
+        .btn-add {
+            flex: 1;
+            border: 1px dashed var(--button-bg);
+        }
+        .btn-done {
+            flex: 0 0 auto;
+            background: var(--button-bg);
+            border-color: var(--button-bg);
+            color: var(--button-text);
+            font-weight: 600;
+        }
+        .btn-done:hover {
+            background: #0069d9;
+            border-color: #0069d9;
+        }
+
+        .base-select-hidden {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-base, .btn-add, .btn-done { display: none; }
+        body.editing .status-btn { display: none; }
+        body.editing .edit-btn { display: none; }
+        body.editing .btn-base,
+        body.editing .btn-add,
+        body.editing .btn-done { display: inline-flex; }
+
+        .rates-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .rate-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 4px;
+            border: none;
+            border-bottom: 1px solid var(--input-border);
+            border-radius: 0;
+            background: transparent;
+            transition: box-shadow 0.15s, transform 0.18s ease;
+            will-change: transform;
+        }
+        .rate-row:last-child {
+            border-bottom: none;
+        }
+        .rate-row.dragging {
+            background: var(--row-hover);
+            box-shadow: 0 6px 20px var(--shadow);
+            z-index: 10;
+            border-radius: 8px;
+            border-bottom-color: transparent;
+        }
+
+        .drag-handle {
+            color: var(--text-muted);
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            font-size: 20px;
+            padding: 4px 2px;
+            flex-shrink: 0;
+            line-height: 1;
+            touch-action: none;
+            display: none;
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .rates-list.is-editing .drag-handle { display: inline-flex; }
+
+        .flag-img {
+            width: 36px;
+            height: 27px;
+            border-radius: 3px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--divider);
+        }
+
+        .flag-img[alt="CHF"] {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            background: transparent;
+        }
+
+        .rate-info { flex: 1; min-width: 0; }
+        .rate-code {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-color);
+            letter-spacing: 0.3px;
+        }
+        .rate-name {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rate-values {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .rate-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-variant-numeric: tabular-nums;
+        }
+        .rate-change {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .rate-change.up { color: var(--up-color); }
+        .rate-change.down { color: var(--down-color); }
+        .rate-change.neutral { color: var(--neutral-color); }
+        .rate-change.loading { color: var(--text-muted); font-weight: normal; }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            display: none;
+            flex-shrink: 0;
+        }
+        .remove-btn:hover { color: var(--down-color); }
+        .rates-list.is-editing .remove-btn { display: inline-flex; }
+        .rates-list.is-editing .rate-values { opacity: 0.5; }
+
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-bg.open { display: flex; }
+        .modal {
+            background: var(--bg-color);
+            border-radius: 10px;
+            max-width: 420px;
+            width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--divider);
+        }
+        .modal-header h3 { font-size: 16px; }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px 8px;
+        }
+        .search-wrap { padding: 12px 16px; border-bottom: 1px solid var(--divider); }
+        .search-wrap input {
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--row-hover);
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            color: var(--text-color);
+        }
+        .search-wrap input:focus {
+            outline: none;
+            background: #e6efff;
+        }
+        .modal-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .modal-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-row:hover { background: var(--row-hover); }
+        .modal-row.disabled { opacity: 0.5; cursor: default; }
+        .modal-row.disabled:hover { background: transparent; }
+        .modal-row-info { flex: 1; min-width: 0; }
+        .modal-row-code { font-weight: bold; color: var(--button-bg); font-size: 14px; }
+        .modal-row-name {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .modal-row-rate { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+        .check { color: var(--up-color); font-weight: bold; }
+        .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; }
+
+        footer {
+            text-align: center;
+            padding: 20px 10px 10px;
+            background-color: var(--bg-color);
+            width: 100%;
+            color: gray;
+            font-size: 14px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1e1e1e;
+                --text-color: #e0e0e0;
+                --text-muted: #888;
+                --input-bg: #333;
+                --input-border: #555;
+                --row-hover: #353a42;
+                --divider: #3a3f47;
+                --shadow: rgba(0, 0, 0, 0.3);
+                --up-color: #66bb6a;
+                --down-color: #ef5350;
+            }
+            .btn-done:hover { background: #2b8aff; border-color: #2b8aff; }
+            .search-wrap input:focus { background: #404650; }
+        }
+
+
+        .side-back-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: calc((100vw - 400px) / 2);
+            display: none;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            z-index: 10;
+            background: transparent;
+            border: none;
+            padding: 0;
+            font: inherit;
+        }
+
+        .side-back-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: gray;
+            opacity: 0.45;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+        }
+
+        .side-back-arrow svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .side-back-zone:hover .side-back-arrow {
+            opacity: 0.85;
+            transform: translate(-50%, -50%) translateX(-4px);
+            background-color: rgba(128, 128, 128, 0.10);
+        }
+
+        @media (min-width: 769px) {
+            .side-back-zone {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button type="button" class="side-back-zone" aria-label="Вернуться на главную" onclick="window.location.replace('index.html')">
+        <span class="side-back-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18L9 12L15 6"></path>
+            </svg>
+        </span>
+    </button>
+    <div class="content">
+    <div class="container">
+        <h2>Курсы валют</h2>
+
+        <div class="actions-row">
+            <button class="status-btn" id="refreshBtn" title="Обновить курсы">
+                <svg class="refresh-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+                    <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
+                </svg>
+                <span class="status-text" id="statusText">Загрузка…</span>
+            </button>
+
+            <button class="action-btn btn-base" id="baseBtn" title="Базовая валюта">
+                <span id="baseBtnText">RUB</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                <select id="baseSelect" class="base-select-hidden"></select>
+            </button>
+            <button class="action-btn btn-add" id="addBtn">+ Добавить валюту</button>
+            <button class="action-btn btn-done" id="doneBtn">Готово</button>
+
+            <button class="edit-btn" id="editBtn" title="Редактировать список">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+        </div>
+
+        <div class="rates-list" id="ratesList"></div>
+
+        <div class="source-note" id="sourceNote"><span id="sourceNoteText"></span></div>
+    </div>
+    </div>
+
+    <div class="modal-bg" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Выберите валюту</h3>
+                <button class="modal-close" id="modalClose">✕</button>
+            </div>
+            <div class="search-wrap">
+                <input type="text" id="searchBox" placeholder="🔍 Поиск" readonly>
+            </div>
+            <div class="modal-list" id="modalList"></div>
+        </div>
+    </div>
+
+<script>
+const CURRENCY_SYMBOLS = {
+    RUB: '₽', USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥',
+    CHF: 'Fr', AUD: 'A$', CAD: 'C$', HKD: 'HK$', SGD: 'S$',
+    KRW: '₩', INR: '₹', TRY: '₺', AED: 'د.إ', ILS: '₪', SAR: '﷼',
+    KZT: '₸', BYN: 'Br', UAH: '₴', GEL: '₾', AMD: '֏', AZN: '₼',
+    KGS: 'с', UZS: 'so\'m', PLN: 'zł', CZK: 'Kč', SEK: 'kr', NOK: 'kr',
+    BRL: 'R$', THB: '฿', NZD: 'NZ$', MXN: '$', ZAR: 'R',
+    XAU_U: 'oz', XAG_U: 'oz', XPT_U: 'oz', XPD_U: 'oz',
+    XAU: 'г', XAG: 'г', XPT: 'г', XPD: 'г',
+    BTC: '₿', ETH: 'Ξ', USDT: '₮', BNB: 'BNB', SOL: 'SOL', XRP: 'XRP', DOGE: 'Ð', TON: 'TON'
+};
+
+const CURRENCY_META = {
+    RUB: { country: 'ru', name: 'Российский рубль' },
+    USD: { country: 'us', name: 'Доллар США' },
+    EUR: { country: 'eu', name: 'Евро' },
+    GBP: { country: 'gb', name: 'Фунт стерлингов' },
+    JPY: { country: 'jp', name: 'Японская иена' },
+    CNY: { country: 'cn', name: 'Китайский юань' },
+    CHF: { country: 'ch', name: 'Швейцарский франк' },
+    AUD: { country: 'au', name: 'Австралийский доллар' },
+    CAD: { country: 'ca', name: 'Канадский доллар' },
+    HKD: { country: 'hk', name: 'Гонконгский доллар' },
+    SGD: { country: 'sg', name: 'Сингапурский доллар' },
+    KRW: { country: 'kr', name: 'Южнокорейская вона' },
+    INR: { country: 'in', name: 'Индийская рупия' },
+    TRY: { country: 'tr', name: 'Турецкая лира' },
+    AED: { country: 'ae', name: 'Дирхам ОАЭ' },
+    ILS: { country: 'il', name: 'Израильский шекель' },
+    SAR: { country: 'sa', name: 'Саудовский риял' },
+    KZT: { country: 'kz', name: 'Казахстанский тенге' },
+    BYN: { country: 'by', name: 'Белорусский рубль' },
+    UAH: { country: 'ua', name: 'Украинская гривна' },
+    GEL: { country: 'ge', name: 'Грузинский лари' },
+    AMD: { country: 'am', name: 'Армянский драм' },
+    AZN: { country: 'az', name: 'Азербайджанский манат' },
+    KGS: { country: 'kg', name: 'Киргизский сом' },
+    UZS: { country: 'uz', name: 'Узбекский сум' },
+    PLN: { country: 'pl', name: 'Польский злотый' },
+    CZK: { country: 'cz', name: 'Чешская крона' },
+    SEK: { country: 'se', name: 'Шведская крона' },
+    NOK: { country: 'no', name: 'Норвежская крона' },
+    BRL: { country: 'br', name: 'Бразильский реал' },
+    THB: { country: 'th', name: 'Тайский бат' },
+    NZD: { country: 'nz', name: 'Новозеландский доллар' },
+    MXN: { country: 'mx', name: 'Мексиканское песо' },
+    ZAR: { country: 'za', name: 'Южноафриканский рэнд' },
+    XAU_U: { country: 'metal-gold', name: 'Золото (унция)', metal: 'xau', perGram: false },
+    XAG_U: { country: 'metal-silver', name: 'Серебро (унция)', metal: 'xag', perGram: false },
+    XPT_U: { country: 'metal-platinum', name: 'Платина (унция)', metal: 'xpt', perGram: false },
+    XPD_U: { country: 'metal-palladium', name: 'Палладий (унция)', metal: 'xpd', perGram: false },
+    XAU: { country: 'metal-gold', name: 'Золото (грамм)', metal: 'xau', perGram: true },
+    XAG: { country: 'metal-silver', name: 'Серебро (грамм)', metal: 'xag', perGram: true },
+    XPT: { country: 'metal-platinum', name: 'Платина (грамм)', metal: 'xpt', perGram: true },
+    XPD: { country: 'metal-palladium', name: 'Палладий (грамм)', metal: 'xpd', perGram: true },
+    BTC: { country: 'crypto-btc', name: 'Биткоин' },
+    ETH: { country: 'crypto-eth', name: 'Эфириум' },
+    USDT: { country: 'crypto-usdt', name: 'Tether USDT' },
+    BNB: { country: 'crypto-bnb', name: 'BNB' },
+    SOL: { country: 'crypto-sol', name: 'Solana' },
+    XRP: { country: 'crypto-xrp', name: 'XRP (Ripple)' },
+    DOGE: { country: 'crypto-doge', name: 'Dogecoin' },
+    TON: { country: 'crypto-ton', name: 'Toncoin' }
+};
+
+const TROY_OUNCE_GRAMS = 31.1034768;
+
+function flagUrl(country) {
+    if (country === 'metal-gold')      return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#d4af37"/><text x="16" y="17" font-family="Arial" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">Au</text></svg>');
+    if (country === 'metal-silver')    return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#c0c0c0"/><text x="16" y="17" font-family="Arial" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">Ag</text></svg>');
+    if (country === 'metal-platinum')  return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#e5e4e2"/><text x="16" y="17" font-family="Arial" font-size="12" font-weight="bold" fill="#000" text-anchor="middle">Pt</text></svg>');
+    if (country === 'metal-palladium') return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#ced0d4"/><text x="16" y="17" font-family="Arial" font-size="12" font-weight="bold" fill="#000" text-anchor="middle">Pd</text></svg>');
+    const CRYPTO = {
+        'crypto-btc':  ['#f7931a','₿','#fff',15], 'crypto-eth':  ['#627eea','Ξ','#fff',15],
+        'crypto-usdt': ['#26a17b','₮','#fff',15], 'crypto-bnb':  ['#f3ba2f','BNB','#000',9],
+        'crypto-sol':  ['#9945ff','SOL','#fff',9], 'crypto-xrp':  ['#23292f','XRP','#fff',9],
+        'crypto-doge': ['#c2a633','Ð','#fff',15], 'crypto-ton':  ['#0098ea','TON','#fff',9]
+    };
+    if (CRYPTO[country]) {
+        const c = CRYPTO[country];
+        return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="' + c[0] + '"/><text x="16" y="17" font-family="Arial" font-size="' + c[3] + '" font-weight="bold" fill="' + c[2] + '" text-anchor="middle">' + c[1] + '</text></svg>');
+    }
+    return `flags/${country}.png`;
+}
+
+const DEFAULT_SELECTED = ['USD', 'EUR', 'RUB', 'BTC', 'XAU'];
+
+const STORAGE_KEY = 'ratesPage_v1';
+const CACHE_KEY = 'ratesPage_cache_v1';
+const ONE_HOUR = 60 * 60 * 1000;
+
+let rates = {};      
+let prevRates = {};   
+let rateDate = null;
+let lastFetchTime = 0;
+let selected = [];
+let baseCurrency = 'RUB';
+
+function saveState() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ selected, baseCurrency }));
+    } catch (e) {}
+}
+
+function loadState() {
+    const MIGRATE = {
+        XAUG: 'XAU', XAGG: 'XAG', XPTG: 'XPT', XPDG: 'XPD'
+    };
+    try {
+        const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        if (Array.isArray(s.selected) && s.selected.length) {
+            selected = s.selected.map(c => MIGRATE[c] || c);
+        }
+        let base = s.baseCurrency;
+        if (base && MIGRATE[base]) base = MIGRATE[base];
+        if (base && CURRENCY_META[base]) baseCurrency = base;
+    } catch (e) {}
+}
+
+function saveCache() {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            rates, prevRates, rateDate, fetchedAt: lastFetchTime
+        }));
+    } catch (e) {}
+}
+
+function loadCache() {
+    try {
+        const c = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (c.rates && c.fetchedAt) {
+            rates = c.rates;
+            prevRates = c.prevRates || {};
+            rateDate = c.rateDate ? new Date(c.rateDate) : null;
+            lastFetchTime = c.fetchedAt;
+            return true;
+        }
+    } catch (e) {}
+    return false;
+}
+
+function parseJsDelivrRubData(data) {
+    if (!data || !data.rub) return null;
+    const result = { RUB: 1 };
+    for (const code in CURRENCY_META) {
+        const meta = CURRENCY_META[code];
+        const lookupKey = meta.metal ? meta.metal : code.toLowerCase();
+        const value = data.rub[lookupKey];
+        if (value && value > 0) {
+            let rubPerUnit = 1 / value;
+            if (meta.perGram) {
+                rubPerUnit = rubPerUnit / TROY_OUNCE_GRAMS;
+            }
+            result[code] = rubPerUnit;
+        }
+    }
+    return result;
+}
+
+async function fetchRatesForDate(dateStr) {
+    const bust = '?_=' + Date.now();
+    const urls = [
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/rub.min.json${bust}`,
+        `https://${dateStr}.currency-api.pages.dev/v1/currencies/rub.min.json${bust}`,
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/rub.json${bust}`
+    ];
+    for (const url of urls) {
+        try {
+            const res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) continue;
+            const data = await res.json();
+            const parsed = parseJsDelivrRubData(data);
+            if (parsed) {
+                return {
+                    rates: parsed,
+                    date: data.date ? new Date(data.date) : null
+                };
+            }
+        } catch (e) {}
+    }
+    return null;
+}
+
+function formatDateForApi(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+const CG_IDS = {
+    BTC: 'bitcoin', ETH: 'ethereum', USDT: 'tether', BNB: 'binancecoin',
+    SOL: 'solana', XRP: 'ripple', DOGE: 'dogecoin', TON: 'the-open-network'
+};
+
+async function fetchCryptoFromCoinGecko() {
+    const ids = Object.values(CG_IDS).join(',');
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=rub&include_24hr_change=true`;
+    try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const out = {};
+        for (const code in CG_IDS) {
+            const d = data[CG_IDS[code]];
+            if (d && d.rub > 0) {
+                const rub = d.rub;
+                const chg = (typeof d.rub_24h_change === 'number') ? d.rub_24h_change : null;
+                const prevRub = (chg !== null) ? rub / (1 + chg / 100) : NaN;
+                out[code] = { rub, prevRub };
+            }
+        }
+        return Object.keys(out).length ? out : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+async function fetchAllRates(force = false) {
+    const now = Date.now();
+    if (!force && lastFetchTime && (now - lastFetchTime < ONE_HOUR)) {
+        updateStatus();
+        return true;
+    }
+
+    document.getElementById('statusText').textContent = 'Обновление курсов…';
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const prevDateStr = formatDateForApi(yesterday);
+
+    const [todayResult, prevResult, cryptoResult] = await Promise.all([
+        fetchRatesForDate('latest'),
+        fetchRatesForDate(prevDateStr),
+        fetchCryptoFromCoinGecko()
+    ]);
+
+    let anyOk = false;
+
+    if (todayResult) {
+        rates = todayResult.rates;
+        rateDate = todayResult.date || new Date();
+        anyOk = true;
+    }
+
+    if (prevResult) {
+        prevRates = prevResult.rates;
+    }
+
+    if (cryptoResult) {
+        for (const code in cryptoResult) {
+            rates[code] = cryptoResult[code].rub;
+            if (isFinite(cryptoResult[code].prevRub)) {
+                prevRates[code] = cryptoResult[code].prevRub;
+            }
+        }
+        anyOk = true;
+    }
+
+    if (anyOk) {
+        lastFetchTime = now;
+        if (!rateDate) rateDate = new Date();
+        saveCache();
+        updateStatus();
+        return true;
+    } else {
+        document.getElementById('statusText').textContent = 'Нет сети';
+        return false;
+    }
+}
+
+function updateStatus() {
+    if (!lastFetchTime) return;
+    const fetched = new Date(lastFetchTime);
+    const d = fetched.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    const t = fetched.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('statusText').textContent = `Обновлено ${d} · ${t}`;
+
+    const note = document.getElementById('sourceNoteText');
+    if (note) {
+        const cd = rateDate
+            ? new Date(rateDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+            : '—';
+        note.innerHTML = `Курс на ${cd} · мировой рынок<span class="note-sep"></span>Крипта на ${t} · CoinGecko`;
+    }
+}
+
+function formatRate(n) {
+    if (!isFinite(n) || n === 0) return '—';
+    let decimals = 2;
+    if (n >= 10000) decimals = 0;
+    else if (n >= 100) decimals = 2;
+    else if (n >= 1) decimals = 4;
+    else decimals = 6;
+    return n.toLocaleString('ru-RU', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
+}
+
+function formatChange(pct) {
+    if (!isFinite(pct)) return '';
+    const sign = pct > 0 ? '+' : '';
+    return `${sign}${pct.toFixed(2)}%`;
+}
+
+function setupDragAndDrop() {
+    const list = document.getElementById('ratesList');
+    let draggedRow = null;
+    let startY = 0;
+    let startTop = 0;
+    let placeholder = null;
+    let lastClientY = 0;
+    let moveFrame = null;
+
+    function animateRows(changeDom) {
+        const rowsBefore = Array.from(list.querySelectorAll('.rate-row:not(.dragging)'));
+        const first = new Map(rowsBefore.map(row => [row, row.getBoundingClientRect().top]));
+
+        changeDom();
+
+        const rowsAfter = Array.from(list.querySelectorAll('.rate-row:not(.dragging)'));
+        rowsAfter.forEach(row => {
+            const oldTop = first.get(row);
+            if (oldTop === undefined) return;
+
+            const newTop = row.getBoundingClientRect().top;
+            const delta = oldTop - newTop;
+            if (!delta) return;
+
+            row.style.transition = 'none';
+            row.style.transform = `translateY(${delta}px)`;
+            row.offsetHeight;
+
+            requestAnimationFrame(() => {
+                row.style.transition = 'transform 0.18s ease';
+                row.style.transform = '';
+            });
+        });
+    }
+
+    function onStart(row, clientY) {
+        draggedRow = row;
+        const rect = row.getBoundingClientRect();
+        startY = clientY;
+        lastClientY = clientY;
+        startTop = rect.top;
+
+        placeholder = document.createElement('div');
+        placeholder.className = 'drag-placeholder';
+        placeholder.style.height = rect.height + 'px';
+        placeholder.style.background = 'transparent';
+
+        row.classList.add('dragging');
+        row.style.position = 'fixed';
+        row.style.left = rect.left + 'px';
+        row.style.top = rect.top + 'px';
+        row.style.width = rect.width + 'px';
+        row.style.pointerEvents = 'none';
+        row.parentNode.insertBefore(placeholder, row);
+    }
+
+    function moveDraggedRow() {
+        moveFrame = null;
+        if (!draggedRow) return;
+        const newTop = startTop + (lastClientY - startY);
+        draggedRow.style.top = newTop + 'px';
+    }
+
+    function movePlaceholder(clientY) {
+        const rows = Array.from(list.querySelectorAll('.rate-row:not(.dragging)'));
+        for (const r of rows) {
+            const rect = r.getBoundingClientRect();
+            const mid = rect.top + rect.height / 2;
+            if (clientY < mid) {
+                if (placeholder.nextSibling !== r) {
+                    animateRows(() => list.insertBefore(placeholder, r));
+                }
+                return;
+            }
+        }
+
+        if (placeholder.nextSibling !== null) {
+            animateRows(() => list.appendChild(placeholder));
+        }
+    }
+
+    function onMove(clientY) {
+        if (!draggedRow) return;
+        lastClientY = clientY;
+
+        if (!moveFrame) {
+            moveFrame = requestAnimationFrame(moveDraggedRow);
+        }
+
+        movePlaceholder(clientY);
+    }
+
+    function onEnd() {
+        if (!draggedRow) return;
+
+        if (moveFrame) {
+            cancelAnimationFrame(moveFrame);
+            moveFrame = null;
+        }
+
+        list.insertBefore(draggedRow, placeholder);
+        placeholder.remove();
+        placeholder = null;
+
+        draggedRow.classList.remove('dragging');
+        draggedRow.style.position = '';
+        draggedRow.style.left = '';
+        draggedRow.style.top = '';
+        draggedRow.style.width = '';
+        draggedRow.style.pointerEvents = '';
+
+        const newOrder = Array.from(list.querySelectorAll('.rate-row'))
+            .map(r => r.dataset.code);
+        selected = newOrder;
+        saveState();
+        draggedRow = null;
+    }
+
+    list.querySelectorAll('.drag-handle').forEach(handle => {
+        handle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            onStart(handle.closest('.rate-row'), e.touches[0].clientY);
+        }, { passive: false });
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            onStart(handle.closest('.rate-row'), e.clientY);
+            const mm = (ev) => onMove(ev.clientY);
+            const mu = () => {
+                onEnd();
+                document.removeEventListener('mousemove', mm);
+                document.removeEventListener('mouseup', mu);
+            };
+            document.addEventListener('mousemove', mm);
+            document.addEventListener('mouseup', mu);
+        });
+    });
+    document.addEventListener('touchmove', (e) => {
+        if (draggedRow) { e.preventDefault(); onMove(e.touches[0].clientY); }
+    }, { passive: false });
+    document.addEventListener('touchend', onEnd);
+    document.addEventListener('touchcancel', onEnd);
+}
+
+function renderList() {
+    const list = document.getElementById('ratesList');
+    list.innerHTML = '';
+
+    if (!selected.length) {
+        list.innerHTML = '<div class="empty">Список пуст. Нажмите карандаш, затем «Добавить валюту».</div>';
+        return;
+    }
+
+    const baseRubRate = baseCurrency === 'RUB' ? 1 : (rates[baseCurrency] || null);
+    const prevBaseRubRate = baseCurrency === 'RUB' ? 1 : (prevRates[baseCurrency] || null);
+    const baseSymbol = CURRENCY_SYMBOLS[baseCurrency] || baseCurrency;
+
+    selected.forEach(code => {
+        if (code === baseCurrency) return;
+
+        const meta = CURRENCY_META[code] || { country: 'un', name: code };
+        const row = document.createElement('div');
+        row.className = 'rate-row';
+        row.dataset.code = code;
+
+        const currentRub = rates[code];
+        const previousRub = prevRates[code];
+        const current = (currentRub && baseRubRate) ? currentRub / baseRubRate : null;
+        const previous = (previousRub && prevBaseRubRate) ? previousRub / prevBaseRubRate : null;
+
+        let changeHtml = '<span class="rate-change loading">…</span>';
+        if (current && previous && previous > 0) {
+            const pct = ((current - previous) / previous) * 100;
+            let cls = 'neutral';
+            let arrow = '';
+            if (pct > 0.01) { cls = 'up'; arrow = '▲ '; }
+            else if (pct < -0.01) { cls = 'down'; arrow = '▼ '; }
+            changeHtml = `<span class="rate-change ${cls}">${arrow}${formatChange(pct)}</span>`;
+        } else if (current && !previous) {
+            changeHtml = '<span class="rate-change neutral">—</span>';
+        }
+
+        const rateStr = current ? `${formatRate(current)} ${baseSymbol}` : '—';
+
+        row.innerHTML = `
+            <span class="drag-handle">≡</span>
+            <img class="flag-img" src="${flagUrl(meta.country)}" alt="${code}" loading="lazy" onerror="this.style.visibility='hidden'">
+            <div class="rate-info">
+                <div class="rate-code">${code}</div>
+                <div class="rate-name">${meta.name}</div>
+            </div>
+            <div class="rate-values">
+                <div class="rate-value">${rateStr}</div>
+                ${changeHtml}
+            </div>
+            <button class="remove-btn" data-remove="${code}" title="Убрать">✕</button>
+        `;
+        list.appendChild(row);
+    });
+
+    list.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const code = e.currentTarget.dataset.remove;
+            selected = selected.filter(c => c !== code);
+            saveState();
+            renderList();
+        });
+    });
+
+    setupDragAndDrop();
+}
+
+const modal = document.getElementById('modal');
+const modalList = document.getElementById('modalList');
+const searchBox = document.getElementById('searchBox');
+
+function openModal() {
+    modal.classList.add('open');
+    searchBox.value = '';
+    searchBox.placeholder = '🔍 Нажмите для поиска';
+    searchBox.setAttribute('readonly', 'readonly');
+    renderModalList('');
+}
+function closeModal() {
+    modal.classList.remove('open');
+    searchBox.blur();
+    searchBox.setAttribute('readonly', 'readonly');
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('addBtn').addEventListener('click', openModal);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+searchBox.addEventListener('click', () => {
+    if (searchBox.hasAttribute('readonly')) {
+        searchBox.removeAttribute('readonly');
+        searchBox.placeholder = 'USD, доллар, евро…';
+        searchBox.focus();
+    }
+});
+searchBox.addEventListener('input', (e) => renderModalList(e.target.value));
+
+function renderModalList(query) {
+    modalList.innerHTML = '';
+    const q = query.trim().toLowerCase();
+
+    const allCodes = Object.keys(CURRENCY_META).sort();
+    const filtered = allCodes.filter(code => {
+        const meta = CURRENCY_META[code];
+        const name = (meta && meta.name) ? meta.name.toLowerCase() : '';
+        return code.toLowerCase().includes(q) || name.includes(q);
+    });
+
+    if (!filtered.length) {
+        modalList.innerHTML = '<div class="empty">Ничего не найдено</div>';
+        return;
+    }
+
+    filtered.forEach(code => {
+        const meta = CURRENCY_META[code];
+        const isSelected = selected.includes(code);
+        const row = document.createElement('div');
+        row.className = 'modal-row' + (isSelected ? ' disabled' : '');
+        const baseRubRate = baseCurrency === 'RUB' ? 1 : (rates[baseCurrency] || 1);
+        const baseSymbol = CURRENCY_SYMBOLS[baseCurrency] || baseCurrency;
+        const inBase = rates[code] ? rates[code] / baseRubRate : null;
+        const rateInfo = inBase ? `${formatRate(inBase)} ${baseSymbol}` : '';
+        row.innerHTML = `
+            <img class="flag-img" src="${flagUrl(meta.country)}" alt="${code}" loading="lazy" onerror="this.style.visibility='hidden'">
+            <div class="modal-row-info">
+                <div class="modal-row-code">${code}</div>
+                <div class="modal-row-name">${meta.name}</div>
+            </div>
+            <div class="modal-row-rate">${rateInfo}</div>
+            ${isSelected ? '<div class="check">✓</div>' : ''}
+        `;
+        if (!isSelected) {
+            row.addEventListener('click', () => {
+                selected.push(code);
+                saveState();
+                renderList();
+                closeModal();
+            });
+        }
+        modalList.appendChild(row);
+    });
+}
+
+const editBtn = document.getElementById('editBtn');
+const doneBtn = document.getElementById('doneBtn');
+
+function setEditing(on) {
+    const list = document.getElementById('ratesList');
+    list.classList.toggle('is-editing', on);
+    document.body.classList.toggle('editing', on);
+}
+
+editBtn.addEventListener('click', () => {
+    setEditing(true);
+});
+
+const baseSelect = document.getElementById('baseSelect');
+const baseBtnText = document.getElementById('baseBtnText');
+
+function populateBaseSelect() {
+    baseSelect.innerHTML = '';
+    const codes = Object.keys(CURRENCY_META).sort((a, b) => {
+        if (a === 'RUB') return -1;
+        if (b === 'RUB') return 1;
+        return a.localeCompare(b);
+    });
+    for (const code of codes) {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = `${code} — ${CURRENCY_META[code].name}`;
+        if (code === baseCurrency) opt.selected = true;
+        baseSelect.appendChild(opt);
+    }
+    baseBtnText.textContent = baseCurrency;
+}
+
+baseSelect.addEventListener('change', () => {
+    baseCurrency = baseSelect.value;
+    baseBtnText.textContent = baseCurrency;
+    saveState();
+    renderList();
+});
+
+doneBtn.addEventListener('click', () => {
+    setEditing(false);
+});
+
+document.getElementById('refreshBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spinning');
+    btn.disabled = true;
+    try {
+        await fetchAllRates(true);
+        renderList();
+    } finally {
+        btn.classList.remove('spinning');
+        btn.disabled = false;
+    }
+});
+
+async function init() {
+    loadState();
+    loadCache();
+
+    if (!Array.isArray(selected) || selected.length === 0) {
+        selected = [...DEFAULT_SELECTED];
+        saveState();
+    }
+
+    populateBaseSelect();
+    renderList();
+    await fetchAllRates(false);
+    renderList();
+}
+
+setInterval(() => fetchAllRates(false).then(() => renderList()), ONE_HOUR);
+
+init();
+</script>
+
+<footer style="
+  text-align: center;
+  margin-top: 30px;
+  padding: 15px;
+  color: #666;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+">
+  © Andrey30
+  <span aria-hidden="true"> · </span>
+  <a href="privacy.html" style="
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  ">
+    Политика конфиденциальности
+  </a>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
