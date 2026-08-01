@@ -1550,6 +1550,174 @@
         background: rgba(255,255,255,0.035);
       }
     }
+
+
+    /* Однократное предложение установить веб-приложение. */
+    .install-offer {
+      position: fixed;
+      left: 50%;
+      bottom: calc(72px + env(safe-area-inset-bottom));
+      z-index: 1900;
+      width: min(520px, calc(100vw - 24px));
+      padding: 14px;
+      border: 1px solid rgba(0,0,0,0.14);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.97);
+      color: #222;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.22);
+      backdrop-filter: blur(18px) saturate(1.12);
+      -webkit-backdrop-filter: blur(18px) saturate(1.12);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate(-50%, 18px) scale(0.98);
+      transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.22s ease;
+    }
+
+    .install-offer.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, 0) scale(1);
+    }
+
+    .install-offer-inner {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 11px;
+      align-items: start;
+    }
+
+    .install-offer-icon {
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: #cc0000;
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .install-offer-title {
+      margin: 1px 0 4px;
+      color: #b00000;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .install-offer-text {
+      margin: 0;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .install-offer-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .install-offer-button {
+      min-height: 38px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .install-offer-button.primary {
+      border: 1px solid #cc0000;
+      background: #cc0000;
+      color: #fff;
+    }
+
+    .install-offer-button.secondary {
+      border: 1px solid #d4d4d4;
+      background: #f4f4f4;
+      color: #444;
+    }
+
+    .install-offer-button:focus-visible {
+      outline: 3px solid rgba(204,0,0,0.25);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .install-offer {
+        bottom: calc(56px + env(safe-area-inset-bottom));
+        width: calc(100vw - 20px);
+        padding: 13px;
+        border-radius: 15px;
+      }
+
+      .install-offer-inner {
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .install-offer-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: 20px;
+      }
+
+      .install-offer-title {
+        font-size: 15px;
+      }
+
+      .install-offer-text {
+        font-size: 12.5px;
+      }
+
+      .install-offer-actions {
+        justify-content: stretch;
+      }
+
+      .install-offer-button {
+        flex: 1;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .install-offer {
+        border-color: rgba(255,255,255,0.13);
+        background: rgba(31,31,31,0.97);
+        color: #eee;
+        box-shadow: 0 10px 32px rgba(0,0,0,0.48);
+      }
+
+      .install-offer-title {
+        color: #ff6666;
+      }
+
+      .install-offer-text {
+        color: #c8c8c8;
+      }
+
+      .install-offer-button.secondary {
+        border-color: #505050;
+        background: #333;
+        color: #eee;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .install-offer {
+        transition: none !important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -1711,6 +1879,24 @@
       <path d="M5 15L12 8L19 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
+
+
+
+  <aside class="install-offer" id="install-offer" role="dialog" aria-modal="false" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
+    <div class="install-offer-inner">
+      <div class="install-offer-icon" aria-hidden="true">🏎️</div>
+      <div>
+        <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
+        <p class="install-offer-text" id="install-offer-text">
+          Добавьте «Формула-1 2026» на главный экран, чтобы открывать сайт как отдельное приложение.
+        </p>
+      </div>
+      <div class="install-offer-actions">
+        <button type="button" class="install-offer-button secondary" id="install-offer-later">Не сейчас</button>
+        <button type="button" class="install-offer-button primary" id="install-offer-install">Установить</button>
+      </div>
+    </div>
+  </aside>
 
   <div class="photo-modal" id="photo-modal" onclick="closePhotoModal(event)">
     <button class="photo-modal-close" onclick="closePhotoModal()" aria-label="Закрыть">✕</button>
@@ -4771,6 +4957,169 @@
         }, { passive: true });
       }
     })();
+
+
+    (function initInstallOffer() {
+      const OFFER_KEY = 'f1_install_offer_shown_v1';
+      let deferredInstallPrompt = null;
+
+      const offer = document.getElementById('install-offer');
+      const title = document.getElementById('install-offer-title');
+      const text = document.getElementById('install-offer-text');
+      const installButton = document.getElementById('install-offer-install');
+      const laterButton = document.getElementById('install-offer-later');
+
+      if (!offer || !title || !text || !installButton || !laterButton) return;
+
+      const userAgent = navigator.userAgent || '';
+      const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+      const isAndroid = /android/i.test(userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+        || window.matchMedia('(display-mode: fullscreen)').matches
+        || navigator.standalone === true;
+      const isSecureEnough = window.isSecureContext
+        || location.hostname === 'localhost'
+        || location.hostname === '127.0.0.1';
+
+      function wasShown() {
+        try {
+          return localStorage.getItem(OFFER_KEY) === '1';
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function rememberShown() {
+        try {
+          localStorage.setItem(OFFER_KEY, '1');
+        } catch (error) {
+          // Если localStorage отключён, окно просто может появиться снова.
+        }
+      }
+
+      function closeOffer() {
+        offer.classList.remove('show');
+        setTimeout(function() {
+          offer.hidden = true;
+        }, 240);
+      }
+
+      function configureNativeOffer() {
+        title.textContent = 'Установить приложение?';
+        text.textContent = 'Добавьте «Формула-1 2026» на главный экран, чтобы открывать сайт как отдельное приложение.';
+        installButton.textContent = 'Установить';
+        installButton.dataset.mode = 'native';
+        laterButton.hidden = false;
+      }
+
+      function configureManualOffer() {
+        title.textContent = 'Установить приложение?';
+
+        if (isIOS) {
+          text.textContent = 'В Safari нажмите «Поделиться», затем выберите «На экран Домой».';
+          installButton.textContent = 'Понятно';
+          installButton.dataset.mode = 'instructions';
+          laterButton.hidden = true;
+          return;
+        }
+
+        text.textContent = 'Нажмите «Установить». Если системное окно не откроется, выберите в меню браузера «Добавить на главный экран».';
+        installButton.textContent = 'Установить';
+        installButton.dataset.mode = 'manual';
+        laterButton.hidden = false;
+      }
+
+      function showOffer(mode) {
+        if (isStandalone || wasShown() || !isSecureEnough) return;
+
+        if (mode === 'native') {
+          configureNativeOffer();
+        } else {
+          configureManualOffer();
+        }
+
+        rememberShown();
+        offer.hidden = false;
+        requestAnimationFrame(function() {
+          offer.classList.add('show');
+        });
+      }
+
+      window.addEventListener('beforeinstallprompt', function(event) {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+
+        if (!offer.hidden) {
+          configureNativeOffer();
+          return;
+        }
+
+        if (!wasShown() && !isStandalone) {
+          setTimeout(function() {
+            showOffer('native');
+          }, 900);
+        }
+      });
+
+      window.addEventListener('appinstalled', function() {
+        rememberShown();
+        deferredInstallPrompt = null;
+        closeOffer();
+      });
+
+      laterButton.addEventListener('click', function() {
+        rememberShown();
+        closeOffer();
+      });
+
+      installButton.addEventListener('click', async function() {
+        const mode = installButton.dataset.mode;
+
+        if (mode === 'instructions') {
+          closeOffer();
+          return;
+        }
+
+        if (deferredInstallPrompt) {
+          const promptEvent = deferredInstallPrompt;
+          deferredInstallPrompt = null;
+
+          try {
+            await promptEvent.prompt();
+            await promptEvent.userChoice;
+          } catch (error) {
+            console.warn('Не удалось открыть системное окно установки.', error);
+          }
+
+          closeOffer();
+          return;
+        }
+
+        title.textContent = 'Как установить';
+        text.textContent = isAndroid
+          ? 'Откройте меню браузера ⋮ и выберите «Установить приложение» или «Добавить на главный экран».'
+          : 'Откройте меню браузера и выберите команду установки приложения или добавления на главный экран.';
+        installButton.textContent = 'Понятно';
+        installButton.dataset.mode = 'instructions';
+        laterButton.hidden = true;
+      });
+
+      if ('serviceWorker' in navigator && isSecureEnough) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./sw.js').catch(function(error) {
+            console.warn('Service Worker не зарегистрирован.', error);
+          });
+        });
+      }
+
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          if (isStandalone || wasShown() || deferredInstallPrompt) return;
+          if (isIOS || isAndroid) showOffer('manual');
+        }, 2500);
+      });
+    })();
+
 </script>
 </body>
 </html>
