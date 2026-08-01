@@ -1555,166 +1555,250 @@
     /* Однократное предложение установить веб-приложение. */
     .install-offer {
       position: fixed;
-      left: 50%;
-      bottom: calc(72px + env(safe-area-inset-bottom));
+      inset: 0;
       z-index: 1900;
-      width: min(520px, calc(100vw - 24px));
-      padding: 14px;
-      border: 1px solid rgba(0,0,0,0.14);
-      border-radius: 16px;
-      background: rgba(255,255,255,0.97);
-      color: #222;
-      box-shadow: 0 10px 32px rgba(0,0,0,0.22);
-      backdrop-filter: blur(18px) saturate(1.12);
-      -webkit-backdrop-filter: blur(18px) saturate(1.12);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 12px calc(86px + env(safe-area-inset-bottom));
+      background: rgba(0,0,0,0.36);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transform: translate(-50%, 18px) scale(0.98);
-      transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.22s ease;
+      transition: opacity 0.24s ease, visibility 0.24s ease;
     }
 
     .install-offer.show {
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
-      transform: translate(-50%, 0) scale(1);
     }
 
     .install-offer-inner {
+      position: relative;
+      width: min(560px, 100%);
       display: grid;
-      grid-template-columns: 42px minmax(0, 1fr);
-      gap: 11px;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 14px;
       align-items: start;
+      padding: 22px 20px 18px;
+      border: 2px solid rgba(204,0,0,0.30);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.99);
+      color: #222;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.38), 0 0 0 5px rgba(255,255,255,0.18);
+      overflow: hidden;
+      transform: translateY(34px) scale(0.96);
+      transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .install-offer-inner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #8f0000, #e00000, #8f0000);
+    }
+
+    .install-offer.show .install-offer-inner {
+      transform: translateY(0) scale(1);
     }
 
     .install-offer-icon {
-      width: 42px;
-      height: 42px;
+      width: 54px;
+      height: 54px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
-      background: #cc0000;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #e00000, #9f0000);
       color: #fff;
-      font-size: 22px;
+      font-size: 28px;
       line-height: 1;
+      box-shadow: 0 6px 16px rgba(204,0,0,0.28);
       user-select: none;
     }
 
+    .install-offer-label {
+      display: inline-block;
+      margin: 0 0 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #ffe7e7;
+      color: #a40000;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0.25px;
+      text-transform: uppercase;
+    }
+
     .install-offer-title {
-      margin: 1px 0 4px;
-      color: #b00000;
-      font-size: 16px;
-      line-height: 1.3;
+      margin: 0 0 6px;
+      color: #a90000;
+      font-size: 20px;
+      line-height: 1.25;
     }
 
     .install-offer-text {
       margin: 0;
-      color: #555;
-      font-size: 13px;
-      line-height: 1.42;
+      color: #444;
+      font-size: 14.5px;
+      line-height: 1.48;
     }
 
     .install-offer-actions {
       grid-column: 1 / -1;
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      margin-top: 12px;
+      gap: 10px;
+      margin-top: 15px;
     }
 
     .install-offer-button {
-      min-height: 38px;
-      padding: 8px 14px;
-      border-radius: 9px;
+      min-height: 44px;
+      padding: 10px 18px;
+      border-radius: 11px;
       font-family: Arial, sans-serif;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 800;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .install-offer-button:active {
+      transform: scale(0.97);
     }
 
     .install-offer-button.primary {
-      border: 1px solid #cc0000;
-      background: #cc0000;
+      border: 1px solid #bd0000;
+      background: linear-gradient(180deg, #df0000, #b50000);
       color: #fff;
+      box-shadow: 0 5px 14px rgba(204,0,0,0.28);
+    }
+
+    .install-offer.show .install-offer-button.primary {
+      animation: installButtonPulse 1.15s ease-in-out 0.45s 2;
     }
 
     .install-offer-button.secondary {
-      border: 1px solid #d4d4d4;
-      background: #f4f4f4;
+      border: 1px solid #cfcfcf;
+      background: #f2f2f2;
       color: #444;
     }
 
     .install-offer-button:focus-visible {
-      outline: 3px solid rgba(204,0,0,0.25);
-      outline-offset: 2px;
+      outline: 3px solid rgba(204,0,0,0.28);
+      outline-offset: 3px;
+    }
+
+    @keyframes installButtonPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 5px 14px rgba(204,0,0,0.28); }
+      50% { transform: scale(1.045); box-shadow: 0 7px 22px rgba(204,0,0,0.48); }
     }
 
     @media (max-width: 600px), (pointer: coarse) {
       .install-offer {
-        bottom: calc(56px + env(safe-area-inset-bottom));
-        width: calc(100vw - 20px);
-        padding: 13px;
-        border-radius: 15px;
+        align-items: flex-end;
+        padding: 12px 10px calc(68px + env(safe-area-inset-bottom));
       }
 
       .install-offer-inner {
-        grid-template-columns: 38px minmax(0, 1fr);
-        gap: 10px;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px;
+        padding: 19px 16px 15px;
+        border-radius: 18px;
       }
 
       .install-offer-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 11px;
-        font-size: 20px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 25px;
       }
 
       .install-offer-title {
-        font-size: 15px;
+        font-size: 18px;
       }
 
       .install-offer-text {
-        font-size: 12.5px;
+        font-size: 13.5px;
       }
 
       .install-offer-actions {
         justify-content: stretch;
+        margin-top: 13px;
       }
 
       .install-offer-button {
         flex: 1;
+        min-height: 45px;
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .install-offer-inner {
+        grid-template-columns: 42px minmax(0, 1fr);
+        gap: 10px;
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .install-offer-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 22px;
+      }
+
+      .install-offer-title {
+        font-size: 17px;
       }
     }
 
     @media (prefers-color-scheme: dark) {
       .install-offer {
-        border-color: rgba(255,255,255,0.13);
-        background: rgba(31,31,31,0.97);
+        background: rgba(0,0,0,0.58);
+      }
+
+      .install-offer-inner {
+        border-color: rgba(255,80,80,0.38);
+        background: rgba(31,31,31,0.99);
         color: #eee;
-        box-shadow: 0 10px 32px rgba(0,0,0,0.48);
+        box-shadow: 0 18px 55px rgba(0,0,0,0.66), 0 0 0 5px rgba(255,255,255,0.06);
+      }
+
+      .install-offer-label {
+        background: #4a1818;
+        color: #ff9b9b;
       }
 
       .install-offer-title {
-        color: #ff6666;
+        color: #ff6f6f;
       }
 
       .install-offer-text {
-        color: #c8c8c8;
+        color: #d2d2d2;
       }
 
       .install-offer-button.secondary {
-        border-color: #505050;
-        background: #333;
-        color: #eee;
+        border-color: #565656;
+        background: #373737;
+        color: #f0f0f0;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .install-offer {
+      .install-offer,
+      .install-offer-inner,
+      .install-offer-button {
         transition: none !important;
+        animation: none !important;
       }
     }
 
@@ -1882,13 +1966,14 @@
 
 
 
-  <aside class="install-offer" id="install-offer" role="dialog" aria-modal="false" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
+  <aside class="install-offer" id="install-offer" role="dialog" aria-modal="true" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
     <div class="install-offer-inner">
       <div class="install-offer-icon" aria-hidden="true">🏎️</div>
       <div>
+        <div class="install-offer-label">Быстрый доступ</div>
         <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
         <p class="install-offer-text" id="install-offer-text">
-          Добавьте «Формула-1 2026» на главный экран, чтобы открывать сайт как отдельное приложение.
+          Добавьте «Формула-1 2026» на главный экран и открывайте календарь и результаты одним нажатием.
         </p>
       </div>
       <div class="install-offer-actions">
@@ -5001,12 +5086,12 @@
         offer.classList.remove('show');
         setTimeout(function() {
           offer.hidden = true;
-        }, 240);
+        }, 360);
       }
 
       function configureNativeOffer() {
         title.textContent = 'Установить приложение?';
-        text.textContent = 'Добавьте «Формула-1 2026» на главный экран, чтобы открывать сайт как отдельное приложение.';
+        text.textContent = 'Добавьте «Формула-1 2026» на главный экран и открывайте календарь и результаты одним нажатием.';
         installButton.textContent = 'Установить';
         installButton.dataset.mode = 'native';
         laterButton.hidden = false;
