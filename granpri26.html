@@ -5205,7 +5205,7 @@
 
       if ('serviceWorker' in navigator && isSecureEnough) {
         window.addEventListener('load', function() {
-          navigator.serviceWorker.register('./sw.js').catch(function(error) {
+          navigator.serviceWorker.register('./sw.js', { scope: './granpri26.html' }).catch(function(error) {
             console.warn('Service Worker не зарегистрирован.', error);
           });
         });

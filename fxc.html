@@ -1631,5 +1631,16 @@
 
     setInterval(update, 1000);
   </script>
+
+  <script>
+    if ('serviceWorker' in navigator && location.protocol === 'https:') {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./fxc-sw.js', { scope: './fxc.html' })
+          .catch(function (error) {
+            console.error('Ошибка регистрации Forex Service Worker:', error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
