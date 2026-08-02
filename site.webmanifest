@@ -12,12 +12,12 @@
   "lang": "ru",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icons/icon-192.png?rev=20260802pad",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/icon-512.png?rev=20260802pad",
       "sizes": "512x512",
       "type": "image/png"
     }
