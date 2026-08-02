@@ -8,8 +8,9 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-  <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#cc0000">
+  <link rel="manifest" href="site.webmanifest?v=grandprix26">
+  <meta name="theme-color" content="#f30a01">
+  <meta name="apple-mobile-web-app-title" content="Гран-при 26">
 
   <title>Формула-1 (2026)</title>
   <meta name="description" content="Календарь, результаты и общий зачёт Формулы-1 2026.">
@@ -1615,23 +1616,18 @@
       align-items: center;
       justify-content: center;
       border-radius: 15px;
-      background: linear-gradient(145deg, #e00000, #9f0000);
-      color: #fff;
-      font-size: 28px;
-      line-height: 1;
-      box-shadow: 0 6px 16px rgba(204,0,0,0.28);
+      background: transparent;
+      box-shadow: 0 6px 16px rgba(204,0,0,0.24);
+      overflow: hidden;
       user-select: none;
     }
 
-    .install-offer-icon-f1 {
-      display: inline-block;
-      font-size: 24px;
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: -0.8px;
-      line-height: 1;
-      transform: translateY(-1px);
-      text-transform: uppercase;
+    .install-offer-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      border-radius: inherit;
     }
 
     .install-offer-label {
@@ -1730,12 +1726,6 @@
         width: 48px;
         height: 48px;
         border-radius: 14px;
-        font-size: 25px;
-      }
-
-      .install-offer-icon-f1 {
-        font-size: 21px;
-        letter-spacing: -0.7px;
       }
 
       .install-offer-title {
@@ -1769,12 +1759,6 @@
       .install-offer-icon {
         width: 42px;
         height: 42px;
-        font-size: 22px;
-      }
-
-      .install-offer-icon-f1 {
-        font-size: 18px;
-        letter-spacing: -0.6px;
       }
 
       .install-offer-title {
@@ -1857,6 +1841,9 @@
           ">
             Политика конфиденциальности
           </a>
+          <div style="margin-top: 8px; font-size: 12px; line-height: 1.4; opacity: 0.88;">
+            Неофициальный фан-сайт. Не связан, не одобрен и не поддерживается Formula 1.
+          </div>
         </footer>
       </div></div>
       <div class="tab-panel" id="panel-results"><div class="tab-panel-inner">
@@ -1920,6 +1907,9 @@
           ">
             Политика конфиденциальности
           </a>
+          <div style="margin-top: 8px; font-size: 12px; line-height: 1.4; opacity: 0.88;">
+            Неофициальный фан-сайт. Не связан, не одобрен и не поддерживается Formula 1.
+          </div>
         </footer>
       </div></div>
       <div class="tab-panel" id="panel-calendar"><div class="tab-panel-inner">
@@ -1941,6 +1931,9 @@
           ">
             Политика конфиденциальности
           </a>
+          <div style="margin-top: 8px; font-size: 12px; line-height: 1.4; opacity: 0.88;">
+            Неофициальный фан-сайт. Не связан, не одобрен и не поддерживается Formula 1.
+          </div>
         </footer>
       </div></div>
     </div>
@@ -1989,12 +1982,12 @@
 
   <aside class="install-offer" id="install-offer" role="dialog" aria-modal="true" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
     <div class="install-offer-inner">
-      <div class="install-offer-icon" aria-hidden="true"><span class="install-offer-icon-f1">F1</span></div>
+      <div class="install-offer-icon" aria-hidden="true"><img src="icons/icon-192.png" alt=""></div>
       <div>
         <div class="install-offer-label">Быстрый доступ</div>
         <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
         <p class="install-offer-text" id="install-offer-text">
-          Добавьте «Формула-1 2026» на главный экран и открывайте календарь и результаты одним нажатием.
+          Добавьте «Гран-при 26» на главный экран и открывайте календарь и результаты одним нажатием.
         </p>
       </div>
       <div class="install-offer-actions">
@@ -5112,7 +5105,7 @@
 
       function configureNativeOffer() {
         title.textContent = 'Установить приложение?';
-        text.textContent = 'Добавьте «Формула-1 2026» на главный экран и открывайте календарь и результаты одним нажатием.';
+        text.textContent = 'Добавьте «Гран-при 26» на главный экран и открывайте календарь и результаты одним нажатием.';
         installButton.textContent = 'Установить';
         installButton.dataset.mode = 'native';
         laterButton.hidden = false;

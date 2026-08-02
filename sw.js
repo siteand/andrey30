@@ -1,4 +1,4 @@
-/* Service Worker для установки веб-приложения Formula 1 2026.
+/* Service Worker для установки веб-приложения «Гран-при 26».
    Он не сохраняет пользовательские данные и не кэширует results.json. */
 
 self.addEventListener('install', function() {
