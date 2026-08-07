@@ -728,18 +728,23 @@
         );
     }
 
-    /* Дневной режим: мягкий стык как в ночном режиме. */
+    /* Дневной режим: мягкий переход без светлой или жёлтой полосы.
+       Вне узкой зоны стыка цвета карточек не меняются. */
     :root[data-theme="light"] .card-session-bg.active-weekday {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.025), rgba(0,0,0,0.025)),
         linear-gradient(
           to right,
           var(--red-soft) 0%,
-          var(--red-soft-2) var(--blend-start),
-          color-mix(in srgb, var(--red-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-          var(--green-soft-2) var(--blend-end),
+          var(--red-soft) calc(var(--elapsed) - 12px),
+          rgba(130, 142, 136, 0.30) var(--elapsed),
+          var(--green-soft) calc(var(--elapsed) + 12px),
           var(--green-soft) 100%
         );
+    }
+
+    :root[data-theme="light"] .card-session-bg.active-weekday::after {
+      content: none;
     }
 
     :root[data-theme="light"] .card-session-bg.active-friday {
@@ -748,11 +753,14 @@
         linear-gradient(
           to right,
           var(--gray-soft) 0%,
-          var(--gray-soft-2) var(--blend-start),
-          color-mix(in srgb, var(--gray-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-          var(--green-soft-2) var(--blend-end),
+          var(--gray-soft) calc(var(--elapsed) - 12px),
+          var(--green-soft) calc(var(--elapsed) + 12px),
           var(--green-soft) 100%
         );
+    }
+
+    :root[data-theme="light"] .card-session-bg.active-friday::after {
+      content: none;
     }
 
     @media (prefers-color-scheme: light) {
@@ -762,11 +770,15 @@
           linear-gradient(
             to right,
             var(--red-soft) 0%,
-            var(--red-soft-2) var(--blend-start),
-            color-mix(in srgb, var(--red-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-            var(--green-soft-2) var(--blend-end),
+            var(--red-soft) calc(var(--elapsed) - 12px),
+            rgba(130, 142, 136, 0.30) var(--elapsed),
+            var(--green-soft) calc(var(--elapsed) + 12px),
             var(--green-soft) 100%
           );
+      }
+
+      :root:not([data-theme]) .card-session-bg.active-weekday::after {
+        content: none;
       }
 
       :root:not([data-theme]) .card-session-bg.active-friday {
@@ -775,11 +787,14 @@
           linear-gradient(
             to right,
             var(--gray-soft) 0%,
-            var(--gray-soft-2) var(--blend-start),
-            color-mix(in srgb, var(--gray-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-            var(--green-soft-2) var(--blend-end),
+            var(--gray-soft) calc(var(--elapsed) - 12px),
+            var(--green-soft) calc(var(--elapsed) + 12px),
             var(--green-soft) 100%
           );
+      }
+
+      :root:not([data-theme]) .card-session-bg.active-friday::after {
+        content: none;
       }
     }
 
@@ -3542,6 +3557,7 @@
         let labelSegment = null;
         let labelLength = 0;
         const state = getState(market, now);
+        const progressState = getSessionProgressState(market, state);
 
         market.sessions.forEach(session => {
           const converted = marketSessionToClockMinutes(market, session, now, clockTimezone);
@@ -3555,7 +3571,11 @@
             }
           });
 
-          if (state.isWeekend) {
+          const isWeekendArc =
+            progressState.className === "weekend" ||
+            progressState.className === "friday-after-close";
+
+          if (isWeekendArc) {
             drawNormalizedInterval(radius, converted.start, converted.end, "market-session weekend", strokeWidth, sessionLayer);
             return;
           }
@@ -3572,7 +3592,10 @@
           while (nowAligned > converted.end) nowAligned -= 1440;
 
           if (nowAligned > converted.start) {
-            drawNormalizedInterval(radius, converted.start, nowAligned, "market-session closed", strokeWidth, sessionLayer);
+            const elapsedArcClass = progressState.className === "active-friday"
+              ? "market-session weekend"
+              : "market-session closed";
+            drawNormalizedInterval(radius, converted.start, nowAligned, elapsedArcClass, strokeWidth, sessionLayer);
           }
           if (nowAligned < converted.end) {
             drawNormalizedInterval(radius, nowAligned, converted.end, "market-session open", strokeWidth, sessionLayer);
