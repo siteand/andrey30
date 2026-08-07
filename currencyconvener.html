@@ -923,12 +923,29 @@ function formatAmount(n) {
     });
 }
 
-const AUTO_WIDE_THRESHOLD = 10000000000; // 10 млрд — с этого значения обычного поля уже не хватает
+const amountMeasureCanvas = document.createElement('canvas');
+const amountMeasureCtx = amountMeasureCanvas.getContext('2d');
 
-function updateAmountInputWidth(input, value) {
+function updateAmountInputWidth(input) {
     if (!input) return;
-    const num = Number(value);
-    input.classList.toggle('is-wide', Number.isFinite(num) && Math.abs(num) >= AUTO_WIDE_THRESHOLD);
+
+    const style = window.getComputedStyle(input);
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const compactWidth = isMobile ? 110 : 120;
+
+    const paddingAndBorder =
+        (parseFloat(style.paddingLeft) || 0) +
+        (parseFloat(style.paddingRight) || 0) +
+        (parseFloat(style.borderLeftWidth) || 0) +
+        (parseFloat(style.borderRightWidth) || 0);
+
+    if (amountMeasureCtx) {
+        amountMeasureCtx.font = style.font || `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        const textWidth = amountMeasureCtx.measureText(input.value || '').width;
+        const availableTextWidth = compactWidth - paddingAndBorder;
+        // Небольшой запас нужен для курсора ввода и различий рендеринга браузеров.
+        input.classList.toggle('is-wide', textWidth + 6 > availableTextWidth);
+    }
 }
 
 function renderList() {
@@ -971,6 +988,7 @@ function renderList() {
             document.querySelectorAll('.currency-row').forEach(r => r.classList.remove('active'));
             e.target.closest('.currency-row').classList.add('active');
             e.target.value = '';
+            updateAmountInputWidth(e.target);
         });
         inp.addEventListener('input', (e) => {
             const el = e.target;
@@ -1007,17 +1025,17 @@ function renderList() {
             if (!isNaN(num)) {
                 activeCode = code;
                 activeAmount = num;
-                updateAmountInputWidth(el, num);
+                updateAmountInputWidth(el);
                 document.querySelectorAll('.amount-input').forEach(other => {
                     if (other.dataset.code !== code) {
                         const v = convert(num, code, other.dataset.code);
                         other.value = formatAmount(v);
-                        updateAmountInputWidth(other, v);
+                        updateAmountInputWidth(other);
                     }
                 });
                 saveState();
             } else {
-                updateAmountInputWidth(el, 0);
+                updateAmountInputWidth(el);
             }
         });
         inp.addEventListener('blur', (e) => {
@@ -1026,12 +1044,12 @@ function renderList() {
                 const code = e.target.dataset.code;
                 const v = (code === activeCode) ? activeAmount : convert(activeAmount, activeCode, code);
                 e.target.value = formatAmount(v);
-                updateAmountInputWidth(e.target, v);
+                updateAmountInputWidth(e.target);
                 return;
             }
             const num = parseFloat(raw) || 0;
             e.target.value = formatAmount(num);
-            updateAmountInputWidth(e.target, num);
+            updateAmountInputWidth(e.target);
         });
         inp.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
@@ -1309,6 +1327,10 @@ async function init() {
 }
 
 setInterval(() => fetchRates(false).then(() => renderList()), ONE_HOUR);
+
+window.addEventListener('resize', () => {
+    document.querySelectorAll('.amount-input').forEach(updateAmountInputWidth);
+});
 
 init();
 </script>
