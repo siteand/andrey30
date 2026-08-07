@@ -157,6 +157,7 @@
       width: 100%;
       max-width: 1120px;
       margin: 0 auto;
+      background: transparent;
     }
 
     .header {
@@ -355,13 +356,14 @@
     }
 
     .tz-select {
+      position: relative;
       width: 100%;
       min-height: 66px;
       border-radius: 18px;
       border: 1px solid var(--border);
       background: var(--panel-solid);
       color: var(--text);
-      padding: 14px 22px 14px 24px;
+      padding: 14px 64px 14px 24px;
       outline: none;
       font-weight: 800;
       font-size: 18px;
@@ -369,7 +371,7 @@
       box-shadow: 0 10px 28px var(--shadow);
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 14px;
       text-align: left;
       cursor: pointer;
@@ -383,14 +385,19 @@
     }
 
     .tz-select-arrow {
+      position: absolute;
+      top: 50%;
+      right: 22px;
       width: 18px;
       height: 18px;
       flex: 0 0 auto;
+      transform: translateY(-50%);
       transition: transform .18s ease;
+      pointer-events: none;
     }
 
     .tz-select[aria-expanded="true"] .tz-select-arrow {
-      transform: rotate(180deg);
+      transform: translateY(-50%) rotate(180deg);
     }
 
     .tz-menu {
@@ -462,7 +469,7 @@
       max-width: 790px;
       margin: 0 auto 18px;
       border-radius: 0;
-      background: var(--clock-bg);
+      background: transparent;
       border: 0;
       padding: 0;
       box-shadow: none;
@@ -728,18 +735,23 @@
         );
     }
 
-    /* Дневной режим: мягкий стык как в ночном режиме. */
+    /* Дневной режим: мягкий переход без светлой или жёлтой полосы.
+       Вне узкой зоны стыка цвета карточек не меняются. */
     :root[data-theme="light"] .card-session-bg.active-weekday {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.025), rgba(0,0,0,0.025)),
         linear-gradient(
           to right,
           var(--red-soft) 0%,
-          var(--red-soft-2) var(--blend-start),
-          color-mix(in srgb, var(--red-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-          var(--green-soft-2) var(--blend-end),
+          var(--red-soft) calc(var(--elapsed) - 12px),
+          rgba(130, 142, 136, 0.30) var(--elapsed),
+          var(--green-soft) calc(var(--elapsed) + 12px),
           var(--green-soft) 100%
         );
+    }
+
+    :root[data-theme="light"] .card-session-bg.active-weekday::after {
+      content: none;
     }
 
     :root[data-theme="light"] .card-session-bg.active-friday {
@@ -748,11 +760,14 @@
         linear-gradient(
           to right,
           var(--gray-soft) 0%,
-          var(--gray-soft-2) var(--blend-start),
-          color-mix(in srgb, var(--gray-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-          var(--green-soft-2) var(--blend-end),
+          var(--gray-soft) calc(var(--elapsed) - 12px),
+          var(--green-soft) calc(var(--elapsed) + 12px),
           var(--green-soft) 100%
         );
+    }
+
+    :root[data-theme="light"] .card-session-bg.active-friday::after {
+      content: none;
     }
 
     @media (prefers-color-scheme: light) {
@@ -762,11 +777,15 @@
           linear-gradient(
             to right,
             var(--red-soft) 0%,
-            var(--red-soft-2) var(--blend-start),
-            color-mix(in srgb, var(--red-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-            var(--green-soft-2) var(--blend-end),
+            var(--red-soft) calc(var(--elapsed) - 12px),
+            rgba(130, 142, 136, 0.30) var(--elapsed),
+            var(--green-soft) calc(var(--elapsed) + 12px),
             var(--green-soft) 100%
           );
+      }
+
+      :root:not([data-theme]) .card-session-bg.active-weekday::after {
+        content: none;
       }
 
       :root:not([data-theme]) .card-session-bg.active-friday {
@@ -775,11 +794,14 @@
           linear-gradient(
             to right,
             var(--gray-soft) 0%,
-            var(--gray-soft-2) var(--blend-start),
-            color-mix(in srgb, var(--gray-soft-2) 72%, var(--green-soft-2)) var(--elapsed),
-            var(--green-soft-2) var(--blend-end),
+            var(--gray-soft) calc(var(--elapsed) - 12px),
+            var(--green-soft) calc(var(--elapsed) + 12px),
             var(--green-soft) 100%
           );
+      }
+
+      :root:not([data-theme]) .card-session-bg.active-friday::after {
+        content: none;
       }
     }
 
@@ -887,13 +909,45 @@
       gap: 5px;
       padding: 7px 9px;
       border-radius: 999px;
-      color: var(--yellow);
-      background: rgba(232,197,71,0.12);
-      border: 1px solid rgba(232,197,71,0.25);
+      background: color-mix(in srgb, var(--panel) 72%, transparent);
+      border: 1px solid var(--soft-border);
       font-size: 12px;
       font-weight: 900;
       white-space: nowrap;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      box-shadow: none;
+    }
+
+    /* Рынок закрыт: текст до открытия красный. */
+    .timer-pill.timer-opening {
+      color: #c93a3a;
+    }
+
+    /* Рынок открыт: текст до закрытия зелёный. */
+    .timer-pill.timer-closing {
+      color: #168a4a;
+    }
+
+    /* Выходные: нейтральный текст — чёрный днём, светлый ночью. */
+    .timer-pill.timer-weekend {
+      color: var(--text);
+    }
+
+    :root:not([data-theme="light"]) .timer-pill.timer-opening {
+      color: #ff7373;
+    }
+
+    :root:not([data-theme="light"]) .timer-pill.timer-closing {
+      color: #55d98a;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme]) .timer-pill.timer-opening {
+        color: #c93a3a;
+      }
+
+      :root:not([data-theme]) .timer-pill.timer-closing {
+        color: #168a4a;
+      }
     }
 
     .footer {
@@ -929,7 +983,7 @@
         font-size: 16px;
         padding: 12px 52px 12px 18px;
       }
-      .select-arrow {
+      .tz-select-arrow {
         right: 18px;
         width: 16px;
         height: 16px;
@@ -1208,6 +1262,31 @@
       color: #8a6a00 !important;
     }
 
+    /* Дневной режим: таймер закрытия должен хорошо читаться на сером и зелёном фоне */
+    :root[data-theme="light"] .timer-pill {
+      background: rgba(255, 241, 166, 0.94) !important;
+      border-color: rgba(184, 138, 0, 0.62) !important;
+      box-shadow: 0 5px 14px rgba(92, 67, 0, 0.16) !important;
+    }
+
+    :root[data-theme="light"] .timer-pill,
+    :root[data-theme="light"] .timer-pill * {
+      color: #664b00 !important;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme]) .timer-pill {
+        background: rgba(255, 241, 166, 0.94) !important;
+        border-color: rgba(184, 138, 0, 0.62) !important;
+        box-shadow: 0 5px 14px rgba(92, 67, 0, 0.16) !important;
+      }
+
+      :root:not([data-theme]) .timer-pill,
+      :root:not([data-theme]) .timer-pill * {
+        color: #664b00 !important;
+      }
+    }
+
     /* FIX: таймер хорошо виден в ночном режиме */
     :root[data-theme="dark"] .timer-pill,
     :root[data-theme="dark"] .timer-pill * {
@@ -1228,6 +1307,168 @@
       :root:not([data-theme]) .timer-pill {
         background: rgba(0, 0, 0, 0.34) !important;
         border-color: rgba(255, 255, 255, 0.26) !important;
+      }
+    }
+
+
+    /* FIX 2026-08-07: стрелка часового пояса у правого края */
+    .tz-select {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: center !important;
+      column-gap: 16px !important;
+      padding: 14px 22px 14px 24px !important;
+    }
+
+    .tz-select-text {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    .tz-select-arrow {
+      position: static !important;
+      top: auto !important;
+      right: auto !important;
+      margin: 0 !important;
+      justify-self: end !important;
+      transform: none !important;
+    }
+
+    .tz-select[aria-expanded="true"] .tz-select-arrow {
+      transform: rotate(180deg) !important;
+    }
+
+    @media (max-width: 620px) {
+      .tz-select {
+        padding: 12px 18px !important;
+        column-gap: 12px !important;
+      }
+    }
+
+    /* FIX 2026-08-07: спокойный, но читаемый таймер в дневном режиме */
+    :root[data-theme="light"] .timer-pill {
+      background: rgba(255, 255, 255, 0.56) !important;
+      border: 1px solid rgba(15, 23, 42, 0.10) !important;
+      color: #6b5a20 !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    :root[data-theme="light"] .timer-pill,
+    :root[data-theme="light"] .timer-pill * {
+      color: #6b5a20 !important;
+      text-shadow: none !important;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme]) .timer-pill {
+        background: rgba(255, 255, 255, 0.56) !important;
+        border: 1px solid rgba(15, 23, 42, 0.10) !important;
+        color: #6b5a20 !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+      }
+
+      :root:not([data-theme]) .timer-pill,
+      :root:not([data-theme]) .timer-pill * {
+        color: #6b5a20 !important;
+        text-shadow: none !important;
+      }
+    }
+
+
+    /* FINAL: цвет текста таймера зависит от состояния рынка. */
+    :root[data-theme="light"] .timer-pill.timer-opening {
+      color: #b4232f !important;
+    }
+
+    :root[data-theme="light"] .timer-pill.timer-closing {
+      color: #137a42 !important;
+    }
+
+    :root[data-theme="light"] .timer-pill.timer-weekend {
+      color: #111827 !important;
+    }
+
+    :root[data-theme="dark"] .timer-pill.timer-opening {
+      color: #ff7b7b !important;
+    }
+
+    :root[data-theme="dark"] .timer-pill.timer-closing {
+      color: #63d994 !important;
+    }
+
+    :root[data-theme="dark"] .timer-pill.timer-weekend {
+      color: #f4f4f5 !important;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme]) .timer-pill.timer-opening {
+        color: #b4232f !important;
+      }
+
+      :root:not([data-theme]) .timer-pill.timer-closing {
+        color: #137a42 !important;
+      }
+
+      :root:not([data-theme]) .timer-pill.timer-weekend {
+        color: #111827 !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) .timer-pill.timer-opening {
+        color: #ff7b7b !important;
+      }
+
+      :root:not([data-theme]) .timer-pill.timer-closing {
+        color: #63d994 !important;
+      }
+
+      :root:not([data-theme]) .timer-pill.timer-weekend {
+        color: #f4f4f5 !important;
+      }
+    }
+
+
+    /* FINAL: одинаковый нейтральный цвет для всех надписей таймера. */
+    :root[data-theme="light"] .timer-pill,
+    :root[data-theme="light"] .timer-pill.timer-opening,
+    :root[data-theme="light"] .timer-pill.timer-closing,
+    :root[data-theme="light"] .timer-pill.timer-weekend,
+    :root[data-theme="light"] .timer-pill * {
+      color: #111111 !important;
+      text-shadow: none !important;
+    }
+
+    :root[data-theme="dark"] .timer-pill,
+    :root[data-theme="dark"] .timer-pill.timer-opening,
+    :root[data-theme="dark"] .timer-pill.timer-closing,
+    :root[data-theme="dark"] .timer-pill.timer-weekend,
+    :root[data-theme="dark"] .timer-pill * {
+      color: #f4f4f5 !important;
+      text-shadow: none !important;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme]) .timer-pill,
+      :root:not([data-theme]) .timer-pill.timer-opening,
+      :root:not([data-theme]) .timer-pill.timer-closing,
+      :root:not([data-theme]) .timer-pill.timer-weekend,
+      :root:not([data-theme]) .timer-pill * {
+        color: #111111 !important;
+        text-shadow: none !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) .timer-pill,
+      :root:not([data-theme]) .timer-pill.timer-opening,
+      :root:not([data-theme]) .timer-pill.timer-closing,
+      :root:not([data-theme]) .timer-pill.timer-weekend,
+      :root:not([data-theme]) .timer-pill * {
+        color: #f4f4f5 !important;
+        text-shadow: none !important;
       }
     }
 
@@ -3542,6 +3783,7 @@
         let labelSegment = null;
         let labelLength = 0;
         const state = getState(market, now);
+        const progressState = getSessionProgressState(market, state);
 
         market.sessions.forEach(session => {
           const converted = marketSessionToClockMinutes(market, session, now, clockTimezone);
@@ -3555,7 +3797,11 @@
             }
           });
 
-          if (state.isWeekend) {
+          const isWeekendArc =
+            progressState.className === "weekend" ||
+            progressState.className === "friday-after-close";
+
+          if (isWeekendArc) {
             drawNormalizedInterval(radius, converted.start, converted.end, "market-session weekend", strokeWidth, sessionLayer);
             return;
           }
@@ -3572,7 +3818,10 @@
           while (nowAligned > converted.end) nowAligned -= 1440;
 
           if (nowAligned > converted.start) {
-            drawNormalizedInterval(radius, converted.start, nowAligned, "market-session closed", strokeWidth, sessionLayer);
+            const elapsedArcClass = progressState.className === "active-friday"
+              ? "market-session weekend"
+              : "market-session closed";
+            drawNormalizedInterval(radius, converted.start, nowAligned, elapsedArcClass, strokeWidth, sessionLayer);
           }
           if (nowAligned < converted.end) {
             drawNormalizedInterval(radius, nowAligned, converted.end, "market-session open", strokeWidth, sessionLayer);
@@ -3663,7 +3912,7 @@
               </div>
 
               <div class="status-row">
-                <div class="timer-pill">
+                <div class="timer-pill ${state.isWeekend ? "timer-weekend" : (state.isOpen ? "timer-closing" : "timer-opening")}">
                   ${timerLabel} ${formatDuration(left)}
                 </div>
               </div>
