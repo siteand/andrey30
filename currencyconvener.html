@@ -923,29 +923,30 @@ function formatAmount(n) {
     });
 }
 
-const amountMeasureCanvas = document.createElement('canvas');
-const amountMeasureCtx = amountMeasureCanvas.getContext('2d');
-
 function updateAmountInputWidth(input) {
     if (!input) return;
 
-    const style = window.getComputedStyle(input);
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const compactWidth = isMobile ? 110 : 120;
+    const wideWidth = isMobile ? 155 : 175;
 
-    const paddingAndBorder =
-        (parseFloat(style.paddingLeft) || 0) +
-        (parseFloat(style.paddingRight) || 0) +
-        (parseFloat(style.borderLeftWidth) || 0) +
-        (parseFloat(style.borderRightWidth) || 0);
+    // Для мобильных браузеров не измеряем текст через canvas:
+    // при 10 цифрах (1 000 000 000) обычного поля уже недостаточно.
+    const value = String(input.value || '').trim();
+    const integerPart = value.split(/[.,]/)[0];
+    const digitCount = (integerPart.match(/\d/g) || []).length;
+    const shouldBeWide = digitCount >= 10;
+    const targetWidth = shouldBeWide ? wideWidth : compactWidth;
 
-    if (amountMeasureCtx) {
-        amountMeasureCtx.font = style.font || `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-        const textWidth = amountMeasureCtx.measureText(input.value || '').width;
-        const availableTextWidth = compactWidth - paddingAndBorder;
-        // Небольшой запас нужен для курсора ввода и различий рендеринга браузеров.
-        input.classList.toggle('is-wide', textWidth + 6 > availableTextWidth);
-    }
+    input.classList.toggle('is-wide', shouldBeWide);
+
+    // Задаём ширину непосредственно элементу. Это не даёт flex/mobile-браузеру
+    // сжать активное поле обратно до компактного размера.
+    input.style.setProperty('width', targetWidth + 'px', 'important');
+    input.style.setProperty('flex-basis', targetWidth + 'px', 'important');
+    input.style.setProperty('min-width', targetWidth + 'px', 'important');
+    input.style.setProperty('max-width', targetWidth + 'px', 'important');
+    input.style.setProperty('flex-shrink', '0', 'important');
 }
 
 function renderList() {
