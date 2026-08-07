@@ -313,7 +313,9 @@
             text-align: right;
             font-size: 16px;
             font-weight: bold;
+            transition: width 0.18s ease;
         }
+        .amount-input.is-wide { width: 175px; }
         .amount-input:focus {
             outline: none;
             border-color: var(--button-bg);
@@ -461,6 +463,7 @@
         @media (max-width: 768px) {
             input, select, button { font-size: 14px; padding: 10px; }
             .amount-input { font-size: 15px; width: 110px; padding: 8px; }
+            .amount-input.is-wide { width: 155px; }
             .edit-btn { width: 40px; height: 40px; }
         }
 
@@ -904,6 +907,14 @@ function formatAmount(n) {
     });
 }
 
+const AUTO_WIDE_THRESHOLD = 10000000000; // 10 млрд — с этого значения обычного поля уже не хватает
+
+function updateAmountInputWidth(input, value) {
+    if (!input) return;
+    const num = Number(value);
+    input.classList.toggle('is-wide', Number.isFinite(num) && Math.abs(num) >= AUTO_WIDE_THRESHOLD);
+}
+
 function renderList() {
     const list = document.getElementById('currencyList');
     list.innerHTML = '';
@@ -933,6 +944,9 @@ function renderList() {
     });
 
     list.querySelectorAll('.amount-input').forEach(inp => {
+        const initialRaw = inp.value.replace(/\s/g, '').replace(',', '.');
+        updateAmountInputWidth(inp, parseFloat(initialRaw));
+
         inp.addEventListener('focus', (e) => {
             const code = e.target.dataset.code;
             activeCode = code;
@@ -977,13 +991,17 @@ function renderList() {
             if (!isNaN(num)) {
                 activeCode = code;
                 activeAmount = num;
+                updateAmountInputWidth(el, num);
                 document.querySelectorAll('.amount-input').forEach(other => {
                     if (other.dataset.code !== code) {
                         const v = convert(num, code, other.dataset.code);
                         other.value = formatAmount(v);
+                        updateAmountInputWidth(other, v);
                     }
                 });
                 saveState();
+            } else {
+                updateAmountInputWidth(el, 0);
             }
         });
         inp.addEventListener('blur', (e) => {
@@ -992,10 +1010,12 @@ function renderList() {
                 const code = e.target.dataset.code;
                 const v = (code === activeCode) ? activeAmount : convert(activeAmount, activeCode, code);
                 e.target.value = formatAmount(v);
+                updateAmountInputWidth(e.target, v);
                 return;
             }
             const num = parseFloat(raw) || 0;
             e.target.value = formatAmount(num);
+            updateAmountInputWidth(e.target, num);
         });
         inp.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
