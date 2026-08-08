@@ -91,7 +91,10 @@
             text-align: center;
             padding: 15px;
             margin-top: 20px;
-            background-color: transparent;
+            background-color: #f0f2f5;
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
             font-family: Arial, sans-serif; 
             color: gray;
@@ -103,11 +106,11 @@
             width: 21px;
             height: 21px;
             margin-right: 12px;
-            padding: 6px;
+            padding: 0;
             flex: 0 0 21px;
-            color: #374151;
-            background: #f1f3f5;
-            border-radius: 9px;
+            color: #111111;
+            stroke-width: 1.8;
+            shape-rendering: geometricPrecision;
         }
 
         @media (max-width: 600px) {
@@ -154,7 +157,7 @@
             }
 
             footer {
-                background-color: transparent;
+                background-color: #1e1e1e;
                 color: gray;
                 box-shadow: none;
             }
@@ -284,38 +287,47 @@
 
         <div class="social-links">
             <a href="calculator_kbju.html" class="social-link" aria-label="Перейти к калькулятору КБЖУ">
-                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                    <path d="M17.05 11.04c-.02-2.31 1.89-3.43 1.98-3.49a4.25 4.25 0 0 0-3.35-1.81c-1.41-.15-2.78.85-3.5.85-.73 0-1.84-.84-3.03-.81a4.46 4.46 0 0 0-3.76 2.29c-1.63 2.82-.42 6.97 1.14 9.25.78 1.12 1.69 2.37 2.88 2.33 1.16-.05 1.6-.75 3-.75 1.39 0 1.81.75 3.02.72 1.25-.02 2.04-1.12 2.79-2.25a9.25 9.25 0 0 0 1.28-2.61 4 4 0 0 1-2.45-3.72ZM14.76 4.25A4.1 4.1 0 0 0 15.7 1.3a4.18 4.18 0 0 0-2.71 1.41 3.92 3.92 0 0 0-.96 2.84 3.45 3.45 0 0 0 2.73-1.3Z"/>
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                    <path d="M7 2v20"/>
+                    <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
                 </svg>
                 Калькулятор КБЖУ
             </a>
             <a href="vklad.html" class="social-link" aria-label="Перейти к калькулятору вкладов">
-                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                    <path d="M12 2 2 7v2h20V7L12 2ZM4 11v7H2v3h20v-3h-2v-7h-3v7h-3v-7h-4v7H7v-7H4Z"/>
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 18v-7"/>
+                    <path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"/>
+                    <path d="M14 18v-7M18 18v-7M3 22h18M6 18v-7"/>
                 </svg>
                 Калькулятор вкладов
             </a>
             <a href="credit.html" class="social-link" aria-label="Перейти к кредитному калькулятору">
-                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                    <path d="M7 2a5 5 0 1 0 0 10A5 5 0 0 0 7 2Zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4Zm10 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4ZM18.6 2.3 2.3 18.6l2.1 2.1L20.7 4.4l-2.1-2.1Z"/>
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 5 5 19"/>
+                    <circle cx="6.5" cy="6.5" r="2.5"/>
+                    <circle cx="17.5" cy="17.5" r="2.5"/>
                 </svg>
                 Кредитный калькулятор 
             </a>
             <a href="fuel.html" class="social-link" aria-label="Перейти к калькулятору расхода топлива">
-                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                    <path d="M18.92 7.17 16.75 5v-1h-1.5v17H4V3c0-1.1.9-2 2-2h7c1.1 0 2 .9 2 2v18h1.75v-8.25h2.5V19a2 2 0 0 0 4 0V9.5l-4.33-2.33ZM7 4h5v6H7V4Zm14.25 15a.5.5 0 0 1-1 0V11.25h-3.5V7.12l1.25 1.25V10h3.25v9Z"/>
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/>
+                    <path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16M2 21h13M3 9h11"/>
                 </svg>
                 Калькулятор расхода топлива
             </a>
             <a href="currencyconvener.html" class="social-link" aria-label="Перейти к конвертеру валют">
-                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                    <path d="M7 2h7.1a6 6 0 0 1 0 12H11v2h5v3h-5v3H7v-3H4v-3h3v-2H4v-3h3V2Zm4 3v6h3.1a3 3 0 0 0 0-6H11Z"/>
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 11h8a4 4 0 0 0 0-8H9v18M6 15h8"/>
                 </svg>
                 Конвертер валют 
             </a>
             <a href="rates.html" class="social-link" aria-label="Перейти к курсам валют">
-                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-                    <path d="M3 3h3v15h15v3H3V3Zm16.6 3.2 2.2 2.1-7.2 7.3-3.5-3.5-3.5 3.5-2.1-2.2 5.6-5.6 3.5 3.5 5-5.1Z"/>
+                <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 16v5M16 14.639V21M20 10.656V21"/>
+                    <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/>
+                    <path d="M4 18.463V21M8 14.656V21"/>
                 </svg>
                 Курсы валют
             </a>
