@@ -528,6 +528,13 @@
       letter-spacing: 0.3px;
     }
 
+    @media (min-width: 621px) {
+      .hour-text {
+        font-size: 29px;
+        font-weight: 500;
+      }
+    }
+
     .market-session {
       fill: none;
       stroke-linecap: butt;
@@ -735,17 +742,16 @@
         );
     }
 
-    /* Дневной режим: мягкий переход без светлой или жёлтой полосы.
-       Вне узкой зоны стыка цвета карточек не меняются. */
+    /* Дневной режим: узкий непрерывный переход без светлой полосы.
+       На стыке сохраняется одинаковая насыщенность обоих цветов. */
     :root[data-theme="light"] .card-session-bg.active-weekday {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.025), rgba(0,0,0,0.025)),
         linear-gradient(
           to right,
           var(--red-soft) 0%,
-          var(--red-soft) calc(var(--elapsed) - 12px),
-          rgba(130, 142, 136, 0.30) var(--elapsed),
-          var(--green-soft) calc(var(--elapsed) + 12px),
+          var(--red-soft) var(--blend-start),
+          var(--green-soft) var(--blend-end),
           var(--green-soft) 100%
         );
     }
@@ -777,9 +783,8 @@
           linear-gradient(
             to right,
             var(--red-soft) 0%,
-            var(--red-soft) calc(var(--elapsed) - 12px),
-            rgba(130, 142, 136, 0.30) var(--elapsed),
-            var(--green-soft) calc(var(--elapsed) + 12px),
+            var(--red-soft) var(--blend-start),
+            var(--green-soft) var(--blend-end),
             var(--green-soft) 100%
           );
       }
@@ -1469,6 +1474,29 @@
       :root:not([data-theme]) .timer-pill * {
         color: #f4f4f5 !important;
         text-shadow: none !important;
+      }
+    }
+
+    /* Компьютер: уменьшаем только жирность текста, размеры не меняем. */
+    @media (min-width: 621px) {
+      .header h1,
+      .settings-title,
+      .settings-label,
+      .seg-btn,
+      .tz-select,
+      .tz-option,
+      .tz-option-check,
+      .minute-text,
+      .market-label,
+      .center-time,
+      .digital,
+      .name,
+      .timer-pill {
+        font-weight: 500;
+      }
+
+      .hour-text {
+        font-weight: 700;
       }
     }
 
