@@ -4,7 +4,7 @@
   "description": "Пилоты, команды, результаты, общий зачёт и календарь сезона 2026.",
   "id": "./granpri26.html",
   "start_url": "./granpri26.html",
-  "scope": "./granpri26.html",
+  "scope": "./granppri26.html",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#e60000",

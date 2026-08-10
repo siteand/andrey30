@@ -1,0 +1,5224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?rev=20260802pad">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?rev=20260802pad">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?rev=20260802pad">
+  <link rel="manifest" href="site.webmanifest?rev=20260802pad">
+  <meta name="theme-color" content="#e60000">
+  <meta name="apple-mobile-web-app-title" content="Гран-при 26">
+
+  <title>Гран-при Формула-1 (2026)</title>
+  <meta name="description" content="Календарь, результаты и общий зачёт Формулы-1 2026.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Формула-1 (2026)">
+  <meta property="og:description" content="Календарь, результаты и общий зачёт Формулы-1 2026.">
+  <meta property="og:site_name" content="Формула-1 (2026)">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Формула-1 (2026)">
+  <meta name="twitter:description" content="Календарь, результаты и общий зачёт Формулы-1 2026.">
+  <style>
+    img[alt^="🇦"], img[alt^="🇧"], img[alt^="🇨"], img[alt^="🇩"], img[alt^="🇪"], img[alt^="🇫"],
+    img[alt^="🇬"], img[alt^="🇭"], img[alt^="🇮"], img[alt^="🇯"], img[alt^="🇰"], img[alt^="🇱"],
+    img[alt^="🇲"], img[alt^="🇳"], img[alt^="🇴"], img[alt^="🇵"], img[alt^="🇶"], img[alt^="🇷"],
+    img[alt^="🇸"], img[alt^="🇹"], img[alt^="🇺"], img[alt^="🇻"], img[alt^="🇼"], img[alt^="🇽"],
+    img[alt^="🇾"], img[alt^="🇿"] {
+      filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.18));
+    }
+
+    .race-flag { filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.18)); }
+
+    html { margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .app-header {
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .app-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 14px 20px 0;
+      margin: 0;
+    }
+    .tab-bar {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      margin-top: 10px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 10px 0 8px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #999;
+      cursor: pointer;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s;
+    }
+    .tab-btn.active {
+      color: #cc0000;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0; right: 0;
+      height: 2px;
+      background: #cc0000;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .tabs-viewport {
+      width: 100%;
+      height: calc(100vh - var(--header-h, 80px));
+      overflow: hidden;
+      overflow-x: hidden;
+      scroll-behavior: auto;
+      overscroll-behavior-x: none;
+    }
+    .tabs-track {
+      display: flex;
+      width: 300%;
+      height: 100%;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      will-change: transform;
+    }
+    .tab-panel {
+      width: 33.3333%;
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
+    }
+    .tab-panel-inner {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .race {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .race.cancelled-result {
+      opacity: 0.4;
+    }
+    .race.cancelled-result h2 {
+      text-decoration: line-through;
+      color: #999;
+      margin-bottom: 0;
+    }
+    h1 { text-align: center; font-size: 1.8rem; margin-bottom: 20px; margin-top: 0; }
+    h2 { margin-top: 0; color: #cc0000; }
+    .input-group { display: flex; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .input-group label { min-width: 70px; margin-right: 10px; font-weight: bold; }
+    input { flex: 1; padding: 6px; box-sizing: border-box; }
+    #results {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-top: 20px; margin-bottom: 40px; padding: 20px;
+    }
+    #results h3:first-of-type { margin-top: 0; }
+    #results h3 { margin-top: 16px; margin-bottom: 8px; }
+    #results h3, .track-anchors h3 { font-size: 1.1rem; }
+    #results h3:nth-of-type(2) {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 16px;
+      margin-top: 20px;
+    }
+    @media (prefers-color-scheme: dark) {
+      #results h3:nth-of-type(2) { border-top-color: #444; }
+    }
+    #drivers, #constructors { list-style-type: none; padding-left: 0; margin: 0; }
+    .excel-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+    .excel-button { background: #1d6f42; color: white; border: none; border-radius: 5px; padding: 10px 15px; cursor: pointer; font-weight: bold; margin: 5px; }
+    .reset-button { background: #cc0000; color: white; border: none; border-radius: 5px; padding: 10px 15px; cursor: pointer; font-weight: bold; margin: 5px; }
+    .track-anchors { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .track-anchors h3 { margin-top: 0; }
+    .track-anchors ol, .track-anchors ul { columns: 2; -webkit-columns: 2; -moz-columns: 2; column-gap: 30px; padding-left: 20px; }
+    .track-anchors ul.track-nav-list { list-style: none; padding-left: 0; margin: 0; }
+    .track-anchors .nav-number { display: inline-block; min-width: 2.1em; font-weight: bold; color: #cc0000; }
+    .track-anchors li { margin-bottom: 10px; }
+    .track-anchors a { text-decoration: none; color: #004bcc; }
+    .track-anchors a:hover { text-decoration: underline; }
+
+    .track-anchors .nav-dot { display: inline-block; min-width: 2.1em; font-weight: bold; color: #cc0000; }
+    .track-anchors .nav-cancelled-link s {
+      text-decoration-thickness: 1.5px;
+    }
+    .race.cancelled-result .badge-cancelled {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .collapse-toggle { margin: 10px 0; cursor: pointer; color: #363636; font-weight: bold; }
+    .collapse-toggle::before { content: "▼"; color: #cc0000; margin-right: 5px; }
+    .collapse-toggle[aria-expanded="true"]::before { content: "▲"; }
+    .collapsible-section { display: none; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 15px; }
+    .warning { color: #cc0000; font-size: 12px; display: none; }
+    #constructors img.constructor-logo, #constructors span.constructor-logo-fallback { vertical-align: middle; margin-top: -3px; }
+    #drivers li, #constructors li { margin-bottom: 8px; display: flex; align-items: center; }
+    #drivers li:last-child, #constructors li:last-child { margin-bottom: 0; }
+    #constructors img { margin-right: 8px; vertical-align: middle; }
+    .constructor-logo { width: 1.5em; height: 1.5em; margin-right: 8px; object-fit: contain; display: inline-block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+    .constructor-logo-fallback { display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.2em; margin-right: 8px; background-color: #999; color: white; font-weight: bold; font-size: 0.9em; border-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); text-transform: uppercase; line-height: 1; padding: 0; text-align: center; vertical-align: middle; text-shadow: 0 0 2px black; }
+
+    .race-card {
+      background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 16px 20px;
+      margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: grid; grid-template-columns: auto auto 1fr; align-items: flex-start; gap: 14px; overflow: hidden;
+    }
+    .race-card.past { opacity: 0.55; }
+    .race-card.cancelled { opacity: 0.4; }
+    .race-card.next { border-color: #cc0000; box-shadow: 0 0 0 2px #cc000033, 0 2px 8px rgba(0,0,0,0.1); }
+    .race-number { font-size: 22px; font-weight: bold; color: #ccc; text-align: right; line-height: 1.2; padding-top: 2px; }
+
+    .race-number-empty { visibility: hidden; }
+    .race-card.next .race-number, .race-card.upcoming .race-number { color: #cc0000; }
+    .race-flag { font-size: 28px; line-height: 1; padding-top: 2px; flex-shrink: 0; }
+    .race-info { min-width: 0; }
+    .race-info h2 { margin: 0 0 4px 0; font-size: 16px; color: #cc0000; line-height: 1.3; word-break: break-word; }
+    .race-card.cancelled .race-info h2 { text-decoration: line-through; color: #999; }
+    .race-meta { font-size: 13px; color: #555; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 4px; }
+    .race-meta span { display: flex; align-items: center; gap: 4px; word-break: break-word; }
+    .badge { display: inline-block; font-size: 11px; font-weight: bold; border-radius: 4px; padding: 2px 7px; margin-top: 6px; margin-right: 4px; letter-spacing: 0.3px; }
+    .badge-sprint { background: #fff3cd; color: #856404; border: 1px solid #ffe69c; }
+    .badge-next { background: #cc0000; color: #fff; animation: pulse 1.5s infinite; }
+    .badge-past { background: #e9ecef; color: #6c757d; border: 1px solid #dee2e6; }
+    .badge-cancelled { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .race-link { display: inline-block; margin-top: 8px; font-size: 12px; color: #004bcc; text-decoration: none; word-break: break-word; }
+    .race-link:hover { text-decoration: underline; }
+    .race-card.cancelled .race-link { display: none; }
+
+    .past-races-block {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .past-races-toggle {
+      padding: 14px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .past-races-toggle:hover { background: rgba(0,0,0,0.03); }
+    .past-arrow { color: #cc0000; font-size: 14px; }
+    .past-count {
+      background: #e9ecef;
+      color: #6c757d;
+      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      padding: 1px 9px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .past-races-list {
+      display: none;
+      padding: 0 14px 14px;
+      border-top: 1px solid #eee;
+    }
+    .past-races-list.open { display: block; }
+    .past-races-list .race-card { margin-top: 14px; margin-bottom: 0; }
+    .past-races-list .race-card:first-child { margin-top: 14px; }
+    .countdown-box {
+      background: #fff; border: 1px solid #ccc; border-radius: 10px;
+      margin-bottom: 20px; padding: 20px; text-align: center; word-break: break-word;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .countdown-box h3 { margin: 0 0 6px 0; color: #cc0000; font-size: 15px; }
+    .countdown-timer { font-size: 28px; font-weight: bold; letter-spacing: 1px; color: #222; word-break: break-word; }
+    .countdown-label { font-size: 12px; color: #888; margin-top: 4px; }
+    .sessions-toggle { display: inline-block; margin-top: 8px; font-size: 12px; color: #cc0000; cursor: pointer; font-weight: bold; user-select: none; }
+    .sessions-toggle:hover { text-decoration: underline; }
+    .sessions-list { display: none; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; }
+    .sessions-list.open { display: block; }
+    .session-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 3px 0; border-bottom: 1px dotted #eee; gap: 8px; word-break: break-word; }
+    .session-row:last-child { border-bottom: none; }
+    .session-day { color: #888; flex-shrink: 0; min-width: 60px; }
+    .session-name { flex: 1; font-weight: bold; word-break: break-word; }
+    .session-name.sprint { color: #856404; }
+    .session-name.race-session { color: #cc0000; }
+    .session-time { -webkit-font-feature-settings: "tnum"; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; -webkit-flex-shrink: 0; flex-shrink: 0; white-space: nowrap; }
+
+    .swipe-hint {
+      text-align: center; font-size: 14px; color: #aaa;
+      padding: 8px 0 8px; display: flex; align-items: center; justify-content: center; gap: 30px;
+    }
+    .swipe-hint span { font-size: 14px; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #121212; color: #fff; }
+      .app-header { background: #1e1e1e; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+      .tab-btn { color: #666; }
+      .tab-btn.active { color: #ff4444; }
+      .tab-btn.active::after { background: #ff3333; }
+      .tab-bar { border-bottom-color: #333; }
+      .race, #results, .track-anchors { background: #1e1e1e; border-color: #444; color: #ddd; }
+      .race.cancelled-result h2 { color: #666; }
+      input { background: #2a2a2a; color: #fff; border: 1px solid #555; }
+      .excel-button { background: #2e8b57; }
+      .reset-button { background: #ff3333; }
+      .track-anchors a { color: #75a7fc; }
+      .track-anchors .nav-number { color: #ff4444; }
+
+      .track-anchors .nav-dot { color: #ff4444; }
+      .collapse-toggle { color: #aaa8a8; }
+      .collapse-toggle::before { color: #ff3333; }
+      .warning { color: #ff6666; }
+      .race-card, .countdown-box { background: #1e1e1e; border: none; color: #ddd; }
+      .race-card.next { border-color: #ff3333; box-shadow: 0 0 0 2px #ff333333, 0 2px 8px rgba(0,0,0,0.3); }
+      .race-info h2 { color: #ff4444; }
+      .race-card.next .race-number, .race-card.upcoming .race-number { color: #ff4444; }
+      .race-meta { color: #aaa; }
+      .badge-next { background: #ff3333; }
+      .badge-past { background: #2a2a2a; color: #888; border-color: #444; }
+      .badge-sprint { background: #3a2e00; color: #ffc107; border-color: #6a5000; }
+      .badge-cancelled { background: #3a1010; color: #f1aeb5; border-color: #842029; }
+      .countdown-timer { color: #f0f0f0; }
+      .race-link { color: #75a7fc; }
+      .race-card.cancelled .race-info h2 { color: #666; }
+      .sessions-toggle { color: #ff4444; }
+      .sessions-list { border-top-color: #333; }
+      .session-row { border-bottom-color: #333; }
+      .session-day { color: #666; }
+      .session-name.sprint { color: #ffc107; }
+      .session-name.race-session { color: #ff4444; }
+      .swipe-hint { color: #555; }
+      h2 { color: #ff4444; }
+      .past-races-block { background: #1e1e1e; border-color: #444; }
+      .past-races-toggle { color: #bbb; }
+      .past-races-toggle:hover { background: rgba(255,255,255,0.04); }
+      .past-arrow { color: #ff4444; }
+      .past-count { background: #2a2a2a; color: #aaa; border-color: #444; }
+      .past-races-list { border-top-color: #333; }
+      .race-flag,
+      img[alt^="🇦"], img[alt^="🇧"], img[alt^="🇨"], img[alt^="🇩"], img[alt^="🇪"], img[alt^="🇫"],
+      img[alt^="🇬"], img[alt^="🇭"], img[alt^="🇮"], img[alt^="🇯"], img[alt^="🇰"], img[alt^="🇱"],
+      img[alt^="🇲"], img[alt^="🇳"], img[alt^="🇴"], img[alt^="🇵"], img[alt^="🇶"], img[alt^="🇷"],
+      img[alt^="🇸"], img[alt^="🇹"], img[alt^="🇺"], img[alt^="🇻"], img[alt^="🇼"], img[alt^="🇽"],
+      img[alt^="🇾"], img[alt^="🇿"] {
+        filter: drop-shadow(0 0 1.5px rgba(255,255,255,0.3)) drop-shadow(0 0 1px rgba(255,255,255,0.2));
+      }
+    }
+
+    @media (max-width: 500px) {
+      .track-anchors ol, .track-anchors ul { columns: 1; -webkit-columns: 1; -moz-columns: 1; }
+      .input-group label { min-width: 100%; margin-right: 0; margin-bottom: 4px; }
+      .excel-buttons { flex-direction: column; align-items: center; }
+      .race-card { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 14px 16px; }
+      .race-number { grid-row: 1; grid-column: 1; text-align: left; }
+      .race-flag { grid-row: 1; grid-column: 2; justify-self: start; }
+      .race-info { grid-row: 2; grid-column: 1 / -1; }
+    }
+    @media (max-width: 300px) {
+      .tab-panel { padding: 12px; }
+      .race-card { padding: 12px 14px; gap: 8px; }
+      .race-number { font-size: 18px; }
+      .race-flag { font-size: 24px; }
+      .race-meta { flex-direction: column; gap: 4px; }
+      .countdown-timer { font-size: 18px; word-break: break-all; }
+    }
+    .result-row { display: flex; align-items: center; padding: 5px 0; border-bottom: 1px dotted #eee; font-size: 14px; }
+    .result-row:last-child { border-bottom: none; }
+    .result-pos { display: inline-block; min-width: 28px; font-weight: bold; }
+    .result-name { font-weight: bold; margin-left: 4px; }
+    .result-empty { color: #bbb; font-weight: normal; font-style: italic; }
+    .pilot-link {
+      cursor: pointer;
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pilot-link:hover, .pilot-link:active { color: #cc0000; }
+    .team-link {
+      cursor: pointer;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .team-link:hover, .team-link:active { color: #cc0000; }
+    @media (prefers-color-scheme: dark) {
+      .result-row { border-bottom-color: #333; }
+      .result-empty { color: #555; }
+      .pilot-link:hover, .pilot-link:active { color: #ff4444; }
+      .team-link:hover, .team-link:active { color: #ff4444; }
+    }
+
+    .team-card {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border-top: 4px solid var(--team-color, #cc0000);
+    }
+    .team-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .team-photo.team-logo {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .team-photo.team-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .team-photo.team-logo .photo-placeholder-hint {
+      padding: 0;
+      font-size: 20px;
+    }
+    .team-name {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--team-color, #cc0000);
+      font-weight: bold;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .team-car-wrap {
+      width: 100%;
+      margin-bottom: 14px;
+    }
+    .team-photo {
+      width: 100%;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 12px;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .team-photo[data-broken="1"] {
+      background: #f5f5f5;
+    }
+
+    .team-photo img {
+      filter: none;
+    }
+
+    .team-photo.team-logo img {
+      filter: none;
+    }
+    .team-photo:active { transform: scale(0.98); }
+    .team-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .team-car-photo {
+      aspect-ratio: 16 / 9;
+    }
+    .team-people {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .team-person {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .team-person .team-photo {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+    }
+    .team-person-label {
+      font-size: 13px;
+      color: #555;
+      margin-top: 6px;
+      font-weight: 600;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .photo-placeholder-hint {
+      padding: 8px;
+      font-size: 32px;
+      line-height: 1;
+      color: #bbb;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 380px) {
+      .team-people { gap: 10px; }
+      .team-person-label { font-size: 12px; }
+      .team-name { font-size: 1.2rem; }
+      .team-photo.team-logo { width: 48px; height: 48px; }
+    }
+
+    .photo-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #f5f5f5;
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    .photo-modal.open { display: flex; }
+    .photo-modal-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      max-width: 100%;
+      max-height: calc(100% - 40px);
+      width: 100%;
+    }
+    .photo-modal img {
+      max-width: 100%;
+      max-height: 70vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .photo-modal-bio {
+      max-width: 90%;
+      width: auto;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #333;
+      text-align: center;
+      padding: 0 8px;
+      font-weight: 500;
+    }
+    .photo-modal-bio:empty { display: none; }
+
+    .photo-modal-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .photo-modal-caption {
+      font-size: 17px;
+      font-weight: 700;
+      color: #222;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .photo-modal-caption:empty { display: none; }
+
+    .caption-number {
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      margin-right: 2px;
+    }
+    .caption-number[data-team="Ferrari"]      { color: #DC0000; }
+    .caption-number[data-team="Mercedes"]     { color: #00A19B; }
+    .caption-number[data-team="Red Bull"]     { color: #1E41FF; }
+    .caption-number[data-team="McLaren"]      { color: #FF8700; }
+    .caption-number[data-team="Aston Martin"] { color: #006F62; }
+    .caption-number[data-team="Alpine"]       { color: #0090FF; }
+    .caption-number[data-team="Racing Bulls"] { color: #2B4562; }
+    .caption-number[data-team="Haas"]         { color: #E6002B; }
+    .caption-number[data-team="Williams"]     { color: #005AFF; }
+    .caption-number[data-team="Audi"]         { color: #333333; }
+    .caption-number[data-team="Cadillac"]     { color: #1E2F4F; }
+
+    .caption-team-name {
+      font-weight: 500;
+      opacity: 0.7;
+    }
+
+    @media (min-width: 580px) {
+      body { font-size: 17px; }
+      .app-title { font-size: 1.8rem; }
+      .tab-btn { font-size: 16px; padding: 12px 20px; }
+      .race-card { font-size: 16px; }
+      .race-card h2 { font-size: 1.5rem; }
+      .race-card h3 { font-size: 1.2rem; }
+      .race-card p { font-size: 16px; }
+      .result-row { font-size: 16px; padding: 7px 0; }
+      .collapse-toggle { font-size: 15px; }
+      #drivers li, #constructors li {
+        font-size: 17px;
+        margin-bottom: 4px;
+        padding: 0;
+        line-height: 1.4;
+      }
+      #results {
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr;
+        grid-template-areas:
+          "h-drivers divider h-constructors"
+          "ul-drivers divider ul-constructors";
+        column-gap: 20px;
+        row-gap: 4px;
+        align-items: start;
+      }
+      #results > h3:nth-of-type(1) { grid-area: h-drivers; margin-top: 0; }
+      #results > #drivers          { grid-area: ul-drivers; margin-top: 0; }
+      #results > h3:nth-of-type(2) {
+        grid-area: h-constructors;
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+      }
+      #results > #constructors     { grid-area: ul-constructors; margin-top: 0; }
+      #results::before {
+        content: '';
+        grid-area: divider;
+        background: #e0e0e0;
+        width: 1px;
+        height: 100%;
+      }
+      @media (prefers-color-scheme: dark) {
+        #results::before { background: #444; }
+      }
+      .countdown-box h3 { font-size: 18px; }
+      .countdown-timer { font-size: 32px; }
+      .countdown-label { font-size: 14px; }
+      .sessions-toggle { font-size: 15px; }
+      .session-day, .session-name, .session-time { font-size: 15px; }
+      .track-anchors h3 { font-size: 1.3rem; }
+      .track-anchors a { font-size: 16px; }
+      .track-anchors li { margin-bottom: 8px; }
+      .team-name { font-size: 1.75rem; }
+      .team-person-label { font-size: 18px; }
+      .photo-modal-content {
+        flex-direction: row;
+        align-items: center;
+        gap: 28px;
+        max-width: 1100px;
+      }
+      .photo-modal img {
+        max-width: min(550px, 50vw);
+        max-height: 75vh;
+      }
+      .photo-modal-text {
+        align-items: flex-start;
+        max-width: 380px;
+        gap: 10px;
+      }
+      .photo-modal-caption {
+        font-size: 19px;
+        text-align: left;
+      }
+      .photo-modal-bio {
+        max-width: 380px;
+        font-size: 17px;
+        line-height: 1.6;
+        text-align: left;
+        font-weight: 600;
+      }
+    }
+    .photo-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 44px;
+      height: 44px;
+      background: transparent;
+      border: none;
+      color: #888;
+      font-size: 32px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+      padding: 0;
+      z-index: 2001;
+    }
+    .photo-modal-close:hover,
+    .photo-modal-close:active {
+      color: #333;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .team-card {
+        background: #1e1e1e;
+        border-color: #444;
+        color: #ddd;
+        border-top-color: color-mix(in srgb, var(--team-color, #cc0000) 55%, #ffffff 45%);
+      }
+      .team-photo[data-broken="1"] { background: #2a2a2a; color: #666; }
+      .team-person-label { color: #ccc; }
+      .photo-placeholder-hint { color: #555; }
+      .team-name {
+        color: color-mix(in srgb, var(--team-color, #cc0000) 55%, #ffffff 45%);
+      }
+      #team-card-audi .team-name {
+        color: #cccccc;
+      }
+      #team-card-audi {
+        border-top-color: #cccccc;
+      }
+      #team-card-cadillac .team-name {
+        color: color-mix(in srgb, #1E2F4F 30%, #ffffff 70%);
+      }
+      #team-card-cadillac {
+        border-top-color: color-mix(in srgb, #1E2F4F 30%, #ffffff 70%);
+      }
+      .team-photo img {
+        filter: none;
+      }
+      .team-photo.team-logo img {
+        filter: none;
+      }
+      .photo-modal {
+        background: #0f0f0f;
+      }
+      .photo-modal-close {
+        color: #999;
+      }
+      .photo-modal-close:hover,
+      .photo-modal-close:active {
+        color: #ddd;
+      }
+      .photo-modal-caption {
+        color: #fff;
+      }
+      .photo-modal-bio {
+        color: #ddd;
+      }
+      .photo-modal img {
+        box-shadow: 0 4px 20px rgba(255,255,255,0.15);
+      }
+      .caption-number[data-team="Ferrari"]      { color: #FF5555; }
+      .caption-number[data-team="Mercedes"]     { color: #5BD9CC; }
+      .caption-number[data-team="Red Bull"]     { color: #6080FF; }
+      .caption-number[data-team="McLaren"]      { color: #FFB04D; }
+      .caption-number[data-team="Aston Martin"] { color: #4DAA9F; }
+      .caption-number[data-team="Alpine"]       { color: #4DB0FF; }
+      .caption-number[data-team="Racing Bulls"] { color: #8FA3BA; }
+      .caption-number[data-team="Haas"]         { color: #FF5577; }
+      .caption-number[data-team="Williams"]     { color: #5C8EFF; }
+      .caption-number[data-team="Audi"]         { color: #CCCCCC; }
+      .caption-number[data-team="Cadillac"]     { color: #A5B0C0; }
+    }
+
+    .race,
+    .race-card,
+    .team-card,
+    .countdown-box {
+      position: relative;
+    }
+
+    .card-actions {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .share-card-btn {
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: #777;
+      opacity: 0.42;
+      border-radius: 999px;
+      padding: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.16s ease, color 0.16s ease, background 0.16s ease, transform 0.10s ease;
+    }
+
+    .share-card-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .share-card-btn:hover,
+    .share-card-btn:focus-visible {
+      opacity: 0.9;
+      color: #cc0000;
+      background: rgba(204, 0, 0, 0.06);
+      outline: none;
+    }
+
+    .share-card-btn:active {
+      transform: scale(0.92);
+      opacity: 1;
+    }
+
+    .share-card-btn.copied {
+      color: #1d6f42;
+      background: rgba(29, 111, 66, 0.08);
+      opacity: 0.95;
+    }
+
+    .copy-toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      z-index: 2200;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(34, 34, 34, 0.88);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.20);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 10px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .copy-toast {
+        display: none !important;
+      }
+    }
+
+    .share-target-highlight {
+      animation: shareTargetPulse 0.72s ease-in-out 5;
+      outline: 2px solid rgba(204, 0, 0, 0.22);
+      outline-offset: -2px;
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .share-target-highlight {
+        animation: shareTargetPulseMobile 0.70s ease-in-out 5;
+        outline: 2px solid rgba(255, 68, 68, 0.28);
+        outline-offset: -2px;
+      }
+
+      @keyframes shareTargetPulseMobile {
+        0%, 100% {
+          background-color: transparent;
+          outline-color: rgba(255, 68, 68, 0.18);
+        }
+        10%, 52% {
+          background-color: rgba(204, 0, 0, 0.24);
+          outline-color: rgba(255, 68, 68, 0.78);
+        }
+        72% {
+          background-color: rgba(204, 0, 0, 0.04);
+          outline-color: rgba(255, 68, 68, 0.28);
+        }
+      }
+    }
+
+    .race,
+    .race-card,
+    .team-card,
+    .countdown-box {
+      scroll-margin-top: 22px;
+    }
+
+    .team-card .team-card-header {
+      padding-right: 30px;
+    }
+
+    /* Не даём длинному названию гонки прижиматься к кнопке копирования ссылки. */
+    .race > h2 {
+      padding-right: 44px;
+    }
+
+
+    @keyframes shareTargetPulse {
+      0%, 100% {
+        background-color: transparent;
+        outline-color: rgba(204, 0, 0, 0.16);
+      }
+      10%, 52% {
+        background-color: rgba(204, 0, 0, 0.22);
+        outline-color: rgba(204, 0, 0, 0.68);
+      }
+      72% {
+        background-color: rgba(204, 0, 0, 0.035);
+        outline-color: rgba(204, 0, 0, 0.24);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .card-actions {
+        top: 8px;
+        right: 10px;
+      }
+      .share-card-btn {
+        width: 24px;
+        height: 24px;
+        opacity: 0.36;
+      }
+      .share-card-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .share-card-btn {
+        color: #aaa;
+        opacity: 0.38;
+      }
+      .share-card-btn:hover,
+      .share-card-btn:focus-visible {
+        color: #ff6666;
+        background: rgba(255, 90, 90, 0.08);
+        opacity: 0.9;
+      }
+      .share-card-btn.copied {
+        color: #65c989;
+        background: rgba(101, 201, 137, 0.10);
+        opacity: 0.95;
+      }
+      .copy-toast {
+        background: rgba(245, 245, 245, 0.92);
+        color: #111;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.42);
+      }
+      @keyframes shareTargetPulse {
+        0%, 100% {
+          background-color: transparent;
+          outline-color: rgba(255, 68, 68, 0.22);
+        }
+        10%, 52% {
+          background-color: rgba(255, 68, 68, 0.22);
+          outline-color: rgba(255, 68, 68, 0.78);
+        }
+        72% {
+          background-color: rgba(255, 68, 68, 0.045);
+          outline-color: rgba(255, 68, 68, 0.34);
+        }
+      }
+
+      @keyframes shareTargetPulseMobile {
+        0%, 100% {
+          background-color: transparent;
+          outline-color: rgba(255, 68, 68, 0.26);
+        }
+        10%, 52% {
+          background-color: rgba(255, 68, 68, 0.27);
+          outline-color: rgba(255, 68, 68, 0.86);
+        }
+        72% {
+          background-color: rgba(255, 68, 68, 0.06);
+          outline-color: rgba(255, 68, 68, 0.40);
+        }
+      }
+    }
+
+
+    .desktop-empty-side-arrow {
+      display: none;
+      position: fixed;
+      top: calc(var(--header-h, 80px) + (100vh - var(--header-h, 80px)) / 2);
+      z-index: 850;
+      transform: translate(-50%, -50%);
+      width: 34px;
+      height: 34px;
+      opacity: 0.58;
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .desktop-empty-side-arrow[hidden] {
+      display: none !important;
+    }
+
+    .desktop-empty-side-arrow svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .desktop-empty-side-arrow path {
+      fill: none;
+      stroke: rgba(204, 0, 0, 0.78);
+      stroke-width: 2.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.14));
+    }
+
+    @media (hover: hover) and (pointer: fine) and (min-width: 900px) {
+      .desktop-empty-side-arrow {
+        display: block;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .desktop-empty-side-arrow path {
+        stroke: rgba(255, 90, 90, 0.86);
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+      }
+    }
+
+
+
+    :root {
+      --bt-dur: 250ms;
+      --bt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .app-title {
+      padding: 14px 20px 14px !important;
+    }
+
+    .tab-bar {
+      display: none !important;
+    }
+
+
+
+    .bottom-tabs-shell {
+      position: fixed;
+      left: 50%;
+      right: auto;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 1150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      max-width: calc(100vw - 24px);
+      pointer-events: none;
+      filter: none;
+    }
+
+    .t-tabs {
+      position: relative;
+      display: grid;
+      grid-template-columns: 28px repeat(3, 108px) 28px;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: auto;
+      max-width: calc(100vw - 24px);
+      padding: 5px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(190,0,0,.76), rgba(135,0,0,.72));
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: none;
+      backdrop-filter: blur(18px) saturate(1.18);
+      -webkit-backdrop-filter: blur(18px) saturate(1.18);
+      overflow: hidden;
+      pointer-events: auto;
+    }
+
+    .t-tabs-pill {
+      position: absolute;
+      top: 5px;
+      left: 0;
+      height: 36px;
+      width: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: none;
+      transform: translateX(0);
+      transition: transform var(--bt-dur) var(--bt-ease), width var(--bt-dur) var(--bt-ease);
+      will-change: transform, width;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .t-tab,
+    .t-tabs-arrow {
+      position: relative;
+      z-index: 1;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      border-radius: 999px;
+      color: rgba(255,255,255,.88);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .t-tab {
+      width: 108px;
+      min-width: 108px;
+      max-width: 108px;
+      height: 36px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color var(--bt-dur) var(--bt-ease);
+    }
+
+    .t-tab[aria-selected="true"] {
+      color: #cc0000;
+      font-weight: 650;
+    }
+
+    .t-tab-text {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      line-height: 1;
+    }
+
+    .t-tab-icon {
+      display: none;
+    }
+
+    .t-tabs-arrow {
+      width: 28px;
+      min-width: 28px;
+      max-width: 28px;
+      height: 36px;
+      font-size: 23px;
+      font-weight: 900;
+      color: rgba(255,255,255,.88);
+    }
+
+    .t-tabs-arrow:disabled {
+      opacity: .34;
+      cursor: default;
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .bottom-tabs-shell {
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        max-width: calc(100vw - 12px);
+      }
+
+      .t-tabs {
+        grid-template-columns: 23px repeat(3, 40px) 23px;
+        gap: 3px;
+        padding: 3px;
+      }
+
+      .t-tabs-arrow {
+        width: 23px;
+        min-width: 23px;
+        max-width: 23px;
+        height: 30px;
+        font-size: 20px;
+      }
+
+      .t-tab {
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        height: 30px;
+      }
+
+      .t-tab-text {
+        display: none;
+      }
+
+      .t-tab-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        font-size: 16px;
+        line-height: 1;
+        text-shadow:
+          -0.45px 0 rgba(255,255,255,0.90),
+           0.45px 0 rgba(255,255,255,0.90),
+           0 -0.45px rgba(255,255,255,0.90),
+           0  0.45px rgba(255,255,255,0.90),
+          -0.45px -0.45px rgba(255,255,255,0.55),
+           0.45px -0.45px rgba(255,255,255,0.55),
+          -0.45px  0.45px rgba(255,255,255,0.55),
+           0.45px  0.45px rgba(255,255,255,0.55);
+      }
+
+      .t-tabs-pill {
+        top: 3px;
+        height: 30px;
+      }
+
+    }
+
+    @media (max-width: 360px) {
+      .t-tabs {
+        grid-template-columns: 22px repeat(3, 38px) 22px;
+        gap: 2px;
+      }
+
+      .t-tabs-arrow {
+        width: 22px;
+        min-width: 22px;
+        max-width: 22px;
+        height: 29px;
+        font-size: 19px;
+      }
+
+      .t-tab {
+        width: 38px;
+        min-width: 38px;
+        max-width: 38px;
+        height: 29px;
+      }
+
+      .t-tabs-pill {
+        height: 29px;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .t-tabs {
+        background: linear-gradient(135deg, rgba(190,0,0,.76), rgba(105,0,0,.72));
+        border-color: rgba(255,255,255,.16);
+      }
+
+      .t-tabs-pill {
+        background: rgba(255,255,255,.90);
+      }
+
+      .t-tab[aria-selected="true"] {
+        color: #cc0000;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .t-tabs-pill,
+      .t-tab {
+        transition: none !important;
+      }
+    }
+
+
+
+    @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+      .t-tabs {
+        grid-template-columns: repeat(3, 108px) !important;
+      }
+
+      .t-tabs-arrow {
+        display: none !important;
+      }
+
+      .t-tab {
+        width: 108px !important;
+        min-width: 108px !important;
+        max-width: 108px !important;
+      }
+    }
+
+
+
+    @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+      .bottom-tabs-shell {
+        left: var(--bottom-tabs-card-center, 50%) !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+      }
+    }
+
+
+
+    .tab-panel-inner {
+      padding-bottom: calc(132px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .tab-panel-inner > footer {
+      margin-bottom: 18px !important;
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .tab-panel-inner {
+        padding-bottom: calc(124px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .tab-panel-inner > footer {
+        margin-bottom: 16px !important;
+      }
+    }
+
+
+
+    @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+      .tab-panel-inner {
+        padding-bottom: calc(104px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .tab-panel-inner > footer {
+        margin-bottom: 0 !important;
+      }
+    }
+
+
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .t-tabs-arrow {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+      }
+
+      .t-tabs-arrow-prev,
+      .t-tabs-arrow-next {
+        transform: translateY(-1px);
+      }
+
+      .t-tabs-arrow:active:not(:disabled) {
+        transform: translateY(-1px) scale(0.92);
+      }
+    }
+
+
+
+    .t-tabs-arrow svg {
+      width: 18px !important;
+      height: 18px !important;
+      display: block !important;
+      overflow: visible !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .t-tabs-arrow svg path {
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2.4 !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .t-tabs-arrow {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 0 !important;
+        font-size: 0 !important;
+        padding: 0 !important;
+      }
+
+      .t-tabs-arrow-prev,
+      .t-tabs-arrow-next,
+      .t-tabs-arrow:active:not(:disabled) {
+        transform: none !important;
+      }
+
+      .t-tabs-arrow svg {
+        width: 17px !important;
+        height: 17px !important;
+      }
+    }
+
+
+
+
+    .mobile-drop-up-button {
+      --up-bg: linear-gradient(135deg, rgba(190,0,0,.76), rgba(135,0,0,.72));
+      --up-border: rgba(255,255,255,.22);
+
+      position: fixed;
+      left: var(--bottom-tabs-card-center, 50%);
+      bottom: calc(72px + env(safe-area-inset-bottom));
+      z-index: 1160;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid var(--up-border);
+      border-radius: 999px;
+      background: var(--up-bg);
+      color: rgba(255,255,255,.92);
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate(-50%, 30px) scale(0.88);
+      transform-origin: 50% 100%;
+      box-shadow: none;
+      backdrop-filter: blur(18px) saturate(1.18);
+      -webkit-backdrop-filter: blur(18px) saturate(1.18);
+      transition:
+        bottom 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.22s ease,
+        visibility 0.22s ease;
+      -webkit-tap-highlight-color: transparent;
+      will-change: transform, opacity;
+    }
+
+    .mobile-drop-up-button::before,
+    .mobile-drop-up-button::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    .mobile-drop-up-button svg {
+      position: relative;
+      z-index: 2;
+      width: 16px;
+      height: 16px;
+      display: block;
+      transform: translateY(-1px);
+      filter: none;
+      transition: transform 0.20s ease, opacity 0.18s ease;
+    }
+
+    .mobile-drop-up-button.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, 0) scale(1);
+      box-shadow: none;
+    }
+
+    .mobile-drop-up-button.is-returning {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate(-50%, 30px) scale(0.88);
+      box-shadow: none;
+    }
+
+    .mobile-drop-up-button.is-returning svg {
+      opacity: 0;
+      transform: translateY(2px) scale(0.92);
+    }
+
+    .mobile-drop-up-button.is-footer-raised {
+      bottom: calc(124px + env(safe-area-inset-bottom));
+    }
+
+    .mobile-drop-up-button:active.is-visible {
+      transform: translate(-50%, 1px) scale(0.96);
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .mobile-drop-up-button {
+        left: 50%;
+        bottom: calc(55px + env(safe-area-inset-bottom));
+        width: 38px;
+        height: 30px;
+        transform: translate(-50%, 28px) scale(0.86);
+      }
+
+      .mobile-drop-up-button svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .mobile-drop-up-button.is-visible {
+        transform: translate(-50%, 0) scale(1);
+      }
+
+      .mobile-drop-up-button.is-returning {
+        transform: translate(-50%, 28px) scale(0.86);
+      }
+
+      .mobile-drop-up-button.is-footer-raised {
+        bottom: calc(106px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .mobile-drop-up-button {
+        --up-bg: linear-gradient(135deg, rgba(190,0,0,.76), rgba(105,0,0,.72));
+        --up-border: rgba(255,255,255,.16);
+        box-shadow: none;
+      }
+    }
+
+
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-drop-up-button,
+      .mobile-drop-up-button svg,
+      .mobile-drop-up-button::before,
+      .mobile-drop-up-button::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+
+
+    @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+      .bottom-tabs-shell {
+        left: var(--bottom-tabs-card-center, 50%) !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+      }
+
+      .mobile-drop-up-button {
+        left: var(--bottom-tabs-card-center, 50%) !important;
+      }
+    }
+
+
+
+    /* Десктоп: уведомление "Скопировано" показываем над кнопкой "вверх",
+       а не внизу экрана. Мобильный режим не меняем: там toast скрыт. */
+    @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+      .copy-toast {
+        left: var(--bottom-tabs-card-center, 50%) !important;
+        bottom: calc(118px + env(safe-area-inset-bottom)) !important;
+      }
+    }
+
+
+
+    .team-photo[data-loading="1"] {
+      background: rgba(0,0,0,0.025);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .team-photo[data-loading="1"] {
+        background: rgba(255,255,255,0.035);
+      }
+    }
+
+
+    /* Однократное предложение установить веб-приложение. */
+    .install-offer {
+      position: fixed;
+      inset: 0;
+      z-index: 1900;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 12px calc(86px + env(safe-area-inset-bottom));
+      background: rgba(0,0,0,0.36);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.24s ease, visibility 0.24s ease;
+    }
+
+    .install-offer.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .install-offer-inner {
+      position: relative;
+      width: min(560px, 100%);
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 22px 20px 18px;
+      border: 2px solid rgba(204,0,0,0.30);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.99);
+      color: #222;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.38), 0 0 0 5px rgba(255,255,255,0.18);
+      overflow: hidden;
+      transform: translateY(34px) scale(0.96);
+      transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .install-offer-inner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #8f0000, #e00000, #8f0000);
+    }
+
+    .install-offer.show .install-offer-inner {
+      transform: translateY(0) scale(1);
+    }
+
+    .install-offer-icon {
+      width: 54px;
+      height: 54px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 15px;
+      background: transparent;
+      box-shadow: 0 6px 16px rgba(204,0,0,0.24);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .install-offer-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+
+    .install-offer-label {
+      display: inline-block;
+      margin: 0 0 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #ffe7e7;
+      color: #a40000;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0.25px;
+      text-transform: uppercase;
+    }
+
+    .install-offer-title {
+      margin: 0 0 6px;
+      color: #a90000;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .install-offer-text {
+      margin: 0;
+      color: #444;
+      font-size: 14.5px;
+      line-height: 1.48;
+    }
+
+    .install-offer-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .install-offer-button {
+      min-height: 44px;
+      padding: 10px 18px;
+      border-radius: 11px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .install-offer-button:active {
+      transform: scale(0.97);
+    }
+
+    .install-offer-button.primary {
+      border: 1px solid #bd0000;
+      background: linear-gradient(180deg, #df0000, #b50000);
+      color: #fff;
+      box-shadow: 0 5px 14px rgba(204,0,0,0.28);
+    }
+
+    .install-offer.show .install-offer-button.primary {
+      animation: installButtonPulse 1.15s ease-in-out 0.45s 2;
+    }
+
+    .install-offer-button.secondary {
+      border: 1px solid #cfcfcf;
+      background: #f2f2f2;
+      color: #444;
+    }
+
+    .install-offer-button:focus-visible {
+      outline: 3px solid rgba(204,0,0,0.28);
+      outline-offset: 3px;
+    }
+
+    @keyframes installButtonPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 5px 14px rgba(204,0,0,0.28); }
+      50% { transform: scale(1.045); box-shadow: 0 7px 22px rgba(204,0,0,0.48); }
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .install-offer {
+        align-items: flex-end;
+        padding: 12px 10px calc(68px + env(safe-area-inset-bottom));
+      }
+
+      .install-offer-inner {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px;
+        padding: 19px 16px 15px;
+        border-radius: 18px;
+      }
+
+      .install-offer-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+      }
+
+      .install-offer-title {
+        font-size: 18px;
+      }
+
+      .install-offer-text {
+        font-size: 13.5px;
+      }
+
+      .install-offer-actions {
+        justify-content: stretch;
+        margin-top: 13px;
+      }
+
+      .install-offer-button {
+        flex: 1;
+        min-height: 45px;
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .install-offer-inner {
+        grid-template-columns: 42px minmax(0, 1fr);
+        gap: 10px;
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .install-offer-icon {
+        width: 42px;
+        height: 42px;
+      }
+
+      .install-offer-title {
+        font-size: 17px;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .install-offer {
+        background: rgba(0,0,0,0.58);
+      }
+
+      .install-offer-inner {
+        border-color: rgba(255,80,80,0.38);
+        background: rgba(31,31,31,0.99);
+        color: #eee;
+        box-shadow: 0 18px 55px rgba(0,0,0,0.66), 0 0 0 5px rgba(255,255,255,0.06);
+      }
+
+      .install-offer-label {
+        background: #4a1818;
+        color: #ff9b9b;
+      }
+
+      .install-offer-title {
+        color: #ff6f6f;
+      }
+
+      .install-offer-text {
+        color: #d2d2d2;
+      }
+
+      .install-offer-button.secondary {
+        border-color: #565656;
+        background: #373737;
+        color: #f0f0f0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .install-offer,
+      .install-offer-inner,
+      .install-offer-button {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+</style>
+</head>
+<body>
+
+  <div class="app-header">
+    <h1 class="app-title">Гран-при Формула-1 (2026)</h1>
+    <nav class="tab-bar">
+      <button class="tab-btn" id="tab-drivers" onclick="switchTab(0)">Пилоты</button>
+      <button class="tab-btn active" id="tab-results" onclick="switchTab(1)">Результаты</button>
+      <button class="tab-btn" id="tab-calendar" onclick="switchTab(2)">Календарь</button>
+    </nav>
+  </div>
+
+  <div class="tabs-viewport" id="tabs-viewport">
+    <div class="tabs-track" id="tabs-track">
+      <div class="tab-panel" id="panel-drivers"><div class="tab-panel-inner">
+        <div id="teams-list"></div>
+        <footer style="
+          text-align: center;
+          margin-top: 30px;
+          padding: 15px;
+          color: #666;
+          font-size: 14px;
+          font-family: Arial, sans-serif;
+        ">
+          © Andrey30
+          <span aria-hidden="true"> · </span>
+          <a href="privacy.html" style="
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+          ">
+            Политика конфиденциальности
+          </a>
+          <div style="margin-top: 8px; font-size: 12px; line-height: 1.4; opacity: 0.88;">
+            Неофициальный сайт для поклонников Формулы-1. Не связан с компаниями Formula 1.
+          </div>
+        </footer>
+      </div></div>
+      <div class="tab-panel" id="panel-results"><div class="tab-panel-inner">
+        <h2>🏁 Следующая гонка</h2>
+        <div class="countdown-box" id="countdown-box">
+          <div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('countdown-box', this);return false;" aria-label="Скопировать ссылку на таймер" title="Скопировать ссылку на таймер"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>
+          <h3 id="countdown-title">До следующей гонки</h3>
+          <div class="countdown-timer" id="countdown-timer">—</div>
+          <div class="countdown-label" id="countdown-label"></div>
+        </div>
+        <h2>🏆 Общий зачёт</h2>
+        <div id="results">
+          <h3>Личный зачёт:</h3>
+          <ul id="drivers"></ul>
+          <h3>Кубок конструкторов:</h3>
+          <ul id="constructors"></ul>
+        </div>
+        <div class="track-anchors">
+          <h3>Быстрая навигация по трассам:</h3>
+          <ul class="track-nav-list">
+            <li><span class="nav-number">1.</span><a href="#melbourne">🇦🇺 Мельбурн | 8 марта</a></li>
+            <li><span class="nav-number">2.</span><a href="#shanghai">🇨🇳 Шанхай | 15 марта*</a></li>
+            <li><span class="nav-number">3.</span><a href="#suzuka">🇯🇵 Сузука | 29 марта</a></li>
+            <li><span class="nav-number">4.</span><a href="#miami">🇺🇸 Майами | 3 мая*</a></li>
+            <li><span class="nav-number">5.</span><a href="#montreal">🇨🇦 Монреаль | 24 мая*</a></li>
+            <li><span class="nav-number">6.</span><a href="#monaco">🇲🇨 Монако | 7 июня</a></li>
+            <li><span class="nav-number">7.</span><a href="#barcelona">🇪🇸 Барселона | 14 июня</a></li>
+            <li><span class="nav-number">8.</span><a href="#spielberg">🇦🇹 Шпильберг | 28 июня</a></li>
+            <li><span class="nav-number">9.</span><a href="#silverstone">🇬🇧 Сильверстоун | 5 июля*</a></li>
+            <li><span class="nav-number">10.</span><a href="#spa">🇧🇪 Спа-Франкоршам | 19 июля</a></li>
+            <li><span class="nav-number">11.</span><a href="#budapest">🇭🇺 Хунгароринг | 26 июля</a></li>
+            <li><span class="nav-number">12.</span><a href="#zandvoort">🇳🇱 Зандворт | 23 августа*</a></li>
+            <li><span class="nav-number">13.</span><a href="#monza">🇮🇹 Монца | 6 сентября</a></li>
+            <li><span class="nav-number">14.</span><a href="#madrid">🇪🇸 Мадрид | 13 сентября</a></li>
+            <li><span class="nav-number">15.</span><a href="#baku">🇦🇿 Баку | 26 сентября</a></li>
+            <li><span class="nav-number">16.</span><a href="#sepang">🇧🇭 Сепанг | 4 октября</a></li>
+            <li><span class="nav-number">17.</span><a href="#singapore">🇸🇬 Марина-Бей | 11 октября*</a></li>
+            <li><span class="nav-number">18.</span><a href="#austin">🇺🇸 Остин | 25 октября</a></li>
+            <li><span class="nav-number">19.</span><a href="#mexico">🇲🇽 Мехико | 1 ноября</a></li>
+            <li><span class="nav-number">20.</span><a href="#saopaulo">🇧🇷 Сан-Паулу | 8 ноября</a></li>
+            <li><span class="nav-number">21.</span><a href="#lasvegas">🇺🇸 Лас-Вегас | 22 ноября</a></li>
+            <li><span class="nav-number">22.</span><a href="#lusail">🇶🇦 Лусаил | 29 ноября</a></li>
+            <li><span class="nav-number">23.</span><a href="#yasmarina">🇦🇪 Абу-Даби | 6 декабря</a></li>
+          </ul>
+        </div>
+        <div id="races"></div>
+        <footer style="
+          text-align: center;
+          margin-top: 30px;
+          padding: 15px;
+          color: #666;
+          font-size: 14px;
+          font-family: Arial, sans-serif;
+        ">
+          © Andrey30
+          <span aria-hidden="true"> · </span>
+          <a href="privacy.html" style="
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+          ">
+            Политика конфиденциальности
+          </a>
+          <div style="margin-top: 8px; font-size: 12px; line-height: 1.4; opacity: 0.88;">
+            Неофициальный сайт для поклонников Формулы-1. Не связан с компаниями Formula 1. Названия команд, пилотов и соревнований указаны только для информации.
+          </div>
+        </footer>
+      </div></div>
+      <div class="tab-panel" id="panel-calendar"><div class="tab-panel-inner">
+        <div id="race-list"></div>
+        <footer style="
+          text-align: center;
+          margin-top: 30px;
+          padding: 15px;
+          color: #666;
+          font-size: 14px;
+          font-family: Arial, sans-serif;
+        ">
+          © Andrey30
+          <span aria-hidden="true"> · </span>
+          <a href="privacy.html" style="
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+          ">
+            Политика конфиденциальности
+          </a>
+          <div style="margin-top: 8px; font-size: 12px; line-height: 1.4; opacity: 0.88;">
+            Неофициальный сайт для поклонников Формулы-1. Не связан с компаниями Formula 1.
+          </div>
+        </footer>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="desktop-empty-side-arrow" id="desktop-empty-side-arrow-left" aria-hidden="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M15 5 L8 12 L15 19"></path>
+    </svg>
+  </div>
+  <div class="desktop-empty-side-arrow" id="desktop-empty-side-arrow-right" aria-hidden="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9 5 L16 12 L9 19"></path>
+    </svg>
+  </div>
+
+
+  <nav class="bottom-tabs-shell" aria-label="Разделы сайта">
+    <div class="t-tabs" id="bottom-tabs" role="tablist">
+      <span class="t-tabs-pill" id="bottom-tabs-pill" aria-hidden="true"></span>
+      <button type="button" class="t-tabs-arrow t-tabs-arrow-prev" id="bottom-tabs-prev" onclick="switchTab(Math.max(0, currentTab - 1))" aria-label="Предыдущая вкладка"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5 L8 12 L15 19"></path></svg></button>
+      <button type="button" class="t-tab" id="bottom-tab-drivers" role="tab" aria-selected="false" aria-label="Пилоты" onclick="switchTab(0)">
+        <span class="t-tab-text">Пилоты</span><span class="t-tab-icon" aria-hidden="true">👥</span>
+      </button>
+      <button type="button" class="t-tab" id="bottom-tab-results" role="tab" aria-selected="true" aria-label="Результаты" onclick="switchTab(1)">
+        <span class="t-tab-text">Результаты</span><span class="t-tab-icon" aria-hidden="true">🏆</span>
+      </button>
+      <button type="button" class="t-tab" id="bottom-tab-calendar" role="tab" aria-selected="false" aria-label="Календарь" onclick="switchTab(2)">
+        <span class="t-tab-text">Календарь</span><span class="t-tab-icon" aria-hidden="true">📅</span>
+      </button>
+      <button type="button" class="t-tabs-arrow t-tabs-arrow-next" id="bottom-tabs-next" onclick="switchTab(Math.min(2, currentTab + 1))" aria-label="Следующая вкладка"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5 L16 12 L9 19"></path></svg></button>
+    </div>
+  </nav>
+
+
+  <div class="copy-toast" id="copy-toast" role="status" aria-live="polite">Скопировано</div>
+
+
+  <button type="button" class="mobile-drop-up-button" id="mobile-drop-up-button" aria-label="Наверх" aria-hidden="true" tabindex="-1">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 15L12 8L19 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+
+
+  <aside class="install-offer" id="install-offer" role="dialog" aria-modal="true" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
+    <div class="install-offer-inner">
+      <div class="install-offer-icon" aria-hidden="true"><img src="icons/icon-192.png" alt=""></div>
+      <div>
+        <div class="install-offer-label">Быстрый доступ</div>
+        <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
+        <p class="install-offer-text" id="install-offer-text">
+          Добавьте «Гран-при 26» на главный экран и открывайте календарь и результаты одним нажатием.
+        </p>
+      </div>
+      <div class="install-offer-actions">
+        <button type="button" class="install-offer-button secondary" id="install-offer-later">Не сейчас</button>
+        <button type="button" class="install-offer-button primary" id="install-offer-install">Установить</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="photo-modal" id="photo-modal" onclick="closePhotoModal(event)">
+    <button class="photo-modal-close" onclick="closePhotoModal()" aria-label="Закрыть">✕</button>
+    <div class="photo-modal-content">
+      <img id="photo-modal-img" src="" alt="">
+      <div class="photo-modal-text">
+        <div class="photo-modal-caption" id="photo-modal-caption"></div>
+        <div class="photo-modal-bio" id="photo-modal-bio"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let resultsFileTimer = null;
+
+    const RESULTS_REMOTE_URLS = [
+      'https://raw.githubusercontent.com/siteand/andrey30/main/results.json',
+      'https://siteand.github.io/andrey30/results.json'
+    ];
+    const RESULTS_LOCAL_URL = 'results.json';
+
+    async function fetchResultsData(url) {
+      const separator = url.includes('?') ? '&' : '?';
+      const res = await fetch(url + separator + 't=' + Date.now(), {
+        cache: 'no-store',
+        mode: 'cors'
+      });
+
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+
+      const parsed = await res.json();
+      const data = parsed && parsed.data && typeof parsed.data === 'object'
+        ? parsed.data
+        : parsed;
+
+      if (!data || Array.isArray(data) || typeof data !== 'object') {
+        throw new Error('Неверная структура JSON');
+      }
+
+      return data;
+    }
+
+    async function loadResultsFile(force) {
+      let data = null;
+      let source = '';
+
+      for (const remoteUrl of RESULTS_REMOTE_URLS) {
+        try {
+          data = await fetchResultsData(remoteUrl);
+          source = remoteUrl;
+          break;
+        } catch (remoteError) {
+          console.warn('Не удалось загрузить результаты с GitHub:', remoteUrl, remoteError);
+        }
+      }
+
+      if (!data) {
+        source = RESULTS_LOCAL_URL;
+        try {
+          data = await fetchResultsData(RESULTS_LOCAL_URL);
+        } catch (localError) {
+          console.warn('Не удалось загрузить локальный results.json из репозитория:', localError);
+          return;
+        }
+      }
+
+      const newJson = JSON.stringify(data);
+      const oldJson = localStorage.getItem('f1_2026_results') || '{}';
+      if (force || newJson !== oldJson) {
+        localStorage.setItem('f1_2026_results', newJson);
+        localStorage.setItem('f1_2026_results_source', source);
+        if (typeof buildRaceCards === 'function') buildRaceCards(true);
+        if (typeof calculatePoints === 'function') calculatePoints();
+      }
+    }
+
+    function initResultsFileSync() {
+      loadResultsFile(true);
+      clearInterval(resultsFileTimer);
+      resultsFileTimer = setInterval(() => loadResultsFile(false), 30000);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(initResultsFileSync, 0);
+    } else {
+      window.addEventListener('DOMContentLoaded', initResultsFileSync);
+    }
+
+    const flagEmoji = {
+      "🇦🇺":"au","🇨🇳":"cn","🇯🇵":"jp","🇧🇭":"bh","🇸🇦":"sa",
+      "🇺🇸":"us","🇨🇦":"ca","🇲🇨":"mc","🇪🇸":"es","🇦🇹":"at",
+      "🇬🇧":"gb","🇧🇪":"be","🇭🇺":"hu","🇳🇱":"nl","🇮🇹":"it",
+      "🇦🇿":"az","🇸🇬":"sg","🇲🇽":"mx","🇧🇷":"br","🇶🇦":"qa",
+      "🇦🇪":"ae","🇫🇷":"fr","🇹🇭":"th","🇦🇷":"ar","🇫🇮":"fi",
+      "🇩🇪":"de","🇳🇿":"nz","🇸🇪":"se"
+    };
+
+    function flagHtml(emoji, size) {
+      size = size || 20;
+      const code = flagEmoji[emoji];
+      if (!code) return emoji;
+      return `<img src="flags/${code}.png" width="${Math.round(size * 1.5)}" height="${size}" style="vertical-align:middle;margin:0 8px;object-fit:cover;border-radius:2px;" alt="${emoji}">`;
+    }
+
+    function flagEl(emoji, size) {
+      size = size || 20;
+      const code = flagEmoji[emoji];
+      if (!code) {
+        const span = document.createElement('span');
+        span.textContent = emoji;
+        return span;
+      }
+      const img = document.createElement('img');
+      img.src = `flags/${code}.png`;
+      img.width = Math.round(size * 1.5);
+      img.height = size;
+      img.style.cssText = 'vertical-align:middle;margin:0 8px;object-fit:cover;border-radius:2px;';
+      img.alt = emoji;
+      return img;
+    }
+
+    let currentTab = 1;
+    const track = document.getElementById('tabs-track');
+    const viewport = document.getElementById('tabs-viewport');
+
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(-33.3333%)';
+
+    requestAnimationFrame(() => {
+      track.style.transition = '';
+      resetHorizontalDrift(true);
+    });
+
+    function activePanel() {
+      if (currentTab === 0) return document.getElementById('panel-drivers');
+      if (currentTab === 1) return document.getElementById('panel-results');
+      return document.getElementById('panel-calendar');
+    }
+
+
+    function resetHorizontalDrift(resetTop) {
+      const keepTop = resetTop ? 0 : (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
+      try { window.scrollTo(0, keepTop); } catch(e) {}
+      try { if (document.scrollingElement) document.scrollingElement.scrollLeft = 0; } catch(e) {}
+      try { document.documentElement.scrollLeft = 0; } catch(e) {}
+      try { document.body.scrollLeft = 0; } catch(e) {}
+      ['tabs-viewport','tabs-track','panel-drivers','panel-results','panel-calendar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          try { el.scrollLeft = 0; } catch(e) {}
+        }
+      });
+    }
+
+    function updateHeaderHeight() {
+      const h = document.querySelector('.app-header').offsetHeight;
+      document.documentElement.style.setProperty('--header-h', h + 'px');
+    }
+
+    function switchTab(index) {
+      resetHorizontalDrift(false);
+      currentTab = index;
+      const offset = -(index * 33.3333);
+      track.style.transform = `translateX(${offset}%)`;
+      document.getElementById('tab-drivers').classList.toggle('active', index === 0);
+      document.getElementById('tab-results').classList.toggle('active', index === 1);
+      document.getElementById('tab-calendar').classList.toggle('active', index === 2);
+      try { localStorage.setItem('f1_active_tab', index); } catch(e) {}
+      requestAnimationFrame(() => {
+        resetHorizontalDrift(false);
+        requestAnimationFrame(() => {
+          resetHorizontalDrift(false);
+        });
+      });
+      if (typeof prepareDesktopEmptySideArrowsForTabSwitch === 'function') {
+        prepareDesktopEmptySideArrowsForTabSwitch();
+      }
+    }
+
+    const desktopEmptySideArrowLeft = document.getElementById('desktop-empty-side-arrow-left');
+    const desktopEmptySideArrowRight = document.getElementById('desktop-empty-side-arrow-right');
+    const desktopEmptySideMedia = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 900px)');
+    let desktopEmptySideIsSwitching = false;
+
+    function getDesktopEmptySideContentRect() {
+      const scrollbarSafe = 28;
+      const contentWidth = Math.min(700, window.innerWidth);
+      const left = Math.max(0, (window.innerWidth - contentWidth) / 2);
+      const right = left + contentWidth;
+      return { left, right, scrollbarSafe };
+    }
+
+    function hideDesktopEmptySideArrows() {
+      if (!desktopEmptySideArrowLeft || !desktopEmptySideArrowRight) return;
+      desktopEmptySideArrowLeft.hidden = true;
+      desktopEmptySideArrowRight.hidden = true;
+    }
+
+    function isDesktopEmptySideNavigationAllowed() {
+      return desktopEmptySideMedia.matches && !document.getElementById('photo-modal')?.classList.contains('open');
+    }
+
+    function updateDesktopEmptySideArrows() {
+      if (!desktopEmptySideArrowLeft || !desktopEmptySideArrowRight) return;
+
+      if (!isDesktopEmptySideNavigationAllowed() || desktopEmptySideIsSwitching) {
+        hideDesktopEmptySideArrows();
+        return;
+      }
+
+      const rect = getDesktopEmptySideContentRect();
+      const minEmptySideWidth = 90;
+      const leftEmptyWidth = rect.left;
+      const rightEmptyWidth = window.innerWidth - rect.right - rect.scrollbarSafe;
+
+      desktopEmptySideArrowLeft.style.left = Math.max(30, leftEmptyWidth / 2) + 'px';
+      desktopEmptySideArrowRight.style.left = (rect.right + Math.max(30, rightEmptyWidth / 2)) + 'px';
+
+      desktopEmptySideArrowLeft.hidden = currentTab <= 0 || leftEmptyWidth < minEmptySideWidth;
+      desktopEmptySideArrowRight.hidden = currentTab >= 2 || rightEmptyWidth < minEmptySideWidth;
+    }
+
+    function prepareDesktopEmptySideArrowsForTabSwitch() {
+      desktopEmptySideIsSwitching = true;
+      hideDesktopEmptySideArrows();
+
+      window.clearTimeout(prepareDesktopEmptySideArrowsForTabSwitch.timer);
+      prepareDesktopEmptySideArrowsForTabSwitch.timer = window.setTimeout(() => {
+        desktopEmptySideIsSwitching = false;
+        updateDesktopEmptySideArrows();
+      }, 430);
+    }
+
+    function clickEmptySideToSwitchTab(event) {
+      if (!isDesktopEmptySideNavigationAllowed()) return;
+      if (event.defaultPrevented || event.button !== 0) return;
+
+      const ignored = event.target.closest(
+        'a, button, input, select, textarea, label, summary, .photo-modal, .tab-bar, .app-header'
+      );
+      if (ignored) return;
+
+      const rect = getDesktopEmptySideContentRect();
+      const x = event.clientX;
+
+      if (x >= window.innerWidth - rect.scrollbarSafe) return;
+
+      if (x < rect.left && currentTab > 0) {
+        switchTab(currentTab - 1);
+      } else if (x > rect.right && currentTab < 2) {
+        switchTab(currentTab + 1);
+      }
+    }
+
+    document.addEventListener('click', clickEmptySideToSwitchTab);
+
+    window.addEventListener('resize', updateDesktopEmptySideArrows);
+    window.addEventListener('orientationchange', updateDesktopEmptySideArrows);
+
+    if (typeof desktopEmptySideMedia.addEventListener === 'function') {
+      desktopEmptySideMedia.addEventListener('change', updateDesktopEmptySideArrows);
+    } else if (typeof desktopEmptySideMedia.addListener === 'function') {
+      desktopEmptySideMedia.addListener(updateDesktopEmptySideArrows);
+    }
+
+    track.addEventListener('transitionend', (event) => {
+      if (event.propertyName === 'transform') {
+        desktopEmptySideIsSwitching = false;
+        updateDesktopEmptySideArrows();
+      }
+    });
+
+    requestAnimationFrame(updateDesktopEmptySideArrows);
+    window.addEventListener('load', updateDesktopEmptySideArrows);
+
+
+    let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+    viewport.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    viewport.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      const dt = Date.now() - touchStartTime;
+      if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 50 && dt < 400) {
+        if (dx < 0 && currentTab < 2) switchTab(currentTab + 1);
+        else if (dx > 0 && currentTab > 0) switchTab(currentTab - 1);
+      }
+    }, { passive: true });
+
+    try { localStorage.removeItem('f1_active_tab'); } catch(e) {}
+
+    const races = [
+      {
+            name: "1. Австралийский GP (Австралия, Мельбурн)",
+            date: "2026-03-08",
+            time: "07:00",
+            location: "Melbourne (Albert Park)",
+            laps: 58,
+            length: "5.278 км",
+            id: "melbourne",
+            hasSprint: false
+      },
+      {
+            name: "2. Китайский GP (Китай, Шанхай)*",
+            date: "2026-03-15",
+            time: "10:00",
+            location: "Shanghai International",
+            laps: 56,
+            length: "5.451 км",
+            id: "shanghai",
+            hasSprint: true
+      },
+      {
+            name: "3. Японский GP (Япония, Сузука)",
+            date: "2026-03-29",
+            time: "08:00",
+            location: "Suzuka",
+            laps: 53,
+            length: "5.807 км",
+            id: "suzuka",
+            hasSprint: false
+      },
+      {
+            name: "16. Бахрейнский GP в Малайзии (Малайзия, Сепанг)",
+            date: "2026-10-04",
+            time: "10:00",
+            timeTbd: true,
+            weekendStart: "2026-10-02",
+            weekendLabel: "2–4 октября",
+            location: "Sepang International Circuit",
+            laps: 56,
+            length: "5.543 км",
+            id: "sepang",
+            hasSprint: false
+      },
+      {
+            name: "Саудовский GP (Саудовская Аравия, Джидда)",
+            date: "2026-04-19",
+            time: "20:00",
+            location: "Jeddah",
+            laps: 50,
+            length: "6.174 км",
+            id: "jeddah",
+            hasSprint: false,
+            cancelled: true
+      },
+      {
+            name: "4. Майами GP (США, Майами)*",
+            date: "2026-05-03",
+            time: "20:00",
+            location: "Miami",
+            laps: 57,
+            length: "5.412 км",
+            id: "miami",
+            hasSprint: true
+      },
+      {
+            name: "5. Канадский GP (Канада, Монреаль)*",
+            date: "2026-05-24",
+            time: "23:00",
+            location: "Montreal",
+            laps: 70,
+            length: "4.361 км",
+            id: "montreal",
+            hasSprint: true
+      },
+      {
+            name: "6. Монако GP (Монако, Монако)",
+            date: "2026-06-07",
+            time: "16:00",
+            location: "Monte Carlo",
+            laps: 78,
+            length: "3.337 км",
+            id: "monaco",
+            hasSprint: false
+      },
+      {
+            name: "7. Испанский GP (Испания, Барселона)",
+            date: "2026-06-14",
+            time: "16:00",
+            location: "Barcelona‑Montmeló",
+            laps: 66,
+            length: "4.657 км",
+            id: "barcelona",
+            hasSprint: false
+      },
+      {
+            name: "8. Австрийский GP (Австрия, Шпильберг)",
+            date: "2026-06-28",
+            time: "16:00",
+            location: "Spielberg",
+            laps: 71,
+            length: "4.326 км",
+            id: "spielberg",
+            hasSprint: false
+      },
+      {
+            name: "9. Британский GP (Великобритания, Сильверстоун)*",
+            date: "2026-07-05",
+            time: "17:00",
+            location: "Silverstone",
+            laps: 52,
+            length: "5.891 км",
+            id: "silverstone",
+            hasSprint: true
+      },
+      {
+            name: "10. Бельгийский GP (Бельгия, Спа)",
+            date: "2026-07-19",
+            time: "16:00",
+            location: "Spa‑Francorchamps",
+            laps: 44,
+            length: "7.004 км",
+            id: "spa",
+            hasSprint: false
+      },
+      {
+            name: "11. Венгерский GP (Венгрия, Хунгароринг)",
+            date: "2026-07-26",
+            time: "16:00",
+            location: "Budapest",
+            laps: 70,
+            length: "4.381 км",
+            id: "budapest",
+            hasSprint: false
+      },
+      {
+            name: "12. Нидерландский GP (Нидерланды, Зандворт)*",
+            date: "2026-08-23",
+            time: "16:00",
+            location: "Zandvoort",
+            laps: 72,
+            length: "4.259 км",
+            id: "zandvoort",
+            hasSprint: true
+      },
+      {
+            name: "13. Итальянский GP (Италия, Монца)",
+            date: "2026-09-06",
+            time: "16:00",
+            location: "Monza",
+            laps: 53,
+            length: "5.793 км",
+            id: "monza",
+            hasSprint: false
+      },
+      {
+            name: "14. Испанский GP (Испания, Мадрид)",
+            date: "2026-09-13",
+            time: "16:00",
+            location: "Madrid",
+            laps: 57,
+            length: "5.416 км",
+            id: "madrid",
+            hasSprint: false
+      },
+      {
+            name: "15. Азербайджанский GP (Азербайджан, Баку)",
+            date: "2026-09-26",
+            time: "14:00",
+            location: "Baku",
+            laps: 51,
+            length: "6.003 км",
+            id: "baku",
+            hasSprint: false
+      },
+      {
+            name: "17. Сингапурский GP (Сингапур, Марина-Бей)*",
+            date: "2026-10-11",
+            time: "15:00",
+            location: "Singapore",
+            laps: 62,
+            length: "4.927 км",
+            id: "singapore",
+            hasSprint: true
+      },
+      {
+            name: "18. США GP (США, Остин)",
+            date: "2026-10-25",
+            time: "23:00",
+            location: "Austin (COTA)",
+            laps: 56,
+            length: "5.513 км",
+            id: "austin",
+            hasSprint: false
+      },
+      {
+            name: "19. Мексика GP (Мексика, Мехико)",
+            date: "2026-11-01",
+            time: "23:00",
+            location: "Mexico City",
+            laps: 71,
+            length: "4.304 км",
+            id: "mexico",
+            hasSprint: false
+      },
+      {
+            name: "20. Сан-Паулу GP (Бразилия, Сан-Паулу)",
+            date: "2026-11-08",
+            time: "20:00",
+            location: "Sao Paulo",
+            laps: 71,
+            length: "4.309 км",
+            id: "saopaulo",
+            hasSprint: false
+      },
+      {
+            name: "21. Лас-Вегас GP (США, Лас-Вегас)",
+            date: "2026-11-22",
+            time: "07:00",
+            location: "Las Vegas",
+            laps: 50,
+            length: "6.201 км",
+            id: "lasvegas",
+            hasSprint: false
+      },
+      {
+            name: "22. Катар GP (Катар, Лусаил)",
+            date: "2026-11-29",
+            time: "19:00",
+            location: "Lusail",
+            laps: 57,
+            length: "5.419 км",
+            id: "lusail",
+            hasSprint: false
+      },
+      {
+            name: "23. Абу-Даби GP (ОАЭ, Яс-Марина)",
+            date: "2026-12-06",
+            time: "16:00",
+            location: "Yas Marina",
+            laps: 58,
+            length: "5.281 км",
+            id: "yasmarina",
+            hasSprint: false
+      }
+];
+
+    const racesCalendar = [
+      {
+            num: 1,
+            name: "Австралийский GP",
+            city: "Мельбурн",
+            country: "Австралия",
+            flag: "🇦🇺",
+            date: "2026-03-08",
+            time: "07:00",
+            location: "Melbourne (Albert Park)",
+            laps: 58,
+            length: "5.278 км",
+            id: "melbourne",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 6 марта",
+                        name: "Практика 1",
+                        time: "04:30"
+                  },
+                  {
+                        day: "Пятница, 6 марта",
+                        name: "Практика 2",
+                        time: "08:00"
+                  },
+                  {
+                        day: "Суббота, 7 марта",
+                        name: "Практика 3",
+                        time: "04:30"
+                  },
+                  {
+                        day: "Суббота, 7 марта",
+                        name: "Квалификация",
+                        time: "08:00"
+                  },
+                  {
+                        day: "Воскресенье, 8 марта",
+                        name: "Гонка",
+                        time: "07:00"
+                  }
+            ]
+      },
+      {
+            num: 2,
+            name: "Китайский GP",
+            city: "Шанхай",
+            country: "Китай",
+            flag: "🇨🇳",
+            date: "2026-03-15",
+            time: "10:00",
+            location: "Shanghai International",
+            laps: 56,
+            length: "5.451 км",
+            id: "shanghai",
+            hasSprint: true,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 13 марта",
+                        name: "Практика 1",
+                        time: "06:30"
+                  },
+                  {
+                        day: "Пятница, 13 марта",
+                        name: "Спринт-квалификация",
+                        time: "10:30"
+                  },
+                  {
+                        day: "Суббота, 14 марта",
+                        name: "Спринт",
+                        time: "06:00"
+                  },
+                  {
+                        day: "Суббота, 14 марта",
+                        name: "Квалификация",
+                        time: "10:00"
+                  },
+                  {
+                        day: "Воскресенье, 15 марта",
+                        name: "Гонка",
+                        time: "10:00"
+                  }
+            ]
+      },
+      {
+            num: 3,
+            name: "Японский GP",
+            city: "Сузука",
+            country: "Япония",
+            flag: "🇯🇵",
+            date: "2026-03-29",
+            time: "08:00",
+            location: "Suzuka",
+            laps: 53,
+            length: "5.807 км",
+            id: "suzuka",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 27 марта",
+                        name: "Практика 1",
+                        time: "05:30"
+                  },
+                  {
+                        day: "Пятница, 27 марта",
+                        name: "Практика 2",
+                        time: "09:00"
+                  },
+                  {
+                        day: "Суббота, 28 марта",
+                        name: "Практика 3",
+                        time: "05:30"
+                  },
+                  {
+                        day: "Суббота, 28 марта",
+                        name: "Квалификация",
+                        time: "09:00"
+                  },
+                  {
+                        day: "Воскресенье, 29 марта",
+                        name: "Гонка",
+                        time: "08:00"
+                  }
+            ]
+      },
+      {
+            num: 4,
+            name: "Майами GP",
+            city: "Майами",
+            country: "США",
+            flag: "🇺🇸",
+            date: "2026-05-03",
+            time: "20:00",
+            location: "Miami",
+            laps: 57,
+            length: "5.412 км",
+            id: "miami",
+            hasSprint: true,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 1 мая",
+                        name: "Практика 1",
+                        time: "19:00"
+                  },
+                  {
+                        day: "Пятница, 1 мая",
+                        name: "Спринт-квалификация",
+                        time: "23:30"
+                  },
+                  {
+                        day: "Суббота, 2 мая",
+                        name: "Спринт",
+                        time: "19:00"
+                  },
+                  {
+                        day: "Суббота, 2 мая",
+                        name: "Квалификация",
+                        time: "23:00"
+                  },
+                  {
+                        day: "Воскресенье, 3 мая",
+                        name: "Гонка",
+                        time: "20:00"
+                  }
+            ]
+      },
+      {
+            num: 5,
+            name: "Канадский GP",
+            city: "Монреаль",
+            country: "Канада",
+            flag: "🇨🇦",
+            date: "2026-05-24",
+            time: "23:00",
+            location: "Montreal",
+            laps: 70,
+            length: "4.361 км",
+            id: "montreal",
+            hasSprint: true,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 22 мая",
+                        name: "Практика 1",
+                        time: "19:30"
+                  },
+                  {
+                        day: "Пятница, 22 мая",
+                        name: "Спринт-квалификация",
+                        time: "23:30"
+                  },
+                  {
+                        day: "Суббота, 23 мая",
+                        name: "Спринт",
+                        time: "19:00"
+                  },
+                  {
+                        day: "Суббота, 23 мая",
+                        name: "Квалификация",
+                        time: "23:00"
+                  },
+                  {
+                        day: "Воскресенье, 24 мая",
+                        name: "Гонка",
+                        time: "23:00"
+                  }
+            ]
+      },
+      {
+            num: 6,
+            name: "Монако GP",
+            city: "Монте-Карло",
+            country: "Монако",
+            flag: "🇲🇨",
+            date: "2026-06-07",
+            time: "16:00",
+            location: "Monte Carlo",
+            laps: 78,
+            length: "3.337 км",
+            id: "monaco",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 5 июня",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 5 июня",
+                        name: "Практика 2",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Суббота, 6 июня",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 6 июня",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 7 июня",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 7,
+            name: "Испанский GP",
+            city: "Барселона",
+            country: "Испания",
+            flag: "🇪🇸",
+            date: "2026-06-14",
+            time: "16:00",
+            location: "Barcelona‑Montmeló",
+            laps: 66,
+            length: "4.657 км",
+            id: "barcelona",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 12 июня",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 12 июня",
+                        name: "Практика 2",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Суббота, 13 июня",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 13 июня",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 14 июня",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 8,
+            name: "Австрийский GP",
+            city: "Шпильберг",
+            country: "Австрия",
+            flag: "🇦🇹",
+            date: "2026-06-28",
+            time: "16:00",
+            location: "Spielberg",
+            laps: 71,
+            length: "4.326 км",
+            id: "spielberg",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 26 июня",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 26 июня",
+                        name: "Практика 2",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Суббота, 27 июня",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 27 июня",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 28 июня",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 9,
+            name: "Британский GP",
+            city: "Сильверстоун",
+            country: "Великобритания",
+            flag: "🇬🇧",
+            date: "2026-07-05",
+            time: "17:00",
+            location: "Silverstone",
+            laps: 52,
+            length: "5.891 км",
+            id: "silverstone",
+            hasSprint: true,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 3 июля",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 3 июля",
+                        name: "Спринт-квалификация",
+                        time: "18:30"
+                  },
+                  {
+                        day: "Суббота, 4 июля",
+                        name: "Спринт",
+                        time: "14:00"
+                  },
+                  {
+                        day: "Суббота, 4 июля",
+                        name: "Квалификация",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Воскресенье, 5 июля",
+                        name: "Гонка",
+                        time: "17:00"
+                  }
+            ]
+      },
+      {
+            num: 10,
+            name: "Бельгийский GP",
+            city: "Спа",
+            country: "Бельгия",
+            flag: "🇧🇪",
+            date: "2026-07-19",
+            time: "16:00",
+            location: "Spa‑Francorchamps",
+            laps: 44,
+            length: "7.004 км",
+            id: "spa",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 17 июля",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 17 июля",
+                        name: "Практика 2",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Суббота, 18 июля",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 18 июля",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 19 июля",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 11,
+            name: "Венгерский GP",
+            city: "Хунгароринг",
+            country: "Венгрия",
+            flag: "🇭🇺",
+            date: "2026-07-26",
+            time: "16:00",
+            location: "Budapest",
+            laps: 70,
+            length: "4.381 км",
+            id: "budapest",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 24 июля",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 24 июля",
+                        name: "Практика 2",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Суббота, 25 июля",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 25 июля",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 26 июля",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 12,
+            name: "Нидерландский GP",
+            city: "Зандворт",
+            country: "Нидерланды",
+            flag: "🇳🇱",
+            date: "2026-08-23",
+            time: "16:00",
+            location: "Zandvoort",
+            laps: 72,
+            length: "4.259 км",
+            id: "zandvoort",
+            hasSprint: true,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 21 августа",
+                        name: "Практика 1",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Пятница, 21 августа",
+                        name: "Спринт-квалификация",
+                        time: "17:30"
+                  },
+                  {
+                        day: "Суббота, 22 августа",
+                        name: "Спринт",
+                        time: "13:00"
+                  },
+                  {
+                        day: "Суббота, 22 августа",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 23 августа",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 13,
+            name: "Итальянский GP",
+            city: "Монца",
+            country: "Италия",
+            flag: "🇮🇹",
+            date: "2026-09-06",
+            time: "16:00",
+            location: "Monza",
+            laps: 53,
+            length: "5.793 км",
+            id: "monza",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 4 сентября",
+                        name: "Практика 1",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Пятница, 4 сентября",
+                        name: "Практика 2",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Суббота, 5 сентября",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 5 сентября",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 6 сентября",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 14,
+            name: "Мадридский GP",
+            city: "Мадрид",
+            country: "Испания",
+            flag: "🇪🇸",
+            date: "2026-09-13",
+            time: "16:00",
+            location: "Madrid",
+            laps: 57,
+            length: "5.416 км",
+            id: "madrid",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 11 сентября",
+                        name: "Практика 1",
+                        time: "14:30"
+                  },
+                  {
+                        day: "Пятница, 11 сентября",
+                        name: "Практика 2",
+                        time: "18:00"
+                  },
+                  {
+                        day: "Суббота, 12 сентября",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 12 сентября",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 13 сентября",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      },
+      {
+            num: 15,
+            name: "Азербайджанский GP",
+            city: "Баку",
+            country: "Азербайджан",
+            flag: "🇦🇿",
+            date: "2026-09-26",
+            time: "14:00",
+            location: "Baku",
+            laps: 51,
+            length: "6.003 км",
+            id: "baku",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Четверг, 24 сентября",
+                        name: "Практика 1",
+                        time: "11:30"
+                  },
+                  {
+                        day: "Четверг, 24 сентября",
+                        name: "Практика 2",
+                        time: "15:00"
+                  },
+                  {
+                        day: "Пятница, 25 сентября",
+                        name: "Практика 3",
+                        time: "11:30"
+                  },
+                  {
+                        day: "Пятница, 25 сентября",
+                        name: "Квалификация",
+                        time: "15:00"
+                  },
+                  {
+                        day: "Суббота, 26 сентября",
+                        name: "Гонка",
+                        time: "14:00"
+                  }
+            ]
+      },
+      {
+            num: 16,
+            name: "Бахрейнский GP в Малайзии",
+            city: "Сепанг",
+            country: "Малайзия",
+            flag: "🇧🇭",
+            date: "2026-10-04",
+            time: "10:00",
+            timeTbd: true,
+            weekendStart: "2026-10-02",
+            weekendLabel: "2–4 октября",
+            location: "Sepang International Circuit",
+            laps: 56,
+            length: "5.543 км",
+            id: "sepang",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 2 октября",
+                        name: "Практика 1",
+                        timeTbd: true
+                  },
+                  {
+                        day: "Пятница, 2 октября",
+                        name: "Практика 2",
+                        timeTbd: true
+                  },
+                  {
+                        day: "Суббота, 3 октября",
+                        name: "Практика 3",
+                        timeTbd: true
+                  },
+                  {
+                        day: "Суббота, 3 октября",
+                        name: "Квалификация",
+                        timeTbd: true
+                  },
+                  {
+                        day: "Воскресенье, 4 октября",
+                        name: "Гонка",
+                        timeTbd: true
+                  }
+            ]
+      },
+      {
+            num: 17,
+            name: "Сингапурский GP",
+            city: "Марина-Бей",
+            country: "Сингапур",
+            flag: "🇸🇬",
+            date: "2026-10-11",
+            time: "15:00",
+            location: "Singapore",
+            laps: 62,
+            length: "4.927 км",
+            id: "singapore",
+            hasSprint: true,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 9 октября",
+                        name: "Практика 1",
+                        time: "11:30"
+                  },
+                  {
+                        day: "Пятница, 9 октября",
+                        name: "Спринт-квалификация",
+                        time: "15:30"
+                  },
+                  {
+                        day: "Суббота, 10 октября",
+                        name: "Спринт",
+                        time: "12:00"
+                  },
+                  {
+                        day: "Суббота, 10 октября",
+                        name: "Квалификация",
+                        time: "16:00"
+                  },
+                  {
+                        day: "Воскресенье, 11 октября",
+                        name: "Гонка",
+                        time: "15:00"
+                  }
+            ]
+      },
+      {
+            num: 18,
+            name: "США GP",
+            city: "Остин",
+            country: "США",
+            flag: "🇺🇸",
+            date: "2026-10-25",
+            time: "23:00",
+            location: "Austin (COTA)",
+            laps: 56,
+            length: "5.513 км",
+            id: "austin",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 23 октября",
+                        name: "Практика 1",
+                        time: "20:30"
+                  },
+                  {
+                        day: "Суббота, 24 октября",
+                        name: "Практика 2",
+                        time: "00:00"
+                  },
+                  {
+                        day: "Суббота, 24 октября",
+                        name: "Практика 3",
+                        time: "20:30"
+                  },
+                  {
+                        day: "Воскресенье, 25 октября",
+                        name: "Квалификация",
+                        time: "00:00"
+                  },
+                  {
+                        day: "Воскресенье, 25 октября",
+                        name: "Гонка",
+                        time: "23:00"
+                  }
+            ]
+      },
+      {
+            num: 19,
+            name: "Мексиканский GP",
+            city: "Мехико",
+            country: "Мексика",
+            flag: "🇲🇽",
+            date: "2026-11-01",
+            time: "23:00",
+            location: "Mexico City",
+            laps: 71,
+            length: "4.304 км",
+            id: "mexico",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 30 октября",
+                        name: "Практика 1",
+                        time: "21:30"
+                  },
+                  {
+                        day: "Суббота, 31 октября",
+                        name: "Практика 2",
+                        time: "01:00"
+                  },
+                  {
+                        day: "Суббота, 31 октября",
+                        name: "Практика 3",
+                        time: "20:30"
+                  },
+                  {
+                        day: "Воскресенье, 1 ноября",
+                        name: "Квалификация",
+                        time: "00:00"
+                  },
+                  {
+                        day: "Воскресенье, 1 ноября",
+                        name: "Гонка",
+                        time: "23:00"
+                  }
+            ]
+      },
+      {
+            num: 20,
+            name: "Сан-Паулу GP",
+            city: "Сан-Паулу",
+            country: "Бразилия",
+            flag: "🇧🇷",
+            date: "2026-11-08",
+            time: "20:00",
+            location: "Sao Paulo",
+            laps: 71,
+            length: "4.309 км",
+            id: "saopaulo",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 6 ноября",
+                        name: "Практика 1",
+                        time: "18:30"
+                  },
+                  {
+                        day: "Пятница, 6 ноября",
+                        name: "Практика 2",
+                        time: "22:00"
+                  },
+                  {
+                        day: "Суббота, 7 ноября",
+                        name: "Практика 3",
+                        time: "17:30"
+                  },
+                  {
+                        day: "Суббота, 7 ноября",
+                        name: "Квалификация",
+                        time: "21:00"
+                  },
+                  {
+                        day: "Воскресенье, 8 ноября",
+                        name: "Гонка",
+                        time: "20:00"
+                  }
+            ]
+      },
+      {
+            num: 21,
+            name: "Лас-Вегас GP",
+            city: "Лас-Вегас",
+            country: "США",
+            flag: "🇺🇸",
+            date: "2026-11-22",
+            time: "07:00",
+            location: "Las Vegas",
+            laps: 50,
+            length: "6.201 км",
+            id: "lasvegas",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 20 ноября",
+                        name: "Практика 1",
+                        time: "03:30"
+                  },
+                  {
+                        day: "Пятница, 20 ноября",
+                        name: "Практика 2",
+                        time: "07:00"
+                  },
+                  {
+                        day: "Суббота, 21 ноября",
+                        name: "Практика 3",
+                        time: "03:30"
+                  },
+                  {
+                        day: "Суббота, 21 ноября",
+                        name: "Квалификация",
+                        time: "07:00"
+                  },
+                  {
+                        day: "Воскресенье, 22 ноября",
+                        name: "Гонка",
+                        time: "07:00"
+                  }
+            ]
+      },
+      {
+            num: 22,
+            name: "Катар GP",
+            city: "Лусаил",
+            country: "Катар",
+            flag: "🇶🇦",
+            date: "2026-11-29",
+            time: "19:00",
+            location: "Lusail",
+            laps: 57,
+            length: "5.419 км",
+            id: "lusail",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 27 ноября",
+                        name: "Практика 1",
+                        time: "16:30"
+                  },
+                  {
+                        day: "Пятница, 27 ноября",
+                        name: "Практика 2",
+                        time: "20:00"
+                  },
+                  {
+                        day: "Суббота, 28 ноября",
+                        name: "Практика 3",
+                        time: "17:30"
+                  },
+                  {
+                        day: "Суббота, 28 ноября",
+                        name: "Квалификация",
+                        time: "21:00"
+                  },
+                  {
+                        day: "Воскресенье, 29 ноября",
+                        name: "Гонка",
+                        time: "19:00"
+                  }
+            ]
+      },
+      {
+            num: 23,
+            name: "Абу-Даби GP",
+            city: "Яс-Марина",
+            country: "ОАЭ",
+            flag: "🇦🇪",
+            date: "2026-12-06",
+            time: "16:00",
+            location: "Yas Marina",
+            laps: 58,
+            length: "5.281 км",
+            id: "yasmarina",
+            hasSprint: false,
+            cancelled: false,
+            sessions: [
+                  {
+                        day: "Пятница, 4 декабря",
+                        name: "Практика 1",
+                        time: "12:30"
+                  },
+                  {
+                        day: "Пятница, 4 декабря",
+                        name: "Практика 2",
+                        time: "16:00"
+                  },
+                  {
+                        day: "Суббота, 5 декабря",
+                        name: "Практика 3",
+                        time: "13:30"
+                  },
+                  {
+                        day: "Суббота, 5 декабря",
+                        name: "Квалификация",
+                        time: "17:00"
+                  },
+                  {
+                        day: "Воскресенье, 6 декабря",
+                        name: "Гонка",
+                        time: "16:00"
+                  }
+            ]
+      }
+];
+
+    function formatDate(dateStr) {
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('ru-RU', options);
+    }
+
+    const pilotConstructorMap = {
+      "Оскар Пиастри": "McLaren","Ландо Норрис": "McLaren","Макс Ферстаппен": "Red Bull","Исак Хаджар": "Red Bull",
+      "Шарль Леклер": "Ferrari","Льюис Хэмилтон": "Ferrari","Джордж Рассел": "Mercedes","Кими Антонелли": "Mercedes",
+      "Лэнс Стролл": "Aston Martin","Фернандо Алонсо": "Aston Martin","Пьер Гасли": "Alpine","Франко Колапинто": "Alpine",
+      "Лиам Лоусон": "Racing Bulls","Арвид Линблад": "Racing Bulls","Эстебан Окон": "Haas","Оливер Берман": "Haas",
+      "Алекс Албон": "Williams","Карлос Сайнс": "Williams","Нико Хюлькенберг": "Audi","Габриэл Бортолето": "Audi",
+      "Серхио Перес": "Cadillac","Вальттери Боттас": "Cadillac",
+    };
+    const pilotCountryMap = {
+      "Оскар Пиастри": "🇦🇺","Ландо Норрис": "🇬🇧","Макс Ферстаппен": "🇳🇱",
+      "Исак Хаджар": "🇫🇷","Шарль Леклер": "🇲🇨","Льюис Хэмилтон": "🇬🇧",
+      "Джордж Рассел": "🇬🇧","Кими Антонелли": "🇮🇹","Лэнс Стролл": "🇨🇦",
+      "Фернандо Алонсо": "🇪🇸","Алекс Албон": "🇹🇭","Карлос Сайнс": "🇪🇸",
+      "Эстебан Окон": "🇫🇷","Оливер Берман": "🇬🇧","Пьер Гасли": "🇫🇷",
+      "Франко Колапинто": "🇦🇷","Серхио Перес": "🇲🇽","Вальттери Боттас": "🇫🇮",
+      "Нико Хюлькенберг": "🇩🇪","Габриэл Бортолето": "🇧🇷","Лиам Лоусон": "🇳🇿",
+      "Арвид Линблад": "🇸🇪"
+    };
+    const constructorLogos = {
+      "McLaren": "photos/teams/mclaren/logo.png",
+      "Red Bull": "photos/teams/redbull/logo.png",
+      "Ferrari": "photos/teams/ferrari/logo.png",
+      "Mercedes": "photos/teams/mercedes/logo.png",
+      "Aston Martin": "photos/teams/astonmartin/logo.png",
+      "Alpine": "photos/teams/alpine/logo.png",
+      "Racing Bulls": "photos/teams/racingbulls/logo.png",
+      "Haas": "photos/teams/haas/logo.png",
+      "Williams": "photos/teams/williams/logo.png",
+      "Audi": "photos/teams/audi/logo.png",
+      "Cadillac": "photos/teams/cadillac/logo.png"
+    };
+    const constructorColors = {
+      "McLaren":"#FF8700","Red Bull":"#1E41FF","Ferrari":"#DC0000","Mercedes":"#00D2BE",
+      "Aston Martin":"#006F62","Alpine":"#0090FF","Racing Bulls":"#2B4562","Haas":"#B6BABD",
+      "Williams":"#005AFF","Audi":"#000000","Cadillac":"#1E2F4F",
+    };
+    const OFFICIAL_ORDER = [
+      "Оскар Пиастри","Ландо Норрис","Макс Ферстаппен","Джордж Рассел","Шарль Леклер","Льюис Хэмилтон",
+      "Кими Антонелли","Алекс Албон","Эстебан Окон","Исак Хаджар","Нико Хюлькенберг","Лэнс Стролл",
+      "Карлос Сайнс","Пьер Гасли","Арвид Линблад","Фернандо Алонсо","Оливер Берман","Лиам Лоусон",
+      "Габриэл Бортолето","Франко Колапинто","Вальттери Боттас","Серхио Перес"
+    ];
+
+    const raceFieldNames = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
+    const sprintFieldNames = ['first','second','third','fourth','fifth','sixth','seventh','eighth'];
+    const expandedState = {};
+    let lastDataSnapshot = null;
+
+    function buildRaceCards(force) {
+      const rawData = localStorage.getItem('f1_2026_results') || '{}';
+      if (!force && rawData === lastDataSnapshot) return;
+      lastDataSnapshot = rawData;
+      document.querySelectorAll('.collapse-toggle').forEach(t => {
+        const idx = t.dataset.index;
+        if (idx !== undefined && t.getAttribute('aria-expanded') === 'true') {
+          expandedState[idx] = true;
+        }
+      });
+      const saved = JSON.parse(rawData);
+      const container = document.getElementById('races');
+      container.innerHTML = '';
+      races
+        .map((race, index) => ({ race, index }))
+        .filter(({ race }) => !race.cancelled)
+        .sort((a, b) => new Date(`${a.race.date}T${a.race.time}:00+03:00`) - new Date(`${b.race.date}T${b.race.time}:00+03:00`))
+        .forEach(({ race, index }) => {
+        const div = document.createElement('div');
+        div.id = race.id;
+        if (race.cancelled) {
+          div.className = 'race cancelled-result';
+          div.innerHTML = `<span class="badge badge-cancelled">ОТМЕНЕНО</span><h2>${race.name}</h2><div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('${race.id}', this);return false;" aria-label="Скопировать ссылку на эту карточку" title="Скопировать ссылку на эту карточку"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>`;
+          container.appendChild(div);
+          return;
+        }
+        const d = saved[index] || {};
+        div.className = 'race';
+        const top3 = ['first','second','third'].map((f,i) => {
+          const v = d[f] && d[f].trim();
+          const flag = v && pilotCountryMap[v] ? flagHtml(pilotCountryMap[v], 16) : '';
+          const nameHtml = v
+            ? `<span class="result-name pilot-link" data-pilot-name="${v}">${v}</span>`
+            : `<span class="result-name result-empty">—</span>`;
+          return `<div class="result-row"><span class="result-pos">${i+1}.</span>${flag}${nameHtml}</div>`;
+        }).join('');
+        const rest = ['fourth','fifth','sixth','seventh','eighth','ninth','tenth'].map((f,i) => {
+          const v = d[f] && d[f].trim();
+          const flag = v && pilotCountryMap[v] ? flagHtml(pilotCountryMap[v], 16) : '';
+          const nameHtml = v
+            ? `<span class="result-name pilot-link" data-pilot-name="${v}">${v}</span>`
+            : `<span class="result-name result-empty">—</span>`;
+          return `<div class="result-row"><span class="result-pos">${i+4}.</span>${flag}${nameHtml}</div>`;
+        }).join('');
+        let sprintHtml = '';
+        if (race.hasSprint) {
+          const sprintRows = sprintFieldNames.map((f,i) => {
+            const v = d['sprint_'+f] && d['sprint_'+f].trim();
+            const flag = v && pilotCountryMap[v] ? flagHtml(pilotCountryMap[v], 16) : '';
+            const nameHtml = v
+              ? `<span class="result-name pilot-link" data-pilot-name="${v}">${v}</span>`
+              : `<span class="result-name result-empty">—</span>`;
+            return `<div class="result-row"><span class="result-pos">${i+1}.</span>${flag}${nameHtml}</div>`;
+          }).join('');
+          sprintHtml = `<h3 style="margin:14px 0 6px;color:#856404;">★ Спринт</h3>${sprintRows}`;
+        }
+        const toggleLabel = race.hasSprint ? 'Показать 4-10 место и спринт' : 'Показать 4-10 место';
+        const isExpanded = !!expandedState[index];
+        div.innerHTML = `
+          <h2>${race.name}</h2>
+          <p><strong>Дата:</strong> ${formatDate(race.date)} &nbsp; <strong>Время:</strong> ${race.timeTbd ? 'уточняется' : (race.timeLabel || race.time)}</p>
+          <p><strong>Трасса:</strong> ${race.location}, Длина круга: ${race.length}, Кругов: ${race.laps} &nbsp;·&nbsp; <a href="#" onclick="switchTab(2);setTimeout(()=>scrollToEl(document.getElementById('card-${race.id}')),350);return false;" style="color:#cc0000;font-weight:bold;text-decoration:none;">Календарь</a></p>
+          <div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('${race.id}', this);return false;" aria-label="Скопировать ссылку на эту карточку" title="Скопировать ссылку на эту карточку"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>
+          <h3 style="margin:10px 0 6px;color:#cc0000;">Гонка</h3>
+          ${top3}
+          <div class="collapse-toggle" data-index="${index}" aria-expanded="${isExpanded?'true':'false'}">${toggleLabel}</div>
+          <div class="collapsible-section" data-index="${index}" style="display:${isExpanded?'block':'none'};">
+            ${rest}
+            ${sprintHtml}
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('collapse-toggle')) {
+        const index = e.target.dataset.index;
+        const section = document.querySelector(`.collapsible-section[data-index="${index}"]`);
+        const isOpen = section.style.display !== 'none' && section.style.display !== '';
+        if (isOpen) {
+          section.style.display = 'none';
+          e.target.setAttribute('aria-expanded','false');
+          delete expandedState[index];
+        } else {
+          section.style.display = 'block';
+          e.target.setAttribute('aria-expanded','true');
+          expandedState[index] = true;
+        }
+      }
+    });
+
+    buildRaceCards(true);
+    setInterval(() => buildRaceCards(false), 3000);
+    window.addEventListener('storage', e => {
+      if (e.key === 'f1_2026_results') { buildRaceCards(true); calculatePoints(); }
+    });
+
+    function calculatePoints() {
+      const saved = JSON.parse(localStorage.getItem('f1_2026_results') || '{}');
+      const driverPoints = {}, constructorPoints = {};
+      const racePointsTable = [25,18,15,12,10,8,6,4,2,1];
+      const sprintPointsTable = [8,7,6,5,4,3,2,1];
+      for (const index in saved) {
+        const entry = saved[index], raceIndex = parseInt(index);
+        if (!races[raceIndex]) continue;
+        ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'].forEach((f,i) => {
+          const driver = entry[f];
+          if (driver && driver.trim()) {
+            const n = driver.trim();
+            driverPoints[n] = (driverPoints[n]||0) + racePointsTable[i];
+            const c = pilotConstructorMap[n];
+            if (c) constructorPoints[c] = (constructorPoints[c]||0) + racePointsTable[i];
+          }
+        });
+        if (races[raceIndex].hasSprint) {
+          ['first','second','third','fourth','fifth','sixth','seventh','eighth'].forEach((f,i) => {
+            const driver = entry['sprint_'+f];
+            if (driver && driver.trim()) {
+              const n = driver.trim();
+              driverPoints[n] = (driverPoints[n]||0) + sprintPointsTable[i];
+              const c = pilotConstructorMap[n];
+              if (c) constructorPoints[c] = (constructorPoints[c]||0) + sprintPointsTable[i];
+            }
+          });
+        }
+      }
+      function updateList(listId, data) {
+        const ul = document.getElementById(listId);
+        ul.innerHTML = '';
+        if (Object.keys(data).length === 0) { const li = document.createElement('li'); li.textContent = "Нет данных для отображения"; ul.appendChild(li); return; }
+        if (listId === 'drivers') {
+          const sorted = Object.entries(data).sort((a,b) => {
+            if (b[1]!==a[1]) return b[1]-a[1];
+            const ai=OFFICIAL_ORDER.indexOf(a[0]),bi=OFFICIAL_ORDER.indexOf(b[0]);
+            const av=ai===-1?9999:ai,bv=bi===-1?9999:bi;
+            if (av===bv&&av===9999) return a[0].localeCompare(b[0]);
+            return av-bv;
+          });
+          sorted.forEach(([name,pts],i) => {
+            const li = document.createElement('li');
+            li.appendChild(document.createTextNode(`${i+1}.`));
+            const fc = pilotCountryMap[name];
+            if (fc) { li.appendChild(flagEl(fc, 17)); }
+            const link = document.createElement('span');
+            link.className = 'pilot-link';
+            link.dataset.pilotName = name;
+            link.textContent = name + ' ' + pts;
+            li.appendChild(link);
+            ul.appendChild(li);
+          });
+        } else {
+          const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]);
+          sorted.forEach(([name,pts],i) => {
+            const li = document.createElement('li');
+            li.appendChild(document.createTextNode(`${i+1}.`));
+            const link = document.createElement('span');
+            link.className = 'team-link';
+            link.dataset.teamName = name;
+            link.style.display = 'inline-flex';
+            link.style.alignItems = 'center';
+            const logoUrl = constructorLogos[name];
+            if (logoUrl) {
+              const img = document.createElement('img'); img.src=logoUrl; img.alt=name; img.className='constructor-logo'; img.style.margin='0 8px';
+              img.onerror = function() { const fb=document.createElement('span'); fb.className='constructor-logo-fallback'; fb.style.backgroundColor=constructorColors[name]||'#999'; fb.style.margin='0 8px'; fb.textContent=name.charAt(0); this.replaceWith(fb); };
+              link.appendChild(img);
+            } else { const fb=document.createElement('span'); fb.className='constructor-logo-fallback'; fb.style.backgroundColor=constructorColors[name]||'#999'; fb.style.margin='0 8px'; fb.textContent=name.charAt(0); link.appendChild(fb); }
+            link.appendChild(document.createTextNode(name+' '+pts));
+            li.appendChild(link);
+            ul.appendChild(li);
+          });
+        }
+      }
+      updateList('drivers', driverPoints);
+      updateList('constructors', constructorPoints);
+    }
+
+    
+
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    } catch(e) {}
+
+    let activeSmoothScrollAnimation = null;
+
+    function smoothScrollPanelTo(panel, targetTop, duration) {
+      if (!panel) return;
+      duration = typeof duration === 'number' ? duration : 650;
+      const startTop = panel.scrollTop;
+      const maxTop = Math.max(0, panel.scrollHeight - panel.clientHeight);
+      const endTop = Math.max(0, Math.min(targetTop, maxTop));
+      const distance = endTop - startTop;
+
+      if (activeSmoothScrollAnimation) {
+        cancelAnimationFrame(activeSmoothScrollAnimation);
+        activeSmoothScrollAnimation = null;
+      }
+
+      if (duration <= 0 || Math.abs(distance) < 2) {
+        panel.scrollTop = endTop;
+        return;
+      }
+
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion) {
+        panel.scrollTop = endTop;
+        return;
+      }
+
+      const startTime = performance.now();
+      const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+      function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        panel.scrollTop = startTop + distance * easeOutCubic(progress);
+        if (progress < 1) {
+          activeSmoothScrollAnimation = requestAnimationFrame(step);
+        } else {
+          panel.scrollTop = endTop;
+          activeSmoothScrollAnimation = null;
+        }
+      }
+
+      activeSmoothScrollAnimation = requestAnimationFrame(step);
+    }
+
+    function scrollActivePanelToTop() {
+      smoothScrollPanelTo(activePanel(), 0, 750);
+    }
+
+    function isMobileLike() {
+      return window.matchMedia && window.matchMedia('(max-width: 600px), (pointer: coarse)').matches;
+    }
+
+    function getScrollTargetGap() {
+      return isMobileLike() ? 44 : 18;
+    }
+
+    function getPanelForElement(el) {
+      return (el && el.closest && el.closest('.tab-panel')) || activePanel();
+    }
+
+    function getTargetTopInsidePanel(el, panel, gap) {
+      const elRect = el.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      return elRect.top + panel.scrollTop - panelRect.top - gap;
+    }
+
+    function scrollToEl(el, options) {
+      if (!el) return;
+      const panel = getPanelForElement(el);
+      const gap = options && typeof options.gap === 'number' ? options.gap : getScrollTargetGap();
+      const duration = options && typeof options.duration === 'number' ? options.duration : 650;
+      const top = getTargetTopInsidePanel(el, panel, gap);
+      smoothScrollPanelTo(panel, top, duration);
+    }
+
+    let lastHashOpenKey = '';
+    let lastHashOpenTime = 0;
+    let sharedCardOpenTimers = [];
+
+    function clearSharedCardOpenTimers() {
+      sharedCardOpenTimers.forEach(timer => window.clearTimeout(timer));
+      sharedCardOpenTimers = [];
+    }
+
+    function scheduleSharedCardStep(fn, delay) {
+      const timer = window.setTimeout(() => {
+        sharedCardOpenTimers = sharedCardOpenTimers.filter(t => t !== timer);
+        fn();
+      }, delay);
+      sharedCardOpenTimers.push(timer);
+      return timer;
+    }
+
+    function scrollToElAfterLayout(el, options) {
+      if (!el) return;
+      const opts = options || {};
+      const gap = typeof opts.gap === 'number' ? opts.gap : (isMobileLike() ? 56 : 22);
+      const duration = typeof opts.duration === 'number' ? opts.duration : (isMobileLike() ? 0 : 420);
+
+      if (activeSmoothScrollAnimation) {
+        cancelAnimationFrame(activeSmoothScrollAnimation);
+        activeSmoothScrollAnimation = null;
+      }
+
+      resetHorizontalDrift(true);
+      requestAnimationFrame(() => {
+        resetHorizontalDrift(true);
+        requestAnimationFrame(() => {
+          resetHorizontalDrift(true);
+          scrollToEl(el, { gap, duration });
+          resetHorizontalDrift(true);
+        });
+      });
+    }
+
+    function scrollToRace(id) {
+      scrollToEl(document.getElementById('card-'+id));
+    }
+
+
+    function makeCardUrl(targetId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('card', targetId);
+      url.hash = '';
+      return url.toString();
+    }
+
+    function fallbackCopyText(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (!ok) throw new Error('copy failed');
+    }
+
+    function showCopyToast(message) {
+      if (isMobileLike()) return;
+      const toast = document.getElementById('copy-toast');
+      if (!toast) return;
+      toast.textContent = message || 'Скопировано';
+      toast.classList.add('show');
+      window.clearTimeout(showCopyToast.timer);
+      showCopyToast.timer = window.setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1400);
+    }
+
+    function showShareButtonDone(btn) {
+      showCopyToast('Скопировано');
+      if (!btn) return;
+      const oldHtml = btn.innerHTML;
+      const oldTitle = btn.getAttribute('title') || 'Скопировать ссылку на эту карточку';
+      const oldLabel = btn.getAttribute('aria-label') || oldTitle;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7"></path></svg>';
+      btn.setAttribute('title', 'Скопировано');
+      btn.setAttribute('aria-label', 'Ссылка скопирована');
+      btn.classList.add('copied');
+      window.clearTimeout(btn.shareResetTimer);
+      btn.shareResetTimer = window.setTimeout(() => {
+        btn.innerHTML = oldHtml;
+        btn.setAttribute('title', oldTitle);
+        btn.setAttribute('aria-label', oldLabel);
+        btn.classList.remove('copied');
+      }, 1200);
+    }
+
+    async function copyCardLink(targetId, btn) {
+      const cardUrl = makeCardUrl(targetId);
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(cardUrl);
+        } else {
+          fallbackCopyText(cardUrl);
+        }
+        showShareButtonDone(btn);
+      } catch (e) {
+        window.prompt('Скопируйте ссылку:', cardUrl);
+      }
+    }
+
+    function getSharedTargetFromUrl() {
+      let byQuery = '';
+      try { byQuery = (new URL(window.location.href).searchParams.get('card') || '').trim(); } catch(e) {}
+      if (byQuery) return decodeURIComponent(byQuery);
+      return decodeURIComponent((window.location.hash || '').replace(/^#/, '')).trim();
+    }
+
+    function clearSharedCardParamFromUrl() {
+      try {
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('card')) return;
+        url.searchParams.delete('card');
+        window.history.replaceState(window.history.state, document.title, url.pathname + url.search + url.hash);
+      } catch(e) {}
+    }
+
+    function openCardFromHash(force, attempt) {
+      const rawHash = getSharedTargetFromUrl();
+      if (!rawHash) return;
+
+      clearSharedCardOpenTimers();
+      resetHorizontalDrift(true);
+
+      attempt = attempt || 0;
+      const now = Date.now();
+      const openKey = rawHash + '|' + currentTab;
+      if (!force && openKey === lastHashOpenKey && now - lastHashOpenTime < 900) return;
+      lastHashOpenKey = openKey;
+      lastHashOpenTime = now;
+
+      let el = document.getElementById(rawHash);
+      let tabIndex = 1;
+
+      if (!el && !rawHash.startsWith('card-')) {
+        const calendarEl = document.getElementById('card-' + rawHash);
+        if (calendarEl) {
+          el = calendarEl;
+          tabIndex = 2;
+        }
+      }
+
+      if (!el) {
+        if (attempt < 8) {
+          scheduleSharedCardStep(() => openCardFromHash(false, attempt + 1), 70);
+        }
+        return;
+      }
+
+      if (rawHash.startsWith('team-card-') || el.classList.contains('team-card')) {
+        tabIndex = 0;
+      } else if (rawHash.startsWith('card-') || el.classList.contains('race-card')) {
+        tabIndex = 2;
+      }
+
+      const sourceTabIndex = 1;
+      const shouldShowResultsFirst = tabIndex !== sourceTabIndex;
+
+      function openPastListIfNeeded() {
+        const pastList = el.closest('.past-races-list');
+        if (pastList && !pastList.classList.contains('open')) {
+          pastList.classList.add('open');
+          const toggle = pastList.previousElementSibling;
+          if (toggle && toggle.classList.contains('past-races-toggle')) {
+            toggle.setAttribute('aria-expanded', 'true');
+            const arrow = toggle.querySelector('.past-arrow');
+            if (arrow) arrow.textContent = '▲';
+          }
+          const raceList = document.getElementById('race-list');
+          if (raceList) raceList.dataset.pastOpen = '1';
+        }
+      }
+
+      function blinkTargetAfterScroll(delay) {
+        scheduleSharedCardStep(() => {
+          el.classList.remove('share-target-highlight');
+          void el.offsetWidth;
+          el.classList.add('share-target-highlight');
+          clearSharedCardParamFromUrl();
+          scheduleSharedCardStep(() => el.classList.remove('share-target-highlight'), isMobileLike() ? 3900 : 4000);
+        }, delay);
+      }
+
+      function scrollToTargetSmoothly() {
+        resetHorizontalDrift(true);
+        openPastListIfNeeded();
+
+        const scrollDuration = isMobileLike() ? 600 : 520;
+        const gap = isMobileLike() ? 56 : 22;
+
+        scheduleSharedCardStep(() => {
+          scrollToElAfterLayout(el, { gap, duration: scrollDuration });
+          blinkTargetAfterScroll(scrollDuration + 90);
+        }, isMobileLike() ? 70 : 40);
+      }
+
+      if (shouldShowResultsFirst) {
+        if (currentTab !== sourceTabIndex) {
+          switchTab(sourceTabIndex);
+        }
+
+        resetHorizontalDrift(true);
+
+        scheduleSharedCardStep(() => {
+          switchTab(tabIndex);
+          resetHorizontalDrift(true);
+          scheduleSharedCardStep(scrollToTargetSmoothly, isMobileLike() ? 260 : 280);
+        }, isMobileLike() ? 150 : 140);
+      } else {
+        switchTab(tabIndex);
+        resetHorizontalDrift(true);
+        scheduleSharedCardStep(scrollToTargetSmoothly, isMobileLike() ? 120 : 120);
+      }
+    }
+
+    window.addEventListener('hashchange', () => {
+      resetHorizontalDrift(true);
+      scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 30 : 35);
+    });
+    window.addEventListener('popstate', () => scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 30 : 35));
+
+    function bootSharedCardOpen() {
+      scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 130 : 90);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      bootSharedCardOpen();
+    } else {
+      window.addEventListener('DOMContentLoaded', bootSharedCardOpen);
+    }
+    function toggleSessions(el) {
+      const list = el.nextElementSibling;
+      const open = list.classList.toggle('open');
+      el.textContent = (open?'▲':'▼')+' Расписание сессий';
+    }
+
+    function getRaceEndMoment(race) {
+      if (race.timeTbd) return new Date(`${race.date}T23:59:59+03:00`);
+      return new Date(`${race.date}T${race.time}:00+03:00`);
+    }
+
+    function getStatus(race) {
+      if (race.cancelled) return 'cancelled';
+      return getRaceEndMoment(race) < new Date() ? 'past' : 'upcoming';
+    }
+    function renderCalendar() {
+      const now = new Date();
+      let nextIdx = -1;
+      for (let i=0;i<racesCalendar.length;i++) {
+        if (!racesCalendar[i].cancelled) {
+          const d = getRaceEndMoment(racesCalendar[i]);
+          if (d >= now) { nextIdx=i; break; }
+        }
+      }
+      nextIndex = nextIdx;
+      const list = document.getElementById('race-list');
+      list.innerHTML = '';
+      const pastWasOpen = list.dataset.pastOpen === '1';
+      const pastWrapper = document.createElement('div');
+      pastWrapper.className = 'past-races-block';
+      const pastList = document.createElement('div');
+      pastList.className = 'past-races-list' + (pastWasOpen ? ' open' : '');
+      let pastCount = 0;
+      let activeRaceNumber = 0;
+      racesCalendar.forEach((race,i) => {
+        if (race.cancelled) return;
+        const status = getStatus(race), isNext = (i===nextIdx);
+        const displayNum = race.cancelled ? '' : String(++activeRaceNumber);
+        let cardClass = 'race-card';
+        if (status==='past') cardClass+=' past';
+        if (status==='cancelled') cardClass+=' cancelled';
+        if (isNext) cardClass+=' next'; else if (status==='upcoming') cardClass+=' upcoming';
+        const badges=[];
+        if (isNext) badges.push(`<span class="badge badge-next">▶ СЛЕДУЮЩАЯ</span>`);
+        else if (status==='past') badges.push(`<span class="badge badge-past">Завершена</span>`);
+        else if (status==='cancelled') badges.push(`<span class="badge badge-cancelled">Отменена</span>`);
+        if (race.hasSprint) badges.push(`<span class="badge badge-sprint">★ СПРИНТ</span>`);
+        const raceLink = status!=='cancelled'
+          ? `<a class="race-link" href="#${race.id}" onclick="switchTab(1);setTimeout(()=>scrollToEl(document.getElementById('${race.id}')),350);return false;">🏆 Результаты этапа →</a>`
+          : '';
+        let sessionsHtml='';
+        if (!race.cancelled && race.sessions && race.sessions.length>0) {
+          const rows=race.sessions.map(s => {
+            let cls='';
+            if (s.name.includes('Спринт-')) cls='sprint';
+            else if (s.name==='Спринт') cls='sprint';
+            else if (s.name==='Гонка') cls='race-session';
+            const dayShort=s.day.includes(',')?s.day.split(', ')[1]:s.day;
+            return `<div class="session-row"><span class="session-day">${dayShort}</span><span class="session-name ${cls}">${s.name}</span><span class="session-time">${s.timeTbd ? 'время уточняется' : ((s.timeLabel || s.time) + ' (мск)')}</span></div>`;
+          }).join('');
+          const isOpen=status!=='past';
+          sessionsHtml=`<span class="sessions-toggle" onclick="toggleSessions(this)">${isOpen?'▲':'▼'} Расписание сессий</span><div class="sessions-list ${isOpen?'open':''}">${rows}</div>`;
+        }
+        const div=document.createElement('div');
+        div.className=cardClass; div.id=`card-${race.id}`;
+        div.innerHTML=`
+          <div class="race-number ${displayNum ? '' : 'race-number-empty'}">${displayNum}</div>
+          <div class="race-flag">${flagHtml(race.flag, 27)}</div>
+          <div class="race-info">
+            <h2>${race.name} — ${race.city}</h2>
+            <div class="race-meta">
+              <span>📅 ${formatDate(race.date)}</span>
+              <span>🕐 ${race.timeTbd ? 'Время уточняется' : ((race.timeLabel || race.time) + ' (мск)')}</span>
+              <span>📍 ${race.location}</span>
+              <span>🔄 ${race.laps} кругов · ${race.length}</span>
+            </div>
+            <div style="margin-top:6px;">${badges.join('')}</div>
+            ${sessionsHtml}
+            ${raceLink}
+            <div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('card-${race.id}', this);return false;" aria-label="Скопировать ссылку на эту карточку" title="Скопировать ссылку на эту карточку"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>
+          </div>`;
+        if (status === 'past' || status === 'cancelled') {
+          pastList.appendChild(div);
+          pastCount++;
+        } else {
+          list.appendChild(div);
+        }
+      });
+      if (pastCount > 0) {
+        const toggle = document.createElement('div');
+        toggle.className = 'past-races-toggle';
+        toggle.setAttribute('aria-expanded', pastWasOpen ? 'true' : 'false');
+        toggle.innerHTML = `<span class="past-arrow">${pastWasOpen ? '▲' : '▼'}</span> Завершённые гонки <span class="past-count">${pastCount}</span>`;
+        toggle.addEventListener('click', () => {
+          const isOpen = pastList.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          toggle.querySelector('.past-arrow').textContent = isOpen ? '▲' : '▼';
+          list.dataset.pastOpen = isOpen ? '1' : '0';
+        });
+        pastWrapper.appendChild(toggle);
+        pastWrapper.appendChild(pastList);
+        list.insertBefore(pastWrapper, list.firstChild);
+      }
+    }
+
+    let nextIndex = -1;
+    renderCalendar();
+    setInterval(renderCalendar, 60000);
+
+    function updateCountdown() {
+      const timerEl=document.getElementById('countdown-timer'),titleEl=document.getElementById('countdown-title'),labelEl=document.getElementById('countdown-label');
+      if (nextIndex===-1) { titleEl.textContent='Сезон завершён'; timerEl.textContent='🏁'; labelEl.textContent=''; return; }
+      const race=racesCalendar[nextIndex];
+      const now=new Date();
+      const raceEndDate=getRaceEndMoment(race);
+      const targetDate=race.timeTbd
+        ? new Date(`${race.weekendStart || race.date}T00:00:00+03:00`)
+        : new Date(race.date+'T'+race.time+':00+03:00');
+      const diff=targetDate-now;
+      titleEl.innerHTML=`До <a onclick="switchTab(2);setTimeout(()=>scrollToRace('${race.id}'),350);return false;" href="#" style="color:inherit;text-decoration:underline;cursor:pointer;">${race.name} (${race.city})</a>`;
+      if (race.timeTbd && now>=targetDate && now<=raceEndDate) {
+        timerEl.textContent='Гоночный уик-энд идёт!';
+        labelEl.textContent=`${race.weekendLabel || formatDate(race.date)} · время старта гонки уточняется`;
+        return;
+      }
+      if (diff<=0) { timerEl.textContent='Гонка идёт!'; labelEl.textContent=''; return; }
+      const days=Math.floor(diff/(1000*60*60*24));
+      const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+      const minutes=Math.floor((diff%(1000*60*60))/(1000*60));
+      const seconds=Math.floor((diff%(1000*60))/1000);
+      timerEl.textContent=`${days}д ${String(hours).padStart(2,'0')}ч ${String(minutes).padStart(2,'0')}м ${String(seconds).padStart(2,'0')}с`;
+      labelEl.textContent=race.timeTbd
+        ? `${race.weekendLabel || formatDate(race.date)} · время старта гонки уточняется`
+        : `${formatDate(race.date)} · старт в ${race.timeLabel || race.time} (мск)`;
+    }
+    updateCountdown();
+    setInterval(updateCountdown,1000);
+
+    const teams2026 = [
+      {
+        name: "Ferrari",
+        color: "#DC0000",
+        logo: "photos/teams/ferrari/logo.png",
+        car: "photos/teams/ferrari/car.png",
+        carBio: "SF-26 — болид Скудерии Феррари сезона 2026. Силовая установка Ferrari собственного производства. Полностью переработанное шасси под новые правила: активная аэродинамика и увеличенная электрическая мощность.",
+        drivers: [
+          { name: "Шарль Леклер",  number: 16, photo: "photos/teams/ferrari/driver1.png",
+            bio: "Монегасский гонщик, родился 16 октября 1997 в Монте-Карло. В Ф-1 с 2018 года. С 2019 — в Ferrari. Чемпион Ф-2 (2017). Любимец Скудерии и тифози." },
+          { name: "Льюис Хэмилтон", number: 44, photo: "photos/teams/ferrari/driver2.png",
+            bio: "Британский гонщик, родился 7 января 1985 в Стивенидже. Семикратный чемпион мира — рекорд по победам в истории Ф-1. С 2025 года в составе Ferrari после долгих лет в Mercedes." }
+        ]
+      },
+      {
+        name: "Mercedes",
+        color: "#00D2BE",
+        logo: "photos/teams/mercedes/logo.png",
+        car: "photos/teams/mercedes/car.png",
+        carBio: "W17 — болид Mercedes-AMG Petronas F1 Team на сезон 2026. Силовая установка Mercedes собственного производства. По регламенту 2026 — упор на эффективность гибрида и снижение веса.",
+        drivers: [
+          { name: "Джордж Рассел",  number: 63, photo: "photos/teams/mercedes/driver1.png",
+            bio: "Британский гонщик, родился 15 февраля 1998 в Кингс-Линне. В Ф-1 с 2019 года. С 2022 — в Mercedes. Чемпион Ф-2 (2018). Известен ровными гоночными темпами и квалификационным мастерством." },
+          { name: "Кими Антонелли", number: 12, photo: "photos/teams/mercedes/driver2.png",
+            bio: "Итальянский гонщик, родился 25 августа 2006 в Болонье. Дебютировал в Ф-1 в 2025 году в составе Mercedes, заменив Льюиса Хэмилтона. Воспитанник академии Mercedes." }
+        ]
+      },
+      {
+        name: "Red Bull",
+        color: "#1E41FF",
+        logo: "photos/teams/redbull/logo.png",
+        car: "photos/teams/redbull/car.png",
+        carBio: "RB22 — первый болид Red Bull с собственной силовой установкой Red Bull Powertrains-Ford. Команда впервые с 2007 года использует свой мотор. Шасси под регламент 2026.",
+        drivers: [
+          { name: "Макс Ферстаппен", number: 3, photo: "photos/teams/redbull/driver1.png",
+            bio: "Нидерландский гонщик, родился 30 сентября 1997 в Хасселте (Бельгия). В Ф-1 с 2015 года. Четырёхкратный чемпион мира (2021, 2022, 2023, 2024). Сын Йоса Ферстаппена." },
+          { name: "Исак Хаджар",     number: 6, photo: "photos/teams/redbull/driver2.png",
+            bio: "Французский гонщик алжирского происхождения, родился 28 сентября 2004 в Париже. Дебют в Ф-1 в 2025 за Racing Bulls. Перешёл в Red Bull на сезон 2026." }
+        ]
+      },
+      {
+        name: "McLaren",
+        color: "#FF8700",
+        logo: "photos/teams/mclaren/logo.png",
+        car: "photos/teams/mclaren/car.png",
+        carBio: "MCL40 — болид McLaren сезона 2026. Силовая установка Mercedes. Шасси разработано под новый технический регламент: активная аэродинамика, более лёгкая машина, гибридная отдача 50/50.",
+        drivers: [
+          { name: "Оскар Пиастри", number: 81, photo: "photos/teams/mclaren/driver1.png",
+            bio: "Австралийский гонщик, родился 6 апреля 2001 в Мельбурне. В Ф-1 с 2023 года, сразу за McLaren. Чемпион Ф-3 (2020) и Ф-2 (2021)." },
+          { name: "Ландо Норрис",  number: 1, photo: "photos/teams/mclaren/driver2.png",
+            bio: "Британский гонщик, родился 13 ноября 1999 в Бристоле. В Ф-1 с 2019 года в составе McLaren. Один из самых популярных пилотов современного поколения." }
+        ]
+      },
+      {
+        name: "Aston Martin",
+        color: "#006F62",
+        logo: "photos/teams/astonmartin/logo.png",
+        car: "photos/teams/astonmartin/car.png",
+        carBio: "AMR26 — первый болид Aston Martin с силовой установкой Honda. Шасси разработано в новом заводском комплексе AMR Technology Campus в Сильверстоуне под руководством Эдриана Ньюи.",
+        drivers: [
+          { name: "Фернандо Алонсо", number: 14, photo: "photos/teams/astonmartin/driver1.png",
+            bio: "Испанский гонщик, родился 29 июля 1981 в Овьедо. Двукратный чемпион мира (2005, 2006). В Ф-1 с 2001 года. Один из самых опытных и уважаемых пилотов в истории." },
+          { name: "Лэнс Стролл",     number: 18, photo: "photos/teams/astonmartin/driver2.png",
+            bio: "Канадский гонщик, родился 29 октября 1998 в Монреале. В Ф-1 с 2017 года. Сын Лоуренса Стролла, владельца команды Aston Martin." }
+        ]
+      },
+      {
+        name: "Alpine",
+        color: "#0090FF",
+        logo: "photos/teams/alpine/logo.png",
+        car: "photos/teams/alpine/car.png",
+        carBio: "A526 — болид Alpine F1 Team сезона 2026. Команда впервые с 2014 года использует клиентскую силовую установку — Mercedes, отказавшись от собственного мотора Renault.",
+        drivers: [
+          { name: "Пьер Гасли",       number: 10, photo: "photos/teams/alpine/driver1.png",
+            bio: "Французский гонщик, родился 7 февраля 1996 в Руане. В Ф-1 с 2017 года. Победитель Гран-при Италии 2020 в составе AlphaTauri. С 2023 — в Alpine." },
+          { name: "Франко Колапинто", number: 43, photo: "photos/teams/alpine/driver2.png",
+            bio: "Аргентинский гонщик, родился 27 мая 2003 в Пилар. Дебют в Ф-1 в 2024 в составе Williams. Перешёл в Alpine на сезон 2025-2026." }
+        ]
+      },
+      {
+        name: "Racing Bulls",
+        color: "#2B4562",
+        logo: "photos/teams/racingbulls/logo.png",
+        car: "photos/teams/racingbulls/car.png",
+        carBio: "VCARB 02 — болид Visa Cash App Racing Bulls сезона 2026. Силовая установка Red Bull Powertrains-Ford. Шасси использует общие узлы со старшим Red Bull в рамках разрешённого партнёрства.",
+        drivers: [
+          { name: "Лиам Лоусон",    number: 30, photo: "photos/teams/racingbulls/driver1.png",
+            bio: "Новозеландский гонщик, родился 11 февраля 2002 в Хастингсе. Дебют в Ф-1 в 2023 году. Воспитанник программы Red Bull Junior Team." },
+          { name: "Арвид Линблад",  number: 8, photo: "photos/teams/racingbulls/driver2.png",
+            bio: "Шведский гонщик, родился 8 апреля 2007 в Стокгольме. Молодой пилот программы Red Bull Junior Team. Дебют в Ф-1 в сезоне 2026." }
+        ]
+      },
+      {
+        name: "Haas",
+        color: "#E6002B",
+        logo: "photos/teams/haas/logo.png",
+        car: "photos/teams/haas/car.png",
+        carBio: "VF-26 — болид MoneyGram Haas F1 Team сезона 2026. Силовая установка Ferrari. Тесное техническое сотрудничество со Скудерией продолжается: трансмиссия, задняя подвеска и КПП поставляются Ferrari.",
+        drivers: [
+          { name: "Эстебан Окон",   number: 31, photo: "photos/teams/haas/driver1.png",
+            bio: "Французский гонщик, родился 17 сентября 1996 в Эвре. В Ф-1 с 2016 года. Победитель Гран-при Венгрии 2021 в составе Alpine. С 2025 года — в Haas." },
+          { name: "Оливер Берман",  number: 87, photo: "photos/teams/haas/driver2.png",
+            bio: "Британский гонщик, родился 8 мая 2005 в Челмсфорде. Дебютировал в Ф-1 в 2024 году, заменив Карлоса Сайнса в Ferrari. С 2025 — основной пилот Haas." }
+        ]
+      },
+      {
+        name: "Williams",
+        color: "#005AFF",
+        logo: "photos/teams/williams/logo.png",
+        car: "photos/teams/williams/car.png",
+        carBio: "FW48 — болид Williams Racing на сезон 2026. Силовая установка Mercedes. Команда продолжает курс на возрождение под руководством Джеймса Воулза, инвестируя в новую инфраструктуру в Гроуве.",
+        drivers: [
+          { name: "Алекс Албон",   number: 23, photo: "photos/teams/williams/driver1.png",
+            bio: "Тайско-британский гонщик, родился 23 марта 1996 в Лондоне. В Ф-1 с 2019 года. С 2022 — в Williams. Известен умением выжимать максимум из машин среднего класса." },
+          { name: "Карлос Сайнс",  number: 55, photo: "photos/teams/williams/driver2.png",
+            bio: "Испанский гонщик, родился 1 сентября 1994 в Мадриде. Сын раллиста Карлоса Сайнса-старшего. В Ф-1 с 2015. Победитель нескольких Гран-при за Ferrari. С 2025 — в Williams." }
+        ]
+      },
+      {
+        name: "Audi",
+        color: "#000000",
+        logo: "photos/teams/audi/logo.png",
+        car: "photos/teams/audi/car.png",
+        carBio: "C46 — первый официальный болид Audi F1 Team. Audi выкупила Sauber и пришла в Ф-1 как полноценный заводской производитель: собственное шасси (Хинвиль) и собственный мотор (Нойбург-ан-дер-Донау).",
+        drivers: [
+          { name: "Нико Хюлькенберг",   number: 27, photo: "photos/teams/audi/driver1.png",
+            bio: "Немецкий гонщик, родился 19 августа 1987 в Эммерих-ам-Райн. В Ф-1 с 2010 года. Победитель «24 часа Ле-Мана» 2015. Один из самых опытных пилотов современного Гран-при." },
+          { name: "Габриэл Бортолето",  number: 5, photo: "photos/teams/audi/driver2.png",
+            bio: "Бразильский гонщик, родился 14 октября 2004 в Сан-Паулу. Чемпион Ф-3 (2023) и Ф-2 (2024). Дебют в Ф-1 в 2025 году в составе Sauber/Audi." }
+        ]
+      },
+      {
+        name: "Cadillac",
+        color: "#1E2F4F",
+        logo: "photos/teams/cadillac/logo.png",
+        car: "photos/teams/cadillac/car.png",
+        carBio: "Дебютный болид Cadillac F1 Team. На первый сезон команда использует силовую установку Ferrari, в дальнейшем планирует перейти на собственный мотор GM. Шасси разработано в Северной Америке (Шарлотт) и Великобритании (Силверстоун).",
+        drivers: [
+          { name: "Серхио Перес",     number: 11, photo: "photos/teams/cadillac/driver1.png",
+            bio: "Мексиканский гонщик, родился 26 января 1990 в Гвадалахаре. В Ф-1 с 2011 по 2024 год. Победитель нескольких Гран-при за Red Bull. Возвращение в Ф-1 в 2026 в составе Cadillac." },
+          { name: "Вальттери Боттас", number: 77, photo: "photos/teams/cadillac/driver2.png",
+            bio: "Финский гонщик, родился 28 августа 1989 года в городе Настола, Финляндия. В Ф-1 с 2013 года. 10 побед на Гран-при за Mercedes (2017-2021). Перешёл в Cadillac на дебютный сезон команды 2026." }
+        ]
+      }
+    ];
+
+    function makePhotoEl({ src, alt, fullCaption, captionHtml, extraClass, bio }) {
+      const wrap = document.createElement('div');
+      wrap.className = 'team-photo' + (extraClass ? ' ' + extraClass : '');
+      wrap.dataset.src = src;
+      wrap.dataset.caption = fullCaption || alt || '';
+      if (captionHtml) wrap.dataset.captionHtml = captionHtml;
+      if (bio) wrap.dataset.bio = bio;
+      const img = document.createElement('img');
+      img.alt = alt || '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      try { img.fetchPriority = 'low'; } catch(e) {}
+      img.dataset.src = src;
+      wrap.dataset.loading = '1';
+      img.onerror = function() {
+        wrap.innerHTML = '';
+        const hint = document.createElement('div');
+        hint.className = 'photo-placeholder-hint';
+        hint.textContent = '📷';
+        wrap.appendChild(hint);
+        wrap.dataset.broken = '1';
+        delete wrap.dataset.loading;
+      };
+      img.onload = function() {
+        delete wrap.dataset.loading;
+      };
+      wrap.appendChild(img);
+      wrap.addEventListener('click', () => {
+        if (wrap.dataset.broken === '1') return;
+        openPhotoModal(src, fullCaption || alt || '', bio || '', captionHtml || '');
+      });
+      return wrap;
+    }
+
+
+    function loadTeamPhotoImage(img) {
+      if (!img || !img.dataset || !img.dataset.src || img.src) return;
+      img.src = img.dataset.src;
+      delete img.dataset.src;
+    }
+
+    let teamImagesLazyObserver = null;
+    let teamImagesLazyStarted = false;
+
+    function initTeamImagesLazyLoading(forceVisibleNow) {
+      const panel = document.getElementById('panel-drivers');
+      if (!panel) return;
+
+      const imgs = Array.from(panel.querySelectorAll('.team-photo img[data-src]'));
+      if (!imgs.length) return;
+
+      if (!('IntersectionObserver' in window)) {
+        imgs.forEach(loadTeamPhotoImage);
+        return;
+      }
+
+      if (!teamImagesLazyObserver) {
+        teamImagesLazyObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const img = entry.target;
+            teamImagesLazyObserver.unobserve(img);
+            loadTeamPhotoImage(img);
+          });
+        }, {
+          root: panel,
+          rootMargin: '520px 0px 520px 0px',
+          threshold: 0.01
+        });
+      }
+
+      imgs.forEach(img => teamImagesLazyObserver.observe(img));
+      teamImagesLazyStarted = true;
+
+      if (forceVisibleNow) {
+        requestAnimationFrame(() => {
+          Array.from(panel.querySelectorAll('.team-photo img[data-src]')).forEach(img => {
+            const rect = img.getBoundingClientRect();
+            const panelRect = panel.getBoundingClientRect();
+            const nearVerticalViewport = rect.bottom >= panelRect.top - 520 && rect.top <= panelRect.bottom + 520;
+            const panelOnScreen = panelRect.right > 0 && panelRect.left < window.innerWidth;
+            if (panelOnScreen && nearVerticalViewport) {
+              if (teamImagesLazyObserver) teamImagesLazyObserver.unobserve(img);
+              loadTeamPhotoImage(img);
+            }
+          });
+        });
+      }
+    }
+
+    function loadPilotImagesWhenNeeded() {
+      if (currentTab !== 0) return;
+      initTeamImagesLazyLoading(true);
+    }
+
+    function renderTeams() {
+      const container = document.getElementById('teams-list');
+      if (!container) return;
+      container.innerHTML = '';
+      teams2026.forEach(team => {
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.style.setProperty('--team-color', team.color);
+        card.id = 'team-card-' + team.name.toLowerCase().replace(/\s+/g, '-');
+
+        const shareActions = document.createElement('div');
+        shareActions.className = 'card-actions';
+        shareActions.innerHTML = '<button type="button" class="share-card-btn" onclick="copyCardLink(\'' + card.id + '\', this);return false;" aria-label="Скопировать ссылку на эту карточку" title="Скопировать ссылку на эту карточку"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button>';
+        card.appendChild(shareActions);
+
+        const header = document.createElement('div');
+        header.className = 'team-card-header';
+        const logoBox = makePhotoEl({
+          src: team.logo,
+          alt: team.name + ' лого',
+          fullCaption: team.name + '',
+          extraClass: 'team-logo'
+        });
+        const title = document.createElement('h2');
+        title.className = 'team-name';
+        title.textContent = team.name;
+        header.appendChild(logoBox);
+        header.appendChild(title);
+        card.appendChild(header);
+        const carWrap = document.createElement('div');
+        carWrap.className = 'team-car-wrap';
+        carWrap.appendChild(makePhotoEl({
+          src: team.car,
+          alt: team.name + ' болид',
+          fullCaption: team.name + ' — болид 2026',
+          extraClass: 'team-car-photo',
+          bio: team.carBio
+        }));
+        card.appendChild(carWrap);
+        const people = document.createElement('div');
+        people.className = 'team-people';
+        team.drivers.forEach(driver => {
+          const dWrap = document.createElement('div');
+          dWrap.className = 'team-person';
+          dWrap.id = 'pilot-' + driver.name.replace(/\s+/g, '_');
+          dWrap.dataset.pilotName = driver.name;
+          dWrap.dataset.pilotPhoto = driver.photo;
+          const photoEl = makePhotoEl({
+            src: driver.photo,
+            alt: driver.name,
+            fullCaption: (driver.number != null ? '#' + driver.number + ' ' : '') + driver.name + ' (' + team.name + ')',
+            captionHtml: (driver.number != null
+              ? '<span class="caption-number" data-team="' + team.name + '">#' + driver.number + '</span> '
+              : '') + driver.name + ' <span class="caption-team-name">(' + team.name + ')</span>',
+            bio: driver.bio
+          });
+          dWrap.appendChild(photoEl);
+          const lbl = document.createElement('div');
+          lbl.className = 'team-person-label';
+          lbl.textContent = driver.name;
+          dWrap.appendChild(lbl);
+          people.appendChild(dWrap);
+        });
+        card.appendChild(people);
+        container.appendChild(card);
+      });
+    }
+
+    function pilotPhotoMap() {
+      const map = {};
+      teams2026.forEach(team => {
+        team.drivers.forEach(d => {
+          map[d.name] = { photo: d.photo, team: team.name, bio: d.bio || '', number: d.number };
+        });
+      });
+      return map;
+    }
+
+    function showPilotFromResults(pilotName) {
+      const map = pilotPhotoMap();
+      const info = map[pilotName];
+      if (!info) return;
+      switchTab(0);
+      setTimeout(() => {
+        const cardId = 'team-card-' + info.team.toLowerCase().replace(/\s+/g, '-');
+        const cardEl = document.getElementById(cardId);
+        if (cardEl) scrollToEl(cardEl);
+        setTimeout(() => {
+          const pilotEl = document.getElementById('pilot-' + pilotName.replace(/\s+/g, '_'));
+          if (pilotEl) {
+            const photo = pilotEl.querySelector('.team-photo');
+            if (photo && photo.dataset.broken !== '1') {
+              const numPrefix = info.number != null ? '#' + info.number + ' ' : '';
+              const cap = numPrefix + pilotName + ' (' + info.team + ')';
+              const capHtml = (info.number != null
+                ? '<span class="caption-number" data-team="' + info.team + '">#' + info.number + '</span> '
+                : '') + pilotName + ' <span class="caption-team-name">(' + info.team + ')</span>';
+              openPhotoModal(info.photo, cap, info.bio, capHtml);
+            }
+          }
+        }, 400);
+      }, 350);
+    }
+
+    function showCarFromConstructors(teamName) {
+      const team = teams2026.find(t => t.name === teamName);
+      if (!team) return;
+      switchTab(0);
+      setTimeout(() => {
+        const cardId = 'team-card-' + team.name.toLowerCase().replace(/\s+/g, '-');
+        const cardEl = document.getElementById(cardId);
+        if (cardEl) scrollToEl(cardEl);
+        setTimeout(() => {
+          if (cardEl) {
+            const carPhoto = cardEl.querySelector('.team-car-photo');
+            if (carPhoto && carPhoto.dataset.broken !== '1') {
+              openPhotoModal(team.car, team.name + ' — болид 2026', team.carBio || '');
+            }
+          }
+        }, 400);
+      }, 350);
+    }
+
+    function openPhotoModal(src, caption, bio, captionHtml) {
+      const modal = document.getElementById('photo-modal');
+      const img = document.getElementById('photo-modal-img');
+      const cap = document.getElementById('photo-modal-caption');
+      const bioEl = document.getElementById('photo-modal-bio');
+      img.src = src;
+      img.alt = caption || '';
+      if (captionHtml) {
+        cap.innerHTML = captionHtml;
+      } else {
+        cap.textContent = caption || '';
+      }
+      bioEl.textContent = bio || '';
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      try {
+        if (!history.state || !history.state.photoModal) {
+          history.pushState({ photoModal: true }, '');
+        }
+      } catch(e) {}
+    }
+
+    function _doClosePhotoModal() {
+      const modal = document.getElementById('photo-modal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closePhotoModal(e) {
+      if (e && e.target && e.target.id !== 'photo-modal' && e.target.classList && !e.target.classList.contains('photo-modal-close')) {
+        return;
+      }
+      const modal = document.getElementById('photo-modal');
+      if (!modal.classList.contains('open')) return;
+      _doClosePhotoModal();
+    }
+
+    window.addEventListener('popstate', e => {
+      const modal = document.getElementById('photo-modal');
+      if (modal && modal.classList.contains('open')) {
+        _doClosePhotoModal();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('photo-modal');
+        if (modal.classList.contains('open')) closePhotoModal();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const modal = document.getElementById('photo-modal');
+      if (modal && modal.classList.contains('open')) return;
+      const tag = (e.target && e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target && e.target.isContentEditable)) return;
+      if (e.metaKey || e.altKey || e.ctrlKey) return;
+      if (e.key === 'ArrowLeft' && currentTab > 0) {
+        switchTab(currentTab - 1);
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' && currentTab < 2) {
+        switchTab(currentTab + 1);
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.collapsible-section').forEach(s => s.style.display='none');
+      document.querySelectorAll('.collapse-toggle').forEach(t => t.setAttribute('aria-expanded','false'));
+      calculatePoints();
+      renderTeams();
+      initTeamImagesLazyLoading(false);
+      loadPilotImagesWhenNeeded();
+      document.querySelectorAll('.track-anchors a').forEach(a => {
+        const firstNode = a.childNodes[0];
+        const text = (firstNode && firstNode.nodeType === 1 && firstNode.tagName === 'S') ? firstNode.childNodes[0] : firstNode;
+        if (text && text.nodeType === 3) {
+          const chars = [...text.textContent.trim()];
+          const fullEmoji = chars.slice(0,2).join('');
+          const code = flagEmoji[fullEmoji];
+          if (code) {
+            const flagNode = document.createElement('img');
+            flagNode.src = `flags/${code}.png`;
+            flagNode.width = 26;
+            flagNode.height = 17;
+            flagNode.style.cssText = 'vertical-align:middle;margin-right:8px;object-fit:cover;border-radius:2px;';
+            flagNode.alt = fullEmoji;
+            text.textContent = text.textContent.replace(fullEmoji, '').trimStart();
+            a.insertBefore(flagNode, a.firstChild);
+          }
+        }
+      });
+
+      updateHeaderHeight();
+    });
+    window.addEventListener('resize', updateHeaderHeight);
+
+    document.addEventListener('click', e => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      e.preventDefault();
+      resetHorizontalDrift(false);
+    }, true);
+
+    document.querySelector('.track-anchors').addEventListener('click', e => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      resetHorizontalDrift(false);
+      scrollToEl(document.getElementById(id));
+      resetHorizontalDrift(false);
+    });
+
+    document.getElementById('panel-results').addEventListener('click', e => {
+      const pilotEl = e.target.closest('.pilot-link');
+      if (pilotEl) {
+        const pilotName = pilotEl.dataset.pilotName;
+        if (pilotName) showPilotFromResults(pilotName);
+        return;
+      }
+      const teamEl = e.target.closest('.team-link');
+      if (teamEl) {
+        const teamName = teamEl.dataset.teamName;
+        if (teamName) showCarFromConstructors(teamName);
+      }
+    });
+
+  
+
+    (function initBottomTabsWithoutMovingUpButton() {
+      const tabIds = ['bottom-tab-drivers', 'bottom-tab-results', 'bottom-tab-calendar'];
+      const prevBtn = document.getElementById('bottom-tabs-prev');
+      const nextBtn = document.getElementById('bottom-tabs-next');
+      const pill = document.getElementById('bottom-tabs-pill');
+      let pillRaf = 0;
+      let pillSnapTimer = 0;
+
+      function currentSafeIndex(index) {
+        const n = typeof index === 'number' ? index : (typeof currentTab === 'number' ? currentTab : 1);
+        return Math.max(0, Math.min(2, n));
+      }
+
+      function updateBottomTabsPill(index, snap) {
+        const safeIndex = currentSafeIndex(index);
+        const tab = document.getElementById(tabIds[safeIndex]);
+        if (!tab || !pill) return;
+
+        const left = tab.offsetLeft;
+        const width = tab.offsetWidth;
+        if (!width) return;
+
+        if (snap) {
+          const oldTransition = pill.style.transition;
+          pill.style.transition = 'none';
+          pill.style.width = width + 'px';
+          pill.style.transform = `translate3d(${left}px, 0, 0)`;
+          pill.offsetHeight;
+          pill.style.transition = oldTransition;
+          return;
+        }
+
+        pill.style.width = width + 'px';
+        pill.style.transform = `translate3d(${left}px, 0, 0)`;
+      }
+
+      function syncBottomTabs(index, snap) {
+        const safeIndex = currentSafeIndex(index);
+        tabIds.forEach((id, i) => {
+          const tab = document.getElementById(id);
+          if (tab) tab.setAttribute('aria-selected', i === safeIndex ? 'true' : 'false');
+        });
+
+        if (prevBtn) prevBtn.disabled = safeIndex <= 0;
+        if (nextBtn) nextBtn.disabled = safeIndex >= 2;
+
+        updateBottomTabsPill(safeIndex, snap);
+      }
+
+      function scheduleBottomTabsSync(index) {
+        const safeIndex = currentSafeIndex(index);
+        clearTimeout(pillSnapTimer);
+        if (pillRaf) cancelAnimationFrame(pillRaf);
+
+        syncBottomTabs(safeIndex, false);
+        pillRaf = requestAnimationFrame(() => {
+          syncBottomTabs(currentSafeIndex(), false);
+          pillRaf = 0;
+        });
+        pillSnapTimer = setTimeout(() => {
+          syncBottomTabs(currentSafeIndex(), true);
+        }, 340);
+      }
+
+      const oldSwitchTab = window.switchTab;
+      if (typeof oldSwitchTab === 'function' && !window.__bottomTabsNoUpMovePatched) {
+        window.__bottomTabsNoUpMovePatched = true;
+
+        window.switchTab = function(index) {
+          oldSwitchTab(index);
+          scheduleBottomTabsSync(index);
+        };
+      }
+
+      function init() {
+        clearTimeout(pillSnapTimer);
+        if (pillRaf) cancelAnimationFrame(pillRaf);
+        syncBottomTabs(currentSafeIndex(), true);
+      }
+
+      init();
+      window.addEventListener('load', init);
+      window.addEventListener('resize', init);
+      window.addEventListener('orientationchange', init);
+    })();
+
+
+
+    (function centerBottomTabsToDesktopCard() {
+      const desktopMq = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 601px)');
+      const panelIds = ['panel-drivers', 'panel-results', 'panel-calendar'];
+      const trackEl = document.getElementById('tabs-track');
+      let centerTimer = 0;
+      let isSwitching = false;
+
+      function getCurrentIndex() {
+        const n = typeof currentTab === 'number' ? currentTab : 1;
+        return Math.max(0, Math.min(2, n));
+      }
+
+      function measureCardCenter() {
+        if (!desktopMq.matches) {
+          document.documentElement.style.removeProperty('--bottom-tabs-card-center');
+          return;
+        }
+
+        const panel = document.getElementById(panelIds[getCurrentIndex()]);
+        const inner = panel ? panel.querySelector('.tab-panel-inner') : null;
+        if (!panel || !inner) return;
+
+        const panelRect = panel.getBoundingClientRect();
+        const innerRect = inner.getBoundingClientRect();
+
+        let center = panelRect.left + panel.clientWidth / 2;
+
+        if (innerRect.width > 0 && innerRect.left < window.innerWidth && innerRect.right > 0) {
+          center = innerRect.left + innerRect.width / 2;
+        }
+
+        center = Math.round(center * 10) / 10;
+        if (center > 0 && center < window.innerWidth) {
+          document.documentElement.style.setProperty('--bottom-tabs-card-center', center + 'px');
+        }
+      }
+
+      function scheduleStableCenter(delay) {
+        clearTimeout(centerTimer);
+        centerTimer = setTimeout(function() {
+          isSwitching = false;
+          measureCardCenter();
+        }, typeof delay === 'number' ? delay : 360);
+      }
+
+      const oldSwitchTabCenterCard = window.switchTab;
+      if (typeof oldSwitchTabCenterCard === 'function' && !window.__centerBottomTabsToDesktopCardPatched) {
+        window.__centerBottomTabsToDesktopCardPatched = true;
+        window.switchTab = function(index) {
+          isSwitching = true;
+          oldSwitchTabCenterCard(index);
+          scheduleStableCenter(360);
+        };
+      }
+
+      if (trackEl) {
+        trackEl.addEventListener('transitionend', function(event) {
+          if (event.propertyName === 'transform') {
+            isSwitching = false;
+            clearTimeout(centerTimer);
+            requestAnimationFrame(measureCardCenter);
+          }
+        });
+      }
+
+      function refreshCenterNow() {
+        if (!isSwitching) requestAnimationFrame(measureCardCenter);
+      }
+
+      window.addEventListener('load', refreshCenterNow);
+      window.addEventListener('resize', refreshCenterNow);
+      window.addEventListener('orientationchange', refreshCenterNow);
+      refreshCenterNow();
+      setTimeout(measureCardCenter, 200);
+    })();
+
+
+
+    (function initMobileDropUpButton() {
+      const btn = document.getElementById('mobile-drop-up-button');
+      if (!btn) return;
+
+      const mobileQuery = window.matchMedia ? window.matchMedia('(max-width: 600px), (pointer: coarse)') : null;
+      let lockedHiddenUntilTop = false;
+      let unlockTimer = null;
+
+      function isMobileMode() {
+        return true;
+      }
+
+      function isCompactMobileMode() {
+        return !mobileQuery || mobileQuery.matches;
+      }
+
+      function getActiveScrollPanel() {
+        if (typeof activePanel === 'function') return activePanel();
+        if (typeof currentTab === 'number') {
+          return document.getElementById(['panel-drivers', 'panel-results', 'panel-calendar'][currentTab]);
+        }
+        return document.getElementById('panel-results');
+      }
+
+      function setButtonState(visible, returning) {
+        btn.classList.toggle('is-visible', !!visible);
+        btn.classList.toggle('is-returning', !!returning && !visible);
+        btn.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        btn.tabIndex = visible ? 0 : -1;
+      }
+
+      function isFooterTooClose(panel) {
+        if (!panel) return false;
+
+        const footer = panel.querySelector('footer');
+        const bottomGap = window.matchMedia && window.matchMedia('(max-width: 600px), (pointer: coarse)').matches ? 138 : 122;
+        const nearScrollEnd = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - bottomGap;
+
+        if (!footer) return nearScrollEnd;
+
+        const footerRect = footer.getBoundingClientRect();
+        const buttonRect = btn.getBoundingClientRect();
+        const footerVisible = footerRect.bottom > 0 && footerRect.top < window.innerHeight;
+        const touchesButtonZone = footerVisible
+          && footerRect.top < buttonRect.bottom + 18
+          && footerRect.bottom > buttonRect.top - 18;
+
+        return nearScrollEnd || touchesButtonZone;
+      }
+
+      function updateMobileDropUpButton() {
+        const panel = getActiveScrollPanel();
+        const top = panel ? panel.scrollTop : 0;
+        const footerTooClose = isCompactMobileMode() && isFooterTooClose(panel);
+        btn.classList.toggle('is-footer-raised', !!footerTooClose && top > 120);
+
+        if (!isMobileMode()) {
+          lockedHiddenUntilTop = false;
+          btn.classList.remove('is-footer-raised');
+          setButtonState(false, false);
+          return;
+        }
+
+        if (lockedHiddenUntilTop) {
+          if (top <= 8) {
+            lockedHiddenUntilTop = false;
+            setButtonState(false, false);
+          } else {
+            setButtonState(false, true);
+          }
+          return;
+        }
+
+        setButtonState(top > 120, false);
+      }
+
+      btn.addEventListener('click', function(event) {
+        event.preventDefault();
+        lockedHiddenUntilTop = true;
+        setButtonState(false, true);
+
+        if (typeof scrollActivePanelToTop === 'function') {
+          scrollActivePanelToTop();
+        } else {
+          const panel = getActiveScrollPanel();
+          if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        clearTimeout(unlockTimer);
+        unlockTimer = setTimeout(function() {
+          lockedHiddenUntilTop = false;
+          updateMobileDropUpButton();
+        }, 1100);
+      });
+
+      ['panel-drivers', 'panel-results', 'panel-calendar'].forEach(function(id) {
+        const panel = document.getElementById(id);
+        if (panel) panel.addEventListener('scroll', updateMobileDropUpButton, { passive: true });
+      });
+
+      const oldSwitchTabForDropUp = window.switchTab;
+      if (typeof oldSwitchTabForDropUp === 'function' && !window.__mobileDropUpButtonPatched) {
+        window.__mobileDropUpButtonPatched = true;
+        window.switchTab = function(index) {
+          oldSwitchTabForDropUp(index);
+          requestAnimationFrame(updateMobileDropUpButton);
+          setTimeout(updateMobileDropUpButton, 360);
+        };
+      }
+
+      if (mobileQuery && typeof mobileQuery.addEventListener === 'function') {
+        mobileQuery.addEventListener('change', updateMobileDropUpButton);
+      } else if (mobileQuery && typeof mobileQuery.addListener === 'function') {
+        mobileQuery.addListener(updateMobileDropUpButton);
+      }
+
+      window.addEventListener('load', updateMobileDropUpButton);
+      window.addEventListener('resize', updateMobileDropUpButton);
+      window.addEventListener('orientationchange', updateMobileDropUpButton);
+      requestAnimationFrame(updateMobileDropUpButton);
+      setTimeout(updateMobileDropUpButton, 250);
+    })();
+
+
+    (function initKeyboardVerticalScrollForPanels() {
+      const panelIds = ['panel-drivers', 'panel-results', 'panel-calendar'];
+
+      function getActiveScrollPanel() {
+        if (typeof activePanel === 'function') return activePanel();
+        if (typeof currentTab === 'number') {
+          return document.getElementById(panelIds[currentTab]) || document.getElementById('panel-results');
+        }
+        return document.getElementById('panel-results');
+      }
+
+      function shouldIgnoreKeyboardScroll(event) {
+        const modal = document.getElementById('photo-modal');
+        if (modal && modal.classList.contains('open')) return true;
+        if (event.metaKey || event.altKey || event.ctrlKey) return true;
+
+        const target = event.target;
+        const tag = (target && target.tagName ? target.tagName : '').toLowerCase();
+        return tag === 'input'
+          || tag === 'textarea'
+          || tag === 'select'
+          || (target && target.isContentEditable);
+      }
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+        if (shouldIgnoreKeyboardScroll(event)) return;
+
+        const panel = getActiveScrollPanel();
+        if (!panel) return;
+
+        const canScroll = panel.scrollHeight > panel.clientHeight + 2;
+        if (!canScroll) return;
+
+        const step = Math.max(72, Math.round(panel.clientHeight * 0.12));
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+
+        event.preventDefault();
+        panel.scrollBy({ top: direction * step, left: 0, behavior: 'auto' });
+      }, { passive: false });
+    })();
+
+
+
+    (function initPilotImagesOnTabOpen() {
+      if (window.__pilotImagesOnTabOpenFix) return;
+      window.__pilotImagesOnTabOpenFix = true;
+
+      const oldSwitchTabForPilotImages = window.switchTab;
+      if (typeof oldSwitchTabForPilotImages === 'function') {
+        window.switchTab = function(index) {
+          oldSwitchTabForPilotImages(index);
+          if (index === 0) {
+            requestAnimationFrame(() => {
+              if (typeof initTeamImagesLazyLoading === 'function') {
+                initTeamImagesLazyLoading(true);
+              }
+            });
+          }
+        };
+      }
+
+      const panel = document.getElementById('panel-drivers');
+      if (panel) {
+        panel.addEventListener('scroll', () => {
+          if (currentTab === 0 && typeof initTeamImagesLazyLoading === 'function') {
+            initTeamImagesLazyLoading(true);
+          }
+        }, { passive: true });
+      }
+    })();
+
+
+    (function initInstallOffer() {
+      const OFFER_KEY = 'f1_install_offer_shown_v1';
+      let deferredInstallPrompt = null;
+
+      const offer = document.getElementById('install-offer');
+      const title = document.getElementById('install-offer-title');
+      const text = document.getElementById('install-offer-text');
+      const installButton = document.getElementById('install-offer-install');
+      const laterButton = document.getElementById('install-offer-later');
+
+      if (!offer || !title || !text || !installButton || !laterButton) return;
+
+      const userAgent = navigator.userAgent || '';
+      const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+      const isAndroid = /android/i.test(userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+        || window.matchMedia('(display-mode: fullscreen)').matches
+        || navigator.standalone === true;
+      const isSecureEnough = window.isSecureContext
+        || location.hostname === 'localhost'
+        || location.hostname === '127.0.0.1';
+
+      function wasShown() {
+        try {
+          return localStorage.getItem(OFFER_KEY) === '1';
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function rememberShown() {
+        try {
+          localStorage.setItem(OFFER_KEY, '1');
+        } catch (error) {
+          // Если localStorage отключён, окно просто может появиться снова.
+        }
+      }
+
+      function closeOffer() {
+        offer.classList.remove('show');
+        setTimeout(function() {
+          offer.hidden = true;
+        }, 360);
+      }
+
+      function configureNativeOffer() {
+        title.textContent = 'Установить приложение?';
+        text.textContent = 'Добавьте «Гран-при 26» на главный экран и открывайте календарь и результаты одним нажатием.';
+        installButton.textContent = 'Установить';
+        installButton.dataset.mode = 'native';
+        laterButton.hidden = false;
+      }
+
+      function configureManualOffer() {
+        title.textContent = 'Установить приложение?';
+
+        if (isIOS) {
+          text.textContent = 'В Safari нажмите «Поделиться», затем выберите «На экран Домой».';
+          installButton.textContent = 'Понятно';
+          installButton.dataset.mode = 'instructions';
+          laterButton.hidden = true;
+          return;
+        }
+
+        text.textContent = 'Нажмите «Установить». Если системное окно не откроется, выберите в меню браузера «Добавить на главный экран».';
+        installButton.textContent = 'Установить';
+        installButton.dataset.mode = 'manual';
+        laterButton.hidden = false;
+      }
+
+      function showOffer(mode) {
+        if (isStandalone || wasShown() || !isSecureEnough) return;
+
+        if (mode === 'native') {
+          configureNativeOffer();
+        } else {
+          configureManualOffer();
+        }
+
+        rememberShown();
+        offer.hidden = false;
+        requestAnimationFrame(function() {
+          offer.classList.add('show');
+        });
+      }
+
+      window.addEventListener('beforeinstallprompt', function(event) {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+
+        if (!offer.hidden) {
+          configureNativeOffer();
+          return;
+        }
+
+        if (!wasShown() && !isStandalone) {
+          setTimeout(function() {
+            showOffer('native');
+          }, 900);
+        }
+      });
+
+      window.addEventListener('appinstalled', function() {
+        rememberShown();
+        deferredInstallPrompt = null;
+        closeOffer();
+      });
+
+      laterButton.addEventListener('click', function() {
+        rememberShown();
+        closeOffer();
+      });
+
+      installButton.addEventListener('click', async function() {
+        const mode = installButton.dataset.mode;
+
+        if (mode === 'instructions') {
+          closeOffer();
+          return;
+        }
+
+        if (deferredInstallPrompt) {
+          const promptEvent = deferredInstallPrompt;
+          deferredInstallPrompt = null;
+
+          try {
+            await promptEvent.prompt();
+            await promptEvent.userChoice;
+          } catch (error) {
+            console.warn('Не удалось открыть системное окно установки.', error);
+          }
+
+          closeOffer();
+          return;
+        }
+
+        title.textContent = 'Как установить';
+        text.textContent = isAndroid
+          ? 'Откройте меню браузера ⋮ и выберите «Установить приложение» или «Добавить на главный экран».'
+          : 'Откройте меню браузера и выберите команду установки приложения или добавления на главный экран.';
+        installButton.textContent = 'Понятно';
+        installButton.dataset.mode = 'instructions';
+        laterButton.hidden = true;
+      });
+
+      if ('serviceWorker' in navigator && isSecureEnough) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./sw.js', { scope: './granpri26.html' }).catch(function(error) {
+            console.warn('Service Worker не зарегистрирован.', error);
+          });
+        });
+      }
+
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          if (isStandalone || wasShown() || deferredInstallPrompt) return;
+          if (isIOS || isAndroid) showOffer('manual');
+        }, 2500);
+      });
+    })();
+
+</script>
+</body>
+</html>
