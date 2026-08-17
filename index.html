@@ -80,12 +80,29 @@
             transition: all 0.3s;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             min-height: 48px;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
 
         .social-link:hover {
             transform: translateY(-3px);
             background-color: #f8f9fa;
+        }
+
+        .social-link:focus {
+            outline: none;
+        }
+
+        .social-link:focus-visible {
+            outline: 2px solid #777;
+            outline-offset: 2px;
+        }
+
+        .social-link:active {
+            background-color: #f8f9fa;
+            color: #333;
         }
 
         footer {
@@ -159,6 +176,15 @@
 
             .social-link:hover {
                 background-color: #444; 
+            }
+
+            .social-link:focus-visible {
+                outline-color: #aaa;
+            }
+
+            .social-link:active {
+                background-color: #444;
+                color: #e0e0e0;
             }
 
             footer {
