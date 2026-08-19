@@ -210,6 +210,16 @@
     .badge-next { background: #cc0000; color: #fff; animation: pulse 1.5s infinite; }
     .badge-past { background: #e9ecef; color: #6c757d; border: 1px solid #dee2e6; }
     .badge-cancelled { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+    .driver-change-note {
+      margin: 10px 0 4px;
+      padding: 8px 10px;
+      border-left: 3px solid #cc0000;
+      border-radius: 7px;
+      background: #fff1f1;
+      color: #555;
+      font-size: 12px;
+      line-height: 1.4;
+    }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     .race-link { display: inline-block; margin-top: 8px; font-size: 12px; color: #004bcc; text-decoration: none; word-break: break-word; }
     .race-link:hover { text-decoration: underline; }
@@ -307,6 +317,7 @@
       .badge-past { background: #2a2a2a; color: #888; border-color: #444; }
       .badge-sprint { background: #3a2e00; color: #ffc107; border-color: #6a5000; }
       .badge-cancelled { background: #3a1010; color: #f1aeb5; border-color: #842029; }
+      .driver-change-note { background: #321b1b; color: #ddd; border-left-color: #ff4444; }
       .countdown-timer { color: #f0f0f0; }
       .race-link { color: #75a7fc; }
       .race-card.cancelled .race-info h2 { color: #666; }
@@ -3525,6 +3536,22 @@
       "Алекс Албон": "Williams","Карлос Сайнс": "Williams","Нико Хюлькенберг": "Audi","Габриэл Бортолето": "Audi",
       "Серхио Перес": "Cadillac","Вальттери Боттас": "Cadillac",
     };
+    const eventDriverChanges = {
+      zandvoort: {
+        teams: {
+          "Лиам Лоусон": "Red Bull",
+          "Юки Цунода": "Racing Bulls"
+        },
+        note: "Замены на этап: Лиам Лоусон — Red Bull, Юки Цунода — Racing Bulls. Исак Хаджар пропускает этап из-за травмы запястья."
+      }
+    };
+    function pilotConstructorForRace(pilotName, race) {
+      return eventDriverChanges[race?.id]?.teams?.[pilotName] || pilotConstructorMap[pilotName];
+    }
+    function driverChangeNoteForRace(race) {
+      const note=eventDriverChanges[race?.id]?.note;
+      return note ? `<div class="driver-change-note"><strong>Изменение состава:</strong> ${note}</div>` : '';
+    }
     const pilotCountryMap = {
       "Оскар Пиастри": "🇦🇺","Ландо Норрис": "🇬🇧","Макс Ферстаппен": "🇳🇱",
       "Исак Хаджар": "🇫🇷","Шарль Леклер": "🇲🇨","Льюис Хэмилтон": "🇬🇧",
@@ -3532,7 +3559,7 @@
       "Фернандо Алонсо": "🇪🇸","Алекс Албон": "🇹🇭","Карлос Сайнс": "🇪🇸",
       "Эстебан Окон": "🇫🇷","Оливер Берман": "🇬🇧","Пьер Гасли": "🇫🇷",
       "Франко Колапинто": "🇦🇷","Серхио Перес": "🇲🇽","Вальттери Боттас": "🇫🇮",
-      "Нико Хюлькенберг": "🇩🇪","Габриэл Бортолето": "🇧🇷","Лиам Лоусон": "🇳🇿",
+      "Нико Хюлькенберг": "🇩🇪","Габриэл Бортолето": "🇧🇷","Лиам Лоусон": "🇳🇿","Юки Цунода": "🇯🇵",
       "Арвид Линблад": "🇸🇪"
     };
     const constructorLogos = {
@@ -3557,7 +3584,7 @@
       "Оскар Пиастри","Ландо Норрис","Макс Ферстаппен","Джордж Рассел","Шарль Леклер","Льюис Хэмилтон",
       "Кими Антонелли","Алекс Албон","Эстебан Окон","Исак Хаджар","Нико Хюлькенберг","Лэнс Стролл",
       "Карлос Сайнс","Пьер Гасли","Арвид Линблад","Фернандо Алонсо","Оливер Берман","Лиам Лоусон",
-      "Габриэл Бортолето","Франко Колапинто","Вальттери Боттас","Серхио Перес"
+      "Габриэл Бортолето","Франко Колапинто","Вальттери Боттас","Серхио Перес","Юки Цунода"
     ];
 
     const raceFieldNames = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
@@ -3627,6 +3654,7 @@
           <h2>${race.name}</h2>
           <p><strong>Дата:</strong> ${formatDate(race.date)} &nbsp; <strong>Время:</strong> ${race.timeTbd ? 'уточняется' : (race.timeLabel || race.time)}</p>
           <p><strong>Трасса:</strong> ${race.location}, Длина круга: ${race.length}, Кругов: ${race.laps} &nbsp;·&nbsp; <a href="#" onclick="switchTab(2);setTimeout(()=>scrollToEl(document.getElementById('card-${race.id}')),350);return false;" style="color:#cc0000;font-weight:bold;text-decoration:none;">Календарь</a></p>
+          ${driverChangeNoteForRace(race)}
           <div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('${race.id}', this);return false;" aria-label="Скопировать ссылку на эту карточку" title="Скопировать ссылку на эту карточку"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>
           <h3 style="margin:10px 0 6px;color:#cc0000;">Гонка</h3>
           ${top3}
@@ -3675,7 +3703,7 @@
           if (driver && driver.trim()) {
             const n = driver.trim();
             driverPoints[n] = (driverPoints[n]||0) + racePointsTable[i];
-            const c = pilotConstructorMap[n];
+            const c = pilotConstructorForRace(n,races[raceIndex]);
             if (c) constructorPoints[c] = (constructorPoints[c]||0) + racePointsTable[i];
           }
         });
@@ -3685,7 +3713,7 @@
             if (driver && driver.trim()) {
               const n = driver.trim();
               driverPoints[n] = (driverPoints[n]||0) + sprintPointsTable[i];
-              const c = pilotConstructorMap[n];
+              const c = pilotConstructorForRace(n,races[raceIndex]);
               if (c) constructorPoints[c] = (constructorPoints[c]||0) + sprintPointsTable[i];
             }
           });
@@ -4139,6 +4167,7 @@
               <span>🔄 ${race.laps} кругов · ${race.length}</span>
             </div>
             <div style="margin-top:6px;">${badges.join('')}</div>
+            ${driverChangeNoteForRace(race)}
             ${sessionsHtml}
             ${raceLink}
             <div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('card-${race.id}', this);return false;" aria-label="Скопировать ссылку на эту карточку" title="Скопировать ссылку на эту карточку"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>
