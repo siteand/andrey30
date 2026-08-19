@@ -72,14 +72,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 14px 30px;
+            padding: 0 30px;
             background-color: #fff;
             border-radius: 14px;
             text-decoration: none;
             color: #333;
             transition: all 0.3s;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            min-height: 48px;
+            height: 50px;
+            min-height: 50px;
             -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
             -webkit-user-select: none;
             user-select: none;
@@ -129,6 +130,10 @@
             color: #111111;
             stroke-width: 1.8;
             shape-rendering: geometricPrecision;
+        }
+
+        .social-label {
+            transform: translateY(1px);
         }
 
         @media (max-width: 600px) {
@@ -323,7 +328,7 @@
                     <path d="M7 2v20"/>
                     <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
                 </svg>
-                Калькулятор КБЖУ
+                <span class="social-label">Калькулятор КБЖУ</span>
             </a>
             <a href="vklad.html" class="social-link" aria-label="Перейти к калькулятору вкладов">
                 <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -331,7 +336,7 @@
                     <path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"/>
                     <path d="M14 18v-7M18 18v-7M3 22h18M6 18v-7"/>
                 </svg>
-                Калькулятор вкладов
+                <span class="social-label">Калькулятор вкладов</span>
             </a>
             <a href="credit.html" class="social-link" aria-label="Перейти к кредитному калькулятору">
                 <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -339,20 +344,20 @@
                     <circle cx="6.5" cy="6.5" r="2.5"/>
                     <circle cx="17.5" cy="17.5" r="2.5"/>
                 </svg>
-                Кредитный калькулятор 
+                <span class="social-label">Кредитный калькулятор</span>
             </a>
             <a href="fuel.html" class="social-link" aria-label="Перейти к калькулятору расхода топлива">
                 <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/>
                     <path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16M2 21h13M3 9h11"/>
                 </svg>
-                Калькулятор расхода топлива
+                <span class="social-label">Калькулятор расхода топлива</span>
             </a>
             <a href="currencyconvener.html" class="social-link" aria-label="Перейти к конвертеру валют">
                 <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 11h8a4 4 0 0 0 0-8H9v18M6 15h8"/>
                 </svg>
-                Конвертер валют 
+                <span class="social-label">Конвертер валют</span>
             </a>
             <a href="rates.html" class="social-link" aria-label="Перейти к курсам валют">
                 <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -360,7 +365,7 @@
                     <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/>
                     <path d="M4 18.463V21M8 14.656V21"/>
                 </svg>
-                Курсы валют
+                <span class="social-label">Курсы валют</span>
             </a>
         </div>
     </div>
