@@ -55,18 +55,6 @@
     "ninth": "",
     "tenth": ""
   },
-  "4": {
-    "first": "",
-    "second": "",
-    "third": "",
-    "fourth": "",
-    "fifth": "",
-    "sixth": "",
-    "seventh": "",
-    "eighth": "",
-    "ninth": "",
-    "tenth": ""
-  },
   "5": {
     "first": "Кими Антонелли",
     "second": "Ландо Норрис",
@@ -198,14 +186,14 @@
     "eighth": "",
     "ninth": "",
     "tenth": "",
-    "sprint_first": "",
-    "sprint_second": "",
-    "sprint_third": "",
-    "sprint_fourth": "",
-    "sprint_fifth": "",
-    "sprint_sixth": "",
-    "sprint_seventh": "",
-    "sprint_eighth": ""
+    "sprint_first": "Джордж Рассел",
+    "sprint_second": "Шарль Леклер",
+    "sprint_third": "Ландо Норрис",
+    "sprint_fourth": "Кими Антонелли",
+    "sprint_fifth": "Оскар Пиастри",
+    "sprint_sixth": "Макс Ферстаппен",
+    "sprint_seventh": "Льюис Хэмилтон",
+    "sprint_eighth": "Пьер Гасли"
   },
   "14": {
     "first": "",
