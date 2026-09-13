@@ -3550,6 +3550,13 @@
           "Юки Цунода": "Racing Bulls"
         },
         note: "Замены на этап: Лиам Лоусон — Red Bull, Юки Цунода — Racing Bulls. Исак Хаджар снова пропускает этап из-за травмы запястья."
+      },
+      madrid: {
+        teams: {
+          "Лиам Лоусон": "Red Bull",
+          "Юки Цунода": "Racing Bulls"
+        },
+        note: "Замены на этап: Лиам Лоусон — Red Bull, Юки Цунода — Racing Bulls. Исак Хаджар снова пропускает этап из-за травмы запястья."
       }
     };
     function pilotConstructorForRace(pilotName, race) {
@@ -3587,17 +3594,33 @@
       "Aston Martin":"#006F62","Alpine":"#0090FF","Racing Bulls":"#2B4562","Haas":"#B6BABD",
       "Williams":"#005AFF","Audi":"#000000","Cadillac":"#1E2F4F",
     };
-    const OFFICIAL_ORDER = [
-      "Оскар Пиастри","Ландо Норрис","Макс Ферстаппен","Джордж Рассел","Шарль Леклер","Льюис Хэмилтон",
-      "Кими Антонелли","Алекс Албон","Эстебан Окон","Исак Хаджар","Нико Хюлькенберг","Лэнс Стролл",
-      "Карлос Сайнс","Пьер Гасли","Арвид Линблад","Фернандо Алонсо","Оливер Берман","Лиам Лоусон",
-      "Габриэл Бортолето","Франко Колапинто","Вальттери Боттас","Серхио Перес","Юки Цунода"
-    ];
-
     const raceFieldNames = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
     const sprintFieldNames = ['first','second','third','fourth','fifth','sixth','seventh','eighth'];
     const expandedState = {};
     let lastDataSnapshot = null;
+
+    function standingStatsFor(stats, name) {
+      if (!stats[name]) stats[name] = { raceFinishes: Array(raceFieldNames.length).fill(0) };
+      return stats[name];
+    }
+
+    function compareChampionshipEntries(a, b, stats) {
+      if (b[1] !== a[1]) return b[1] - a[1];
+      const aFinishes = stats[a[0]]?.raceFinishes || [];
+      const bFinishes = stats[b[0]]?.raceFinishes || [];
+      for (let i = 0; i < raceFieldNames.length; i++) {
+        const difference = (bFinishes[i] || 0) - (aFinishes[i] || 0);
+        if (difference) return difference;
+      }
+      return a[0].localeCompare(b[0], 'ru');
+    }
+
+    function haveSameChampionshipRank(a, b, stats) {
+      if (!a || !b || a[1] !== b[1]) return false;
+      const aFinishes = stats[a[0]]?.raceFinishes || [];
+      const bFinishes = stats[b[0]]?.raceFinishes || [];
+      return raceFieldNames.every((_, i) => (aFinishes[i] || 0) === (bFinishes[i] || 0));
+    }
 
     function buildRaceCards(force) {
       const rawData = localStorage.getItem('f1_2026_results') || '{}';
@@ -3700,6 +3723,7 @@
     function calculatePoints() {
       const saved = JSON.parse(localStorage.getItem('f1_2026_results') || '{}');
       const driverPoints = {}, constructorPoints = {};
+      const driverStats = {}, constructorStats = {};
       const racePointsTable = [25,18,15,12,10,8,6,4,2,1];
       const sprintPointsTable = [8,7,6,5,4,3,2,1];
       for (const index in saved) {
@@ -3710,8 +3734,12 @@
           if (driver && driver.trim()) {
             const n = driver.trim();
             driverPoints[n] = (driverPoints[n]||0) + racePointsTable[i];
+            standingStatsFor(driverStats, n).raceFinishes[i]++;
             const c = pilotConstructorForRace(n,races[raceIndex]);
-            if (c) constructorPoints[c] = (constructorPoints[c]||0) + racePointsTable[i];
+            if (c) {
+              constructorPoints[c] = (constructorPoints[c]||0) + racePointsTable[i];
+              standingStatsFor(constructorStats, c).raceFinishes[i]++;
+            }
           }
         });
         if (races[raceIndex].hasSprint) {
@@ -3730,17 +3758,14 @@
         const ul = document.getElementById(listId);
         ul.innerHTML = '';
         if (Object.keys(data).length === 0) { const li = document.createElement('li'); li.textContent = "Нет данных для отображения"; ul.appendChild(li); return; }
+        const stats = listId === 'drivers' ? driverStats : constructorStats;
+        const sorted = Object.entries(data).sort((a,b) => compareChampionshipEntries(a,b,stats));
         if (listId === 'drivers') {
-          const sorted = Object.entries(data).sort((a,b) => {
-            if (b[1]!==a[1]) return b[1]-a[1];
-            const ai=OFFICIAL_ORDER.indexOf(a[0]),bi=OFFICIAL_ORDER.indexOf(b[0]);
-            const av=ai===-1?9999:ai,bv=bi===-1?9999:bi;
-            if (av===bv&&av===9999) return a[0].localeCompare(b[0]);
-            return av-bv;
-          });
+          let displayedRank = 0;
           sorted.forEach(([name,pts],i) => {
+            if (i === 0 || !haveSameChampionshipRank(sorted[i], sorted[i-1], stats)) displayedRank = i + 1;
             const li = document.createElement('li');
-            li.appendChild(document.createTextNode(`${i+1}.`));
+            li.appendChild(document.createTextNode(`${displayedRank}.`));
             const fc = pilotCountryMap[name];
             if (fc) { li.appendChild(flagEl(fc, 17)); }
             const link = document.createElement('span');
@@ -3751,10 +3776,11 @@
             ul.appendChild(li);
           });
         } else {
-          const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]);
+          let displayedRank = 0;
           sorted.forEach(([name,pts],i) => {
+            if (i === 0 || !haveSameChampionshipRank(sorted[i], sorted[i-1], stats)) displayedRank = i + 1;
             const li = document.createElement('li');
-            li.appendChild(document.createTextNode(`${i+1}.`));
+            li.appendChild(document.createTextNode(`${displayedRank}.`));
             const link = document.createElement('span');
             link.className = 'team-link';
             link.dataset.teamName = name;
