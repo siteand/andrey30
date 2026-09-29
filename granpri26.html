@@ -4449,9 +4449,11 @@
       if (bio) wrap.dataset.bio = bio;
       const img = document.createElement('img');
       img.alt = alt || '';
-      img.loading = 'lazy';
+      // Близость к экрану уже проверяет IntersectionObserver ниже.
+      // После назначения src начинаем загрузку без второй отложенной очереди.
+      img.loading = 'eager';
       img.decoding = 'async';
-      try { img.fetchPriority = 'low'; } catch(e) {}
+      try { img.fetchPriority = 'auto'; } catch(e) {}
       img.dataset.src = src;
       wrap.dataset.loading = '1';
       img.onerror = function() {
@@ -4479,6 +4481,10 @@
       if (!img || !img.dataset || !img.dataset.src || img.src) return;
       img.src = img.dataset.src;
       delete img.dataset.src;
+      if (img.complete && img.naturalWidth > 0) {
+        const wrap = img.closest('.team-photo');
+        if (wrap) delete wrap.dataset.loading;
+      }
     }
 
     let teamImagesLazyObserver = null;
@@ -5298,10 +5304,11 @@
       });
 
       if ('serviceWorker' in navigator && isSecureEnough) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('./sw.js', { scope: './granpri26.html' }).catch(function(error) {
-            console.warn('Service Worker не зарегистрирован.', error);
-          });
+        navigator.serviceWorker.register('./sw.js', {
+          scope: './granpri26.html',
+          updateViaCache: 'none'
+        }).catch(function(error) {
+          console.warn('Service Worker не зарегистрирован.', error);
         });
       }
 
