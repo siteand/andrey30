@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?rev=20260802pad">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?rev=20260802pad">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?rev=20260802pad">
-  <link rel="manifest" href="site.webmanifest?rev=20260802pad">
+  <link rel="manifest" href="site.webmanifest?rev=20260929-scope-v1">
   <meta name="theme-color" content="#e60000">
   <meta name="apple-mobile-web-app-title" content="Гран-при 26">
 
@@ -5304,12 +5304,29 @@
       });
 
       if ('serviceWorker' in navigator && isSecureEnough) {
-        navigator.serviceWorker.register('./sw.js', {
-          scope: './granpri26.html',
-          updateViaCache: 'none'
-        }).catch(function(error) {
-          console.warn('Service Worker не зарегистрирован.', error);
-        });
+        (async function registerGranpriServiceWorker() {
+          try {
+            const directoryScope = new URL('./', window.location.href).href;
+            const swPath = new URL('./sw.js', window.location.href).pathname;
+            const registrations = await navigator.serviceWorker.getRegistrations();
+
+            // Удаляем только старую регистрацию «Гран-при 26», которая могла
+            // охватывать всю папку /andrey30/ и показывать значок на других страницах.
+            await Promise.all(registrations.map(function(registration) {
+              const worker = registration.active || registration.waiting || registration.installing;
+              if (!worker || registration.scope !== directoryScope) return false;
+              if (new URL(worker.scriptURL).pathname !== swPath) return false;
+              return registration.unregister();
+            }));
+
+            await navigator.serviceWorker.register('./sw.js', {
+              scope: './granpri26.html',
+              updateViaCache: 'none'
+            });
+          } catch (error) {
+            console.warn('Service Worker не зарегистрирован.', error);
+          }
+        })();
       }
 
       window.addEventListener('load', function() {
