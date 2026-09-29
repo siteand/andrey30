@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="icons2/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons2/favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons2/apple-touch-icon.png">
-    <link rel="manifest" href="currency.webmanifest">
+    <link rel="manifest" href="currency.webmanifest?rev=20260929-offline-v1">
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -176,6 +176,24 @@
             color: var(--text-muted);
             text-align: center;
             overflow-wrap: anywhere;
+        }
+        .install-app-btn {
+            background: var(--input-bg);
+            color: var(--button-bg);
+            border: 1px solid var(--button-bg);
+            font-size: 14px;
+            padding: 10px 12px;
+        }
+        .install-app-btn:hover { background: var(--row-hover); }
+        .install-app-btn[hidden], .install-help[hidden] { display: none !important; }
+        .install-help {
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        @media (display-mode: standalone) {
+            .install-app-btn, .install-help { display: none !important; }
         }
         .source-note { line-height: 1.5; }
         .status-btn:disabled { cursor: wait; }
@@ -553,6 +571,8 @@
 
         <div class="source-note" id="sourceNote"><span id="sourceNoteText"></span></div>
         <p class="offline-note" id="offlineNote" role="status" aria-live="polite">Сохраняем для работы без интернета…</p>
+        <button class="install-app-btn" id="installAppBtn" type="button" hidden>Установить приложение</button>
+        <p class="install-help" id="installHelp" role="status" aria-live="polite" hidden></p>
     </div>
     </div>
 
@@ -674,6 +694,7 @@ let refreshPromise = null;
 let lastRefreshFailed = false;
 let cacheWriteFailed = false;
 let offlineReady = false;
+let deferredInstallPrompt = null;
 let lastFetchTime = 0;
 let selected = [];
 let activeCode = null;
@@ -991,11 +1012,58 @@ async function prepareOffline() {
         }
         offlineReady = true;
         updateOfflineNote();
+        updateInstallButton();
     } catch (error) {
         note.textContent = 'Не удалось сохранить страницу для офлайн-режима. Откройте её ещё раз с интернетом.';
         console.warn('Не удалось подготовить конвертер для работы офлайн:', error);
     }
 }
+
+function isStandaloneMode() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+}
+
+function updateInstallButton() {
+    const button = document.getElementById('installAppBtn');
+    const help = document.getElementById('installHelp');
+    if (isStandaloneMode()) {
+        button.hidden = true;
+        help.hidden = true;
+        return;
+    }
+    button.hidden = !offlineReady;
+}
+
+window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    updateInstallButton();
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    document.getElementById('installAppBtn').hidden = true;
+    document.getElementById('installHelp').hidden = true;
+});
+
+document.getElementById('installAppBtn').addEventListener('click', async () => {
+    const button = document.getElementById('installAppBtn');
+    const help = document.getElementById('installHelp');
+    if (deferredInstallPrompt) {
+        const promptEvent = deferredInstallPrompt;
+        deferredInstallPrompt = null;
+        await promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+            button.hidden = true;
+            help.hidden = true;
+            return;
+        }
+    }
+    help.textContent = 'В Samsung Internet откройте меню ≡ и выберите «Добавить страницу в» → «Главный экран». В Chrome нажмите ⋮ → «Установить приложение».';
+    help.hidden = false;
+});
 
 document.getElementById('refreshBtn').addEventListener('click', () => fetchRates(true));
 window.addEventListener('offline', updateStatus);
