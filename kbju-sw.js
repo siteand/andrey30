@@ -1,11 +1,11 @@
-/* Калькулятор КБЖУ: установка и работа без сети. Сборка 20260929-v1. */
+/* Калькулятор КБЖУ: установка и работа без сети. Сборка 20260929-v3. */
 'use strict';
 
 const BASE_URL = new URL('./', self.location.href);
 const PAGE_URL = new URL('calculator_kbju.html', BASE_URL).href;
 const PAGE_PATH = new URL(PAGE_URL).pathname;
 const CACHE_PREFIX = 'kbju-offline:' + BASE_URL.pathname + ':';
-const CACHE_NAME = CACHE_PREFIX + '20260929-v1';
+const CACHE_NAME = CACHE_PREFIX + '20260929-v3';
 const CORE = ['calculator_kbju.html', 'kbju.webmanifest'].map(path => new URL(path, BASE_URL).href);
 const ASSETS = [
   'images/kbju-icon-16.png',
