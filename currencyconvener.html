@@ -169,6 +169,17 @@
             transition: max-height 0.25s ease, opacity 0.2s ease;
         }
         .source-note > span { display: block; padding: 8px 4px 0; }
+        .source-note.has-message { max-height: 240px; opacity: 1; }
+        .offline-note {
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+        .source-note { line-height: 1.5; }
+        .status-btn:disabled { cursor: wait; }
+
         .note-sep {
             display: inline-block;
             width: 1px;
@@ -179,7 +190,7 @@
         }
         .actions-row.editing ~ .source-note,
         body.editing .source-note {
-            max-height: 40px;
+            max-height: 240px;
             opacity: 1;
         }
 
@@ -524,7 +535,7 @@
                     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
                     <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
                 </svg>
-                <span class="status-text" id="statusText">Загрузка…</span>
+                <span class="status-text" id="statusText" role="status" aria-live="polite">Загрузка…</span>
             </button>
             <button class="add-btn" id="addBtn">+ Добавить валюту</button>
             <button class="edit-btn" id="editBtn" title="Редактировать список">
@@ -541,6 +552,7 @@
         <div class="currency-list" id="currencyList"></div>
 
         <div class="source-note" id="sourceNote"><span id="sourceNoteText"></span></div>
+        <p class="offline-note" id="offlineNote" role="status" aria-live="polite">Сохраняем для работы без интернета…</p>
     </div>
     </div>
 
@@ -638,15 +650,6 @@ const CURRENCY_META = {
     TON: { country: 'crypto-ton', name: 'Toncoin' }
 };
 
-const FALLBACK_RATES_RUB = {
-    RUB: 1, USD: 0.0114, EUR: 0.0105, GBP: 0.0090, JPY: 1.72, CNY: 0.082, CHF: 0.0098, AUD: 0.0175, CAD: 0.0157, HKD: 0.0888, SGD: 0.0153, KRW: 15.8, INR: 0.96, TRY: 0.39, AED: 0.0418, ILS: 0.043, SAR: 0.0427, QAR: 0.041, EGP: 0.56, KZT: 5.6, BYN: 0.038, UAH: 0.47, GEL: 0.031, AMD: 4.5, AZN: 0.0193, KGS: 0.99, UZS: 143, TJS: 0.124, TMT: 0.04, MDL: 0.205, PLN: 0.045, CZK: 0.265, SEK: 0.122, NOK: 0.125, DKK: 0.078, HUF: 4.2, RON: 0.052, BGN: 0.0205, RSD: 1.23, ZAR: 0.213, BRL: 0.064, THB: 0.39, VND: 287, NZD: 0.019, MXN: 0.23, MYR: 0.054, IDR: 184, PHP: 0.66, PKR: 3.16, BDT: 1.36, TWD: 0.36, CLP: 11, ARS: 11.3, COP: 47, PEN: 0.043, NGN: 17.6, KWD: 0.0035, BHD: 0.0043, OMR: 0.0044, JOD: 0.0081, LKR: 3.4,
-    XAU: 0.0001, XAU_U: 0.000003, 
-    XAG: 0.008, XAG_U: 0.00025,   
-    XPT: 0.0003, XPT_U: 0.000009, 
-    XPD: 0.00033, XPD_U: 0.00001,
-    BTC: 0.00000019, ETH: 0.0000034, USDT: 0.01136, BNB: 0.0000175, SOL: 0.000063, XRP: 0.00495, DOGE: 0.0325, TON: 0.00227
-};
-
 function flagUrl(country) {
     if (country === 'metal-gold')      return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#d4af37"/><text x="16" y="17" font-family="Arial" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">Au</text></svg>');
     if (country === 'metal-silver')    return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#c0c0c0"/><text x="16" y="17" font-family="Arial" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">Ag</text></svg>');
@@ -665,24 +668,25 @@ function flagUrl(country) {
     return `flags/${country}.png`;
 }
 
-let rates = {};
-let rateDate = null;
+let rates = { RUB: 1 };
+let rateDetails = {};
+let refreshPromise = null;
+let lastRefreshFailed = false;
+let cacheWriteFailed = false;
+let offlineReady = false;
 let lastFetchTime = 0;
 let selected = [];
 let activeCode = null;
 let activeAmount = 1;
 
 const STORAGE_KEY = 'cbrConverter_v6';
-const CACHE_KEY = 'cbrConverter_cache_v6';
+// v6 could contain approximate built-in rates. Save verified rates separately.
+const CACHE_KEY = 'cbrConverter_cache_v7';
 const ONE_HOUR = 60 * 60 * 1000;
+const NETWORK_TIMEOUT = 6000;
 
-function applyFallbackRates() {
-    for (const code in FALLBACK_RATES_RUB) {
-        if (rates[code] === undefined) {
-            rates[code] = 1 / FALLBACK_RATES_RUB[code];
-        }
-    }
-    rates.RUB = 1;
+function validRate(value) {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }
 
 function saveState() {
@@ -715,22 +719,57 @@ function loadState() {
 function saveCache() {
     try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({
-            rates, rateDate, fetchedAt: lastFetchTime
+            rates, details: rateDetails, fetchedAt: lastFetchTime
         }));
-    } catch (e) {}
+        cacheWriteFailed = false;
+    } catch (e) {
+        cacheWriteFailed = true;
+    }
 }
 
 function loadCache() {
     try {
         const c = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-        if (c.rates && c.fetchedAt) {
-            rates = c.rates;
-            rateDate = c.rateDate ? new Date(c.rateDate) : null;
-            lastFetchTime = c.fetchedAt;
-            return true;
+        if (!c || !c.rates || !c.details || !validRate(c.fetchedAt)) return false;
+        const restored = { RUB: 1 };
+        const details = {};
+        for (const code of Object.keys(CURRENCY_META)) {
+            const detail = c.details[code];
+            if (code !== 'RUB' && validRate(c.rates[code]) && detail && validRate(detail.fetchedAt)) {
+                restored[code] = c.rates[code];
+                details[code] = {
+                    fetchedAt: detail.fetchedAt,
+                    date: typeof detail.date === 'string' ? detail.date : null,
+                    source: typeof detail.source === 'string' ? detail.source : ''
+                };
+            }
         }
-    } catch (e) {}
-    return false;
+        if (!Object.keys(details).length) return false;
+        rates = restored;
+        rateDetails = details;
+        lastFetchTime = c.fetchedAt;
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+async function fetchJSON(url) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), NETWORK_TIMEOUT);
+    try {
+        const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return await response.json();
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+function sourceDate(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? date.toISOString().slice(0, 10) : null;
 }
 
 async function fetchFromJsDelivr(now) {
@@ -739,30 +778,25 @@ async function fetchFromJsDelivr(now) {
         `https://latest.currency-api.pages.dev/v1/currencies/rub.json?_=${now}`
     ];
     const METAL_CODES = ['XAU', 'XAG', 'XPT', 'XPD'];
-    const OZ_TO_G = 31.1035; 
+    const OZ_TO_G = 31.1035;
     for (const url of urls) {
         try {
-            const res = await fetch(url);
-            if (!res.ok) continue;
-            const data = await res.json();
-            if (data && data.rub) {
-                const result = { RUB: 1 };
-                const cbDate = data.date ? new Date(data.date) : new Date();
-                for (const code in CURRENCY_META) {
-                    const lower = code.toLowerCase();
-                    if (data.rub[lower] && data.rub[lower] > 0) {
-                        result[code] = 1 / data.rub[lower];
-                    }
+            const data = await fetchJSON(url);
+            if (!data || !data.rub) continue;
+            const result = {};
+            for (const code of Object.keys(CURRENCY_META)) {
+                const value = data.rub[code.toLowerCase()];
+                if (validRate(value) && validRate(1 / value)) result[code] = 1 / value;
+            }
+            for (const metal of METAL_CODES) {
+                const value = data.rub[metal.toLowerCase()];
+                if (validRate(value) && validRate(1 / value)) {
+                    result[metal] = (1 / value) / OZ_TO_G;
+                    result[metal + '_U'] = 1 / value;
                 }
-                for (const metal of METAL_CODES) {
-                    const lower = metal.toLowerCase();
-                    if (data.rub[lower] && data.rub[lower] > 0) {
-                        const ozInRub = 1 / data.rub[lower];
-                        result[metal] = ozInRub / OZ_TO_G;  
-                        result[metal + '_U'] = ozInRub;      
-                    }
-                }
-                return { rates: result, date: cbDate };
+            }
+            if (Object.keys(result).some(code => code !== 'RUB')) {
+                return { rates: result, date: sourceDate(data.date), source: 'Currency API' };
             }
         } catch (e) {}
     }
@@ -771,15 +805,18 @@ async function fetchFromJsDelivr(now) {
 
 async function fetchFromCBR(now) {
     try {
-        const res = await fetch('https://www.cbr-xml-daily.ru/daily_json.js?_=' + now);
-        if (!res.ok) return null;
-        const data = await res.json();
-        const result = { RUB: 1 };
-        for (const code in data.Valute) {
-            const v = data.Valute[code];
-            result[code] = v.Value / v.Nominal;
+        const data = await fetchJSON('https://www.cbr-xml-daily.ru/daily_json.js?_=' + now);
+        if (!data || !data.Valute) return null;
+        const result = {};
+        for (const code of Object.keys(data.Valute)) {
+            const value = data.Valute[code];
+            if (Object.hasOwn(CURRENCY_META, code) && value && validRate(value.Value) && validRate(value.Nominal)) {
+                const rate = value.Value / value.Nominal;
+                if (validRate(rate)) result[code] = rate;
+            }
         }
-        return { rates: result, date: new Date(data.Date) };
+        return Object.keys(result).some(code => code !== 'RUB')
+            ? { rates: result, date: sourceDate(data.Date), source: 'ЦБ РФ' } : null;
     } catch (e) {
         return null;
     }
@@ -792,119 +829,189 @@ const CG_IDS = {
 
 async function fetchCryptoFromCoinGecko() {
     const ids = Object.values(CG_IDS).join(',');
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=rub`;
     try {
-        const res = await fetch(url);
-        if (!res.ok) return null;
-        const data = await res.json();
-        const out = {};
-        for (const code in CG_IDS) {
-            const d = data[CG_IDS[code]];
-            if (d && d.rub > 0) out[code] = d.rub;
+        const data = await fetchJSON(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=rub`);
+        if (!data) return null;
+        const result = {};
+        for (const code of Object.keys(CG_IDS)) {
+            const value = data[CG_IDS[code]];
+            if (value && validRate(value.rub)) result[code] = value.rub;
         }
-        return Object.keys(out).length ? out : null;
+        return Object.keys(result).length
+            ? { rates: result, date: null, source: 'CoinGecko' } : null;
     } catch (e) {
         return null;
     }
 }
 
 async function fetchRates(force = false) {
-    const now = Date.now();
-    if (!force && lastFetchTime && (now - lastFetchTime < ONE_HOUR)) {
+    if (navigator.onLine === false) {
         updateStatus();
-        return true;
-    }
-
-    document.getElementById('statusText').textContent = 'Обновление курсов…';
-
-    const [cbrResult, jsdResult, cryptoResult] = await Promise.all([
-        fetchFromCBR(now),
-        fetchFromJsDelivr(now),
-        fetchCryptoFromCoinGecko()
-    ]);
-
-    let anyOk = false;
-    const fresh = { RUB: 1 };
-
-    if (cbrResult) {
-        for (const code in cbrResult.rates) {
-            fresh[code] = cbrResult.rates[code];
-        }
-        rateDate = cbrResult.date;
-        anyOk = true;
-    }
-
-    if (jsdResult) {
-        for (const code in jsdResult.rates) {
-            if (fresh[code] === undefined) {
-                fresh[code] = jsdResult.rates[code];
-            }
-        }
-        if (!rateDate) rateDate = jsdResult.date;
-        anyOk = true;
-    }
-
-    if (anyOk) {
-        rates = fresh;          
-        applyFallbackRates();   
-    }
-
-    if (cryptoResult) {
-        for (const code in cryptoResult) {
-            rates[code] = cryptoResult[code];
-        }
-        anyOk = true;
-    }
-
-    if (anyOk) {
-        if (!rateDate) rateDate = new Date();
-        lastFetchTime = now;
-        saveCache();
-        updateStatus();
-        return true;
-    } else {
-        document.getElementById('statusText').textContent = 'Нет сети — данные приблизительные';
         return false;
     }
+    if (refreshPromise) return refreshPromise;
+    if (!force && lastFetchTime && Date.now() - lastFetchTime < ONE_HOUR && !lastRefreshFailed) {
+        updateStatus();
+        return true;
+    }
+    const button = document.getElementById('refreshBtn');
+    button.classList.add('spinning');
+    button.disabled = true;
+    document.getElementById('statusText').textContent = 'Обновление курсов…';
+    refreshPromise = (async () => {
+        const now = Date.now();
+        const [cbr, currencyAPI, crypto] = await Promise.all([
+            fetchFromCBR(now), fetchFromJsDelivr(now), fetchCryptoFromCoinGecko()
+        ]);
+        // Merge successful sources. Keep every previously saved rate when a source fails.
+        // CBR takes priority for fiat; CoinGecko takes priority for cryptocurrency.
+        let anyOk = false;
+        const receivedAt = Date.now();
+        for (const result of [currencyAPI, cbr, crypto]) {
+            if (!result) continue;
+            for (const [code, value] of Object.entries(result.rates)) {
+                if (code === 'RUB' || !Object.hasOwn(CURRENCY_META, code) || !validRate(value)) continue;
+                rates[code] = value;
+                rateDetails[code] = {
+                    fetchedAt: receivedAt, date: result.date, source: result.source
+                };
+                anyOk = true;
+            }
+        }
+        lastRefreshFailed = !anyOk;
+        if (anyOk) {
+            lastFetchTime = receivedAt;
+            saveCache();
+        }
+        refreshAmounts();
+        return anyOk;
+    })();
+    try {
+        return await refreshPromise;
+    } finally {
+        refreshPromise = null;
+        button.classList.remove('spinning');
+        button.disabled = false;
+        updateStatus();
+    }
+}
+
+function formatSavedAt(timestamp) {
+    return new Date(timestamp).toLocaleString('ru-RU', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+}
+
+function updateOfflineNote() {
+    if (!offlineReady) return;
+    document.getElementById('offlineNote').textContent = cacheWriteFailed
+        ? 'Страница сохранена, но новые курсы сохранить не удалось. Проверьте свободное место на устройстве.'
+        : lastFetchTime
+            ? 'Доступно без интернета на этом устройстве.'
+            : 'Страница сохранена. Для расчётов сначала загрузите курсы с интернетом.';
 }
 
 function updateStatus() {
-    if (!lastFetchTime) return;
-    const fetched = new Date(lastFetchTime);
-    const d = fetched.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-    const t = fetched.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('statusText').textContent = `Обновлено ${d} · ${t}`;
+    const offline = navigator.onLine === false;
+    const stamp = lastFetchTime ? formatSavedAt(lastFetchTime) : '';
+    const status = document.getElementById('statusText');
+    status.textContent = !lastFetchTime
+        ? (offline ? 'Офлайн · нет сохранённых курсов' : 'Курсы пока не загружены')
+        : `${offline ? 'Офлайн' : lastRefreshFailed ? 'Сохранено' : 'Обновлено'} · ${stamp}`;
+    document.getElementById('refreshBtn').title = status.textContent + '. Обновить курсы';
 
-    const note = document.getElementById('sourceNoteText');
-    if (note) {
-        const cd = rateDate
-            ? new Date(rateDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
-            : '—';
-        note.innerHTML = `Курс на ${cd} · ЦБ РФ<span class="note-sep"></span>Крипта на ${t} · CoinGecko`;
+    const messages = [];
+    const codes = [...new Set([...selected, activeCode])].filter(code => code && code !== 'RUB');
+    const missing = codes.filter(code => !validRate(rates[code]));
+    const older = codes.filter(code => rateDetails[code] && rateDetails[code].fetchedAt < lastFetchTime);
+    if (offline && lastFetchTime) messages.push('Без интернета расчёт выполняется по сохранённым курсам.');
+    if (lastRefreshFailed && !offline) messages.push('Сервисы курсов недоступны. Показаны последние сохранённые данные.');
+    if (!lastFetchTime) messages.push('Подключитесь к интернету и нажмите обновление курсов.');
+    else if (missing.length) messages.push(`Нет сохранённого курса: ${missing.join(', ')}.`);
+    if (older.length) messages.push(`Ранее сохранённые курсы: ${older.join(', ')}.`);
+    const note = document.getElementById('sourceNote');
+    note.classList.toggle('has-message', messages.length > 0);
+    const dates = [...new Set(codes.map(code => rateDetails[code]?.date).filter(Boolean))].sort();
+    const sources = [...new Set(codes.map(code => rateDetails[code]?.source).filter(Boolean))];
+    if (dates.length) {
+        const first = dates[0].split('-').reverse().join('.');
+        const last = dates[dates.length - 1].split('-').reverse().join('.');
+        messages.push(`Дата курсов: ${first === last ? first : first + ' — ' + last}.`);
+    }
+    if (sources.length) messages.push(`Источники: ${sources.join(', ')}.`);
+    document.getElementById('sourceNoteText').textContent = messages.join(' ');
+    updateOfflineNote();
+}
+
+function rateDescription(code) {
+    if (code === 'RUB') return 'Российский рубль';
+    const detail = rateDetails[code];
+    if (!detail) return 'Нет сохранённого курса. Для загрузки нужен интернет.';
+    return `${detail.source}. Сохранено ${formatSavedAt(detail.fetchedAt)}`
+        + (detail.date ? `. Курс на ${detail.date.split('-').reverse().join('.')}` : '');
+}
+
+function refreshAmounts() {
+    document.querySelectorAll('.amount-input').forEach(input => {
+        if (input !== document.activeElement) {
+            input.value = formatAmount(input.dataset.code === activeCode
+                ? activeAmount : convert(activeAmount, activeCode, input.dataset.code));
+            updateAmountInputWidth(input);
+        }
+    });
+    document.querySelectorAll('.currency-row').forEach(row => {
+        row.querySelector('.currency-name').title = rateDescription(row.dataset.code);
+    });
+    if (document.getElementById('modal').classList.contains('open')) renderModalList(searchBox.value);
+}
+
+async function prepareOffline() {
+    const note = document.getElementById('offlineNote');
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+        note.textContent = 'Для офлайн-режима откройте конвертер на сайте в современном браузере.';
+        return;
+    }
+    try {
+        const registration = await navigator.serviceWorker.register('./currency-sw.js', {
+            scope: './currencyconvener.html', updateViaCache: 'none'
+        });
+        if (registration.active?.state !== 'activated') {
+            const worker = registration.installing || registration.waiting || registration.active;
+            if (!worker) throw new Error('No service worker');
+            await new Promise((resolve, reject) => {
+                const changed = () => {
+                    if (worker.state !== 'activated' && worker.state !== 'redundant') return;
+                    worker.removeEventListener('statechange', changed);
+                    if (worker.state === 'activated') resolve();
+                    else reject(new Error('Offline installation failed'));
+                };
+                worker.addEventListener('statechange', changed);
+                changed();
+            });
+        }
+        offlineReady = true;
+        updateOfflineNote();
+    } catch (error) {
+        note.textContent = 'Не удалось сохранить страницу для офлайн-режима. Откройте её ещё раз с интернетом.';
+        console.warn('Не удалось подготовить конвертер для работы офлайн:', error);
     }
 }
 
-document.getElementById('refreshBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('refreshBtn');
-    btn.classList.add('spinning');
-    btn.disabled = true;
-    try {
-        await fetchRates(true);
-        renderList();
-    } finally {
-        btn.classList.remove('spinning');
-        btn.disabled = false;
-    }
+document.getElementById('refreshBtn').addEventListener('click', () => fetchRates(true));
+window.addEventListener('offline', updateStatus);
+window.addEventListener('online', () => fetchRates(true));
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) fetchRates(false);
 });
 
 function convert(amount, fromCode, toCode) {
-    if (!rates[fromCode] || !rates[toCode]) return 0;
+    if (!validRate(rates[fromCode]) || !validRate(rates[toCode])) return null;
     const inRub = amount * rates[fromCode];
     return inRub / rates[toCode];
 }
 
 function formatAmount(n) {
-    if (!isFinite(n)) return '0';
+    if (!Number.isFinite(n)) return '—';
     const abs = Math.abs(n);
     let decimals = 2;
     if (abs >= 10000) decimals = 0;
@@ -950,6 +1057,7 @@ function updateAmountInputWidth(input) {
 }
 
 function renderList() {
+    updateStatus();
     const list = document.getElementById('currencyList');
     list.innerHTML = '';
 
@@ -974,6 +1082,7 @@ function renderList() {
                    value="${formatAmount(value)}" data-code="${code}">
             <button class="remove-btn" data-remove="${code}" title="Убрать">✕</button>
         `;
+        row.querySelector('.currency-name').title = rateDescription(code);
         list.appendChild(row);
     });
 
@@ -1252,7 +1361,7 @@ function renderModalList(query) {
     modalList.innerHTML = '';
     const q = query.trim().toLowerCase();
 
-    const allCodes = Object.keys(rates).filter(c => CURRENCY_META[c]).sort();
+    const allCodes = Object.keys(CURRENCY_META).sort();
 
     const filtered = allCodes.filter(code => {
         const meta = CURRENCY_META[code];
@@ -1270,7 +1379,7 @@ function renderModalList(query) {
         const isSelected = selected.includes(code);
         const row = document.createElement('div');
         row.className = 'modal-row' + (isSelected ? ' disabled' : '');
-        const rateInfo = code === 'RUB' ? '1 ₽' : `${formatAmount(rates[code])} ₽`;
+        const rateInfo = validRate(rates[code]) ? `${formatAmount(rates[code])} ₽` : 'Нет курса';
         row.innerHTML = `
             <img class="flag-img" src="${flagUrl(meta.country)}" alt="${code}" loading="lazy" onerror="this.style.visibility='hidden'">
             <div class="modal-row-info">
@@ -1306,10 +1415,9 @@ editBtn.addEventListener('click', () => {
 });
 
 async function init() {
-    applyFallbackRates();
     loadState();
     loadCache();
-    applyFallbackRates();
+    selected = [...new Set(selected)].filter(code => Object.hasOwn(CURRENCY_META, code));
 
     if (!Array.isArray(selected) || selected.length === 0) {
         selected = [...DEFAULT_SELECTED];
@@ -1323,11 +1431,11 @@ async function init() {
 
     renderList();
 
+    prepareOffline();
     await fetchRates(false);
-    renderList();
 }
 
-setInterval(() => fetchRates(false).then(() => renderList()), ONE_HOUR);
+setInterval(() => fetchRates(false), ONE_HOUR);
 
 window.addEventListener('resize', () => {
     document.querySelectorAll('.amount-input').forEach(updateAmountInputWidth);
@@ -1354,6 +1462,5 @@ init();
     Политика конфиденциальности
   </a>
 </footer>
-<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 </body>
 </html>
