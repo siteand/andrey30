@@ -7,19 +7,19 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f4f6">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
 
-  <link rel="manifest" href="./fxc.webmanifest">
+  <link rel="manifest" href="./fxc.webmanifest?rev=20260929-offline-v1">
 
   <link
 	rel="icon"
 	type="image/png"
 	sizes="192x192"
-	href="./images/fxc-192.png"
+	href="./images/fxc-192.png?rev=20260929-offline-v1"
   >
 
   <link
 	rel="apple-touch-icon"
 	sizes="192x192"
-	href="./images/fxc-192.png"
+	href="./images/fxc-192.png?rev=20260929-offline-v1"
   >
 
   <meta name="mobile-web-app-capable" content="yes">
@@ -1500,6 +1500,162 @@
       }
     }
 
+    /* Однократное предложение установить офлайн-приложение. */
+    .install-offer {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px 12px calc(28px + env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.24s ease, visibility 0.24s ease;
+    }
+
+    .install-offer[hidden] { display: none !important; }
+
+    .install-offer.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .install-offer-inner {
+      position: relative;
+      width: min(560px, 100%);
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 22px 20px 18px;
+      border: 1px solid color-mix(in srgb, var(--yellow) 55%, transparent);
+      border-radius: 20px;
+      background: var(--settings-bg);
+      color: var(--text);
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.48);
+      overflow: hidden;
+      transform: translateY(34px) scale(0.96);
+      transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .install-offer-inner::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: var(--yellow);
+    }
+
+    .install-offer.show .install-offer-inner {
+      transform: translateY(0) scale(1);
+    }
+
+    .install-offer-icon {
+      width: 54px;
+      height: 54px;
+      display: inline-flex;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      user-select: none;
+    }
+
+    .install-offer-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .install-offer-label {
+      display: inline-block;
+      margin: 0 0 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--yellow) 18%, transparent);
+      color: var(--yellow);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0.25px;
+      text-transform: uppercase;
+    }
+
+    .install-offer-title {
+      margin: 0 0 6px;
+      color: var(--text-strong);
+      font-size: 20px;
+      line-height: 1.25;
+      text-align: left;
+    }
+
+    .install-offer-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.48;
+    }
+
+    .install-offer-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .install-offer-button {
+      min-height: 44px;
+      margin: 0;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      font: 800 14px Arial, sans-serif;
+      cursor: pointer;
+    }
+
+    .install-offer-button.primary {
+      border-color: var(--yellow);
+      background: var(--yellow);
+      color: #111111;
+      box-shadow: 0 5px 16px color-mix(in srgb, var(--yellow) 32%, transparent);
+    }
+
+    .install-offer-button.secondary {
+      background: var(--panel-solid);
+      color: var(--text);
+    }
+
+    .install-offer.show .install-offer-button.primary {
+      animation: installButtonPulse 1.15s ease-in-out 0.45s 2;
+    }
+
+    @keyframes installButtonPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.045); }
+    }
+
+    @media (max-width: 600px), (pointer: coarse) {
+      .install-offer { padding: 12px 10px calc(20px + env(safe-area-inset-bottom)); }
+      .install-offer-inner {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px;
+        padding: 19px 16px 15px;
+        border-radius: 18px;
+      }
+      .install-offer-icon { width: 48px; height: 48px; border-radius: 14px; }
+      .install-offer-title { font-size: 18px; }
+      .install-offer-text { font-size: 13.5px; }
+      .install-offer-actions { justify-content: stretch; margin-top: 13px; }
+      .install-offer-button { flex: 1; min-height: 45px; padding: 10px 12px; }
+    }
+
   </style>
 </head>
 
@@ -1613,6 +1769,23 @@
       </a>
     </footer>
   </div>
+
+  <aside class="install-offer" id="install-offer" role="dialog" aria-modal="true" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
+    <div class="install-offer-inner">
+      <div class="install-offer-icon" aria-hidden="true">
+        <img src="./images/fxc-192.png?rev=20260929-offline-v1" alt="">
+      </div>
+      <div>
+        <div class="install-offer-label">Быстрый доступ</div>
+        <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
+        <p class="install-offer-text" id="install-offer-text">Добавьте «Форекс часы» на главный экран и пользуйтесь ими даже без интернета.</p>
+      </div>
+      <div class="install-offer-actions">
+        <button type="button" class="install-offer-button secondary" id="install-offer-later">Не сейчас</button>
+        <button type="button" class="install-offer-button primary" id="install-offer-install">Установить</button>
+      </div>
+    </div>
+  </aside>
 
   <script>
     const markets = [
@@ -4112,6 +4285,167 @@
     });
 
     setInterval(update, 1000);
+  </script>
+
+  <script>
+    (function initOfflineApp() {
+      const OFFER_KEY = "fxc_install_offer_shown_v1";
+      let deferredInstallPrompt = null;
+
+      const offer = document.getElementById("install-offer");
+      const title = document.getElementById("install-offer-title");
+      const text = document.getElementById("install-offer-text");
+      const installButton = document.getElementById("install-offer-install");
+      const laterButton = document.getElementById("install-offer-later");
+
+      const userAgent = navigator.userAgent || "";
+      const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+      const isAndroid = /android/i.test(userAgent);
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+        || window.matchMedia("(display-mode: fullscreen)").matches
+        || navigator.standalone === true;
+      const isSecureEnough = window.isSecureContext
+        || location.hostname === "localhost"
+        || location.hostname === "127.0.0.1";
+
+      function wasShown() {
+        try {
+          return localStorage.getItem(OFFER_KEY) === "1";
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function rememberShown() {
+        try {
+          localStorage.setItem(OFFER_KEY, "1");
+        } catch (error) {
+          // Если localStorage недоступен, предложение может появиться повторно.
+        }
+      }
+
+      function closeOffer() {
+        if (!offer) return;
+        offer.classList.remove("show");
+        setTimeout(function() {
+          offer.hidden = true;
+        }, 360);
+      }
+
+      function configureNativeOffer() {
+        title.textContent = "Установить приложение?";
+        text.textContent = "Добавьте «Форекс часы» на главный экран и пользуйтесь ими даже без интернета.";
+        installButton.textContent = "Установить";
+        installButton.dataset.mode = "native";
+        laterButton.hidden = false;
+      }
+
+      function configureManualOffer() {
+        title.textContent = "Установить приложение?";
+
+        if (isIOS) {
+          text.textContent = "В Safari нажмите «Поделиться», затем выберите «На экран Домой».";
+          installButton.textContent = "Понятно";
+          installButton.dataset.mode = "instructions";
+          laterButton.hidden = true;
+          return;
+        }
+
+        text.textContent = "Нажмите «Установить». Если системное окно не откроется, выберите в меню браузера «Добавить на главный экран».";
+        installButton.textContent = "Установить";
+        installButton.dataset.mode = "manual";
+        laterButton.hidden = false;
+      }
+
+      function showOffer(mode) {
+        if (!offer || !title || !text || !installButton || !laterButton) return;
+        if (isStandalone || wasShown() || !isSecureEnough) return;
+
+        mode === "native" ? configureNativeOffer() : configureManualOffer();
+        rememberShown();
+        offer.hidden = false;
+        requestAnimationFrame(function() {
+          offer.classList.add("show");
+        });
+      }
+
+      window.addEventListener("beforeinstallprompt", function(event) {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+
+        if (offer && !offer.hidden) {
+          configureNativeOffer();
+          return;
+        }
+
+        if (!wasShown() && !isStandalone) {
+          setTimeout(function() {
+            showOffer("native");
+          }, 900);
+        }
+      });
+
+      window.addEventListener("appinstalled", function() {
+        rememberShown();
+        deferredInstallPrompt = null;
+        closeOffer();
+      });
+
+      if (laterButton) {
+        laterButton.addEventListener("click", function() {
+          rememberShown();
+          closeOffer();
+        });
+      }
+
+      if (installButton) {
+        installButton.addEventListener("click", async function() {
+          const mode = installButton.dataset.mode;
+
+          if (mode === "instructions") {
+            closeOffer();
+            return;
+          }
+
+          if (deferredInstallPrompt) {
+            const promptEvent = deferredInstallPrompt;
+            deferredInstallPrompt = null;
+            try {
+              await promptEvent.prompt();
+              await promptEvent.userChoice;
+            } catch (error) {
+              console.warn("Не удалось открыть системное окно установки.", error);
+            }
+            closeOffer();
+            return;
+          }
+
+          title.textContent = "Как установить";
+          text.textContent = isAndroid
+            ? "В Samsung Internet откройте меню ≡ и выберите «Добавить страницу в» → «Главный экран». В Chrome откройте меню ⋮ и выберите «Установить приложение»."
+            : "Откройте меню браузера и выберите установку приложения или добавление на главный экран.";
+          installButton.textContent = "Понятно";
+          installButton.dataset.mode = "instructions";
+          laterButton.hidden = true;
+        });
+      }
+
+      if ("serviceWorker" in navigator && isSecureEnough) {
+        navigator.serviceWorker.register("./fxc-sw.js", {
+          scope: "./fxc.html",
+          updateViaCache: "none"
+        }).catch(function(error) {
+          console.warn("Не удалось подготовить «Форекс часы» для работы без сети:", error);
+        });
+      }
+
+      window.addEventListener("load", function() {
+        setTimeout(function() {
+          if (isStandalone || wasShown() || deferredInstallPrompt) return;
+          if (isIOS || isAndroid) showOffer("manual");
+        }, 2500);
+      });
+    })();
   </script>
 </body>
 </html>
