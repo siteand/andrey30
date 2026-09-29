@@ -2082,6 +2082,10 @@
         localStorage.setItem('f1_2026_results_source', source);
         if (typeof buildRaceCards === 'function') buildRaceCards(true);
         if (typeof calculatePoints === 'function') calculatePoints();
+        // Первая загрузка перестраивает карточки и меняет высоту общего зачёта.
+        if (force && typeof refreshSharedCardAfterResults === 'function') {
+          refreshSharedCardAfterResults();
+        }
       }
     }
 
@@ -3885,6 +3889,8 @@
     let lastHashOpenKey = '';
     let lastHashOpenTime = 0;
     let sharedCardOpenTimers = [];
+    let startupSharedTarget = '';
+    let lastSharedLocationTarget = '';
 
     function clearSharedCardOpenTimers() {
       sharedCardOpenTimers.forEach(timer => window.clearTimeout(timer));
@@ -3916,7 +3922,9 @@
         resetHorizontalDrift(true);
         requestAnimationFrame(() => {
           resetHorizontalDrift(true);
-          scrollToEl(el, { gap, duration });
+          // За время ожидания results.json мог заменить исходный DOM-элемент.
+          const currentEl = el.id ? document.getElementById(el.id) : el;
+          if (currentEl && currentEl.isConnected) scrollToEl(currentEl, { gap, duration });
           resetHorizontalDrift(true);
         });
       });
@@ -3995,34 +4003,39 @@
     }
 
     function getSharedTargetFromUrl() {
-      let byQuery = '';
-      try { byQuery = (new URL(window.location.href).searchParams.get('card') || '').trim(); } catch(e) {}
-      if (byQuery) return decodeURIComponent(byQuery);
-      return decodeURIComponent((window.location.hash || '').replace(/^#/, '')).trim();
+      try {
+        // URLSearchParams уже декодирует значение параметра.
+        const byQuery = (new URL(window.location.href).searchParams.get('card') || '').trim();
+        if (byQuery) return byQuery;
+      } catch(e) {}
+      const hash = (window.location.hash || '').replace(/^#/, '');
+      try { return decodeURIComponent(hash).trim(); } catch(e) { return ''; }
     }
 
-    function clearSharedCardParamFromUrl() {
-      try {
-        const url = new URL(window.location.href);
-        if (!url.searchParams.has('card')) return;
-        url.searchParams.delete('card');
-        window.history.replaceState(window.history.state, document.title, url.pathname + url.search + url.hash);
-      } catch(e) {}
+    function refreshSharedCardAfterResults() {
+      const target = startupSharedTarget;
+      startupSharedTarget = '';
+      if (target && getSharedTargetFromUrl() === target) openCardFromHash(true);
     }
+
+    // Если посетитель уже начал пользоваться страницей, не возвращаем его назад.
+    ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(type => {
+      document.addEventListener(type, () => { startupSharedTarget = ''; }, { passive: true });
+    });
 
     function openCardFromHash(force, attempt) {
       const rawHash = getSharedTargetFromUrl();
       if (!rawHash) return;
 
-      clearSharedCardOpenTimers();
-      resetHorizontalDrift(true);
-
       attempt = attempt || 0;
       const now = Date.now();
       const openKey = rawHash + '|' + currentTab;
-      if (!force && openKey === lastHashOpenKey && now - lastHashOpenTime < 900) return;
+      if (!force && !attempt && openKey === lastHashOpenKey && now - lastHashOpenTime < 900) return;
+      clearSharedCardOpenTimers();
+      resetHorizontalDrift(true);
       lastHashOpenKey = openKey;
       lastHashOpenTime = now;
+      lastSharedLocationTarget = rawHash;
 
       let el = document.getElementById(rawHash);
       let tabIndex = 1;
@@ -4048,10 +4061,17 @@
         tabIndex = 2;
       }
 
+      const targetId = el.id;
       const sourceTabIndex = 1;
       const shouldShowResultsFirst = tabIndex !== sourceTabIndex;
 
+      function refreshTargetElement() {
+        el = document.getElementById(targetId);
+        return el;
+      }
+
       function openPastListIfNeeded() {
+        if (!refreshTargetElement()) return;
         const pastList = el.closest('.past-races-list');
         if (pastList && !pastList.classList.contains('open')) {
           pastList.classList.add('open');
@@ -4068,11 +4088,14 @@
 
       function blinkTargetAfterScroll(delay) {
         scheduleSharedCardStep(() => {
+          if (!refreshTargetElement()) return;
           el.classList.remove('share-target-highlight');
           void el.offsetWidth;
           el.classList.add('share-target-highlight');
-          clearSharedCardParamFromUrl();
-          scheduleSharedCardStep(() => el.classList.remove('share-target-highlight'), isMobileLike() ? 3900 : 4000);
+          // Сохраняем ?card= в адресе для обновления страницы и повторной отправки.
+          scheduleSharedCardStep(() => {
+            if (refreshTargetElement()) el.classList.remove('share-target-highlight');
+          }, isMobileLike() ? 3900 : 4000);
         }, delay);
       }
 
@@ -4084,6 +4107,7 @@
         const gap = isMobileLike() ? 56 : 22;
 
         scheduleSharedCardStep(() => {
+          if (!refreshTargetElement()) return;
           scrollToElAfterLayout(el, { gap, duration: scrollDuration });
           blinkTargetAfterScroll(scrollDuration + 90);
         }, isMobileLike() ? 70 : 40);
@@ -4108,14 +4132,24 @@
       }
     }
 
-    window.addEventListener('hashchange', () => {
-      resetHorizontalDrift(true);
-      scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 30 : 35);
-    });
-    window.addEventListener('popstate', () => scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 30 : 35));
+    function handleSharedCardLocationChange() {
+      const target = getSharedTargetFromUrl();
+      // Закрытие фото через «Назад» не должно снова открывать исходную карточку.
+      if (target === lastSharedLocationTarget) return;
+      lastSharedLocationTarget = target;
+      startupSharedTarget = '';
+      clearSharedCardOpenTimers();
+      if (target) scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 30 : 35);
+    }
+    window.addEventListener('hashchange', handleSharedCardLocationChange);
+    window.addEventListener('popstate', handleSharedCardLocationChange);
 
     function bootSharedCardOpen() {
-      scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 130 : 90);
+      startupSharedTarget = getSharedTargetFromUrl();
+      lastSharedLocationTarget = startupSharedTarget;
+      if (startupSharedTarget) {
+        scheduleSharedCardStep(() => openCardFromHash(true), isMobileLike() ? 130 : 90);
+      }
     }
 
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
