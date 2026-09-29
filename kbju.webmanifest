@@ -1,0 +1,27 @@
+{
+  "name": "Калькулятор КБЖУ",
+  "short_name": "КБЖУ",
+  "description": "Расчёт калорий, белков, жиров и углеводов",
+  "id": "./calculator_kbju.html",
+  "start_url": "./calculator_kbju.html",
+  "scope": "./calculator_kbju.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#4caf50",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "images/kbju-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/kbju-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

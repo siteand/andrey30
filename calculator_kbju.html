@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/kbju-icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/kbju-icon-16.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="images/kbju-icon-192.png">
+    <link rel="manifest" href="kbju.webmanifest?rev=20260929-offline-v1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4caf50">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="КБЖУ">
     <title>Калькулятор КБЖУ на 100 г</title>
     <style>
         :root {
@@ -48,6 +51,34 @@
             font-size: 16px;
         }
         button:hover { background-color: #45a049; }
+
+        .app-install-card {
+            margin: 24px 0 10px;
+            padding: 14px;
+            border: 1px solid #dcebdc;
+            border-radius: 10px;
+            background: #f5fbf5;
+            text-align: center;
+        }
+        .app-install-status,
+        .app-install-help {
+            margin: 0;
+            padding: 0;
+            color: #647064;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .app-install-btn {
+            margin-top: 10px;
+            background-color: #ffffff;
+            color: #388e3c;
+            border: 1px solid #4caf50;
+        }
+        .app-install-btn:hover { background-color: #eaf7ea; }
+        .app-install-btn[hidden], .app-install-help[hidden] { display: none !important; }
+        @media (display-mode: standalone) {
+            .app-install-btn, .app-install-help { display: none !important; }
+        }
 
         .button-row {
             display: flex;
@@ -1778,6 +1809,11 @@
         </div>
 
         <div class="about-project">
+            <div class="app-install-card">
+                <p class="app-install-status" id="appInstallStatus" role="status" aria-live="polite">Сохраняем калькулятор для работы без интернета…</p>
+                <button class="app-install-btn" id="installAppBtn" type="button" hidden>Установить приложение</button>
+                <p class="app-install-help" id="installAppHelp" role="status" aria-live="polite" hidden></p>
+            </div>
             <p style="font-weight: bold; font-size: 21px">О калькуляторе</p>
             <p>Этот калькулятор КБЖУ поможет вам быстро рассчитать количество калорий, белков, жиров и углеводов на 100 грамм продукта.</p>
             <p>Разработано для удобства спортсменов, людей на диете и всех, кто следит за питанием.</p>
@@ -1813,6 +1849,8 @@
         let productListHistory = [];
         let showFullHistory = false;
         let showProductListHistory = false;
+        let deferredInstallPrompt = null;
+        let offlineReady = false;
 
         function loadProducts() {
             try {
@@ -2788,10 +2826,102 @@
             }
         });
 
-        document.getElementById("year").textContent = new Date().getFullYear();
+        function isStandaloneMode() {
+            return window.matchMedia("(display-mode: standalone)").matches
+                || window.navigator.standalone === true;
+        }
+
+        function updateInstallButton() {
+            const button = document.getElementById("installAppBtn");
+            const help = document.getElementById("installAppHelp");
+            if (isStandaloneMode()) {
+                button.hidden = true;
+                help.hidden = true;
+                return;
+            }
+            button.hidden = !offlineReady;
+        }
+
+        async function prepareOffline() {
+            const status = document.getElementById("appInstallStatus");
+            if (!("serviceWorker" in navigator) || !window.isSecureContext) {
+                status.textContent = "Для установки откройте страницу на сайте в современном браузере.";
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.register("./kbju-sw.js", {
+                    scope: "./calculator_kbju.html",
+                    updateViaCache: "none"
+                });
+                if (registration.active?.state !== "activated") {
+                    const worker = registration.installing || registration.waiting || registration.active;
+                    if (!worker) throw new Error("Service Worker отсутствует");
+                    await new Promise((resolve, reject) => {
+                        const changed = () => {
+                            if (worker.state !== "activated" && worker.state !== "redundant") return;
+                            worker.removeEventListener("statechange", changed);
+                            worker.state === "activated" ? resolve() : reject(new Error("Установка прервана"));
+                        };
+                        worker.addEventListener("statechange", changed);
+                        changed();
+                    });
+                }
+                offlineReady = true;
+                status.textContent = navigator.onLine
+                    ? "Калькулятор доступен без интернета на этом устройстве."
+                    : "Офлайн-режим: данные сохраняются только на этом устройстве.";
+                updateInstallButton();
+            } catch (error) {
+                status.textContent = "Не удалось подготовить офлайн-режим. Откройте страницу ещё раз с интернетом.";
+                console.warn("Не удалось подготовить КБЖУ для работы без сети:", error);
+            }
+        }
+
+        window.addEventListener("beforeinstallprompt", event => {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            updateInstallButton();
+        });
+
+        window.addEventListener("appinstalled", () => {
+            deferredInstallPrompt = null;
+            document.getElementById("installAppBtn").hidden = true;
+            document.getElementById("installAppHelp").hidden = true;
+        });
+
+        window.addEventListener("online", () => {
+            if (offlineReady) document.getElementById("appInstallStatus").textContent = "Калькулятор доступен без интернета на этом устройстве.";
+        });
+
+        window.addEventListener("offline", () => {
+            if (offlineReady) document.getElementById("appInstallStatus").textContent = "Офлайн-режим: данные сохраняются только на этом устройстве.";
+        });
+
+        document.getElementById("installAppBtn").addEventListener("click", async () => {
+            const button = document.getElementById("installAppBtn");
+            const help = document.getElementById("installAppHelp");
+            if (deferredInstallPrompt) {
+                const promptEvent = deferredInstallPrompt;
+                deferredInstallPrompt = null;
+                await promptEvent.prompt();
+                const choice = await promptEvent.userChoice;
+                if (choice && choice.outcome === "accepted") {
+                    button.hidden = true;
+                    help.hidden = true;
+                    return;
+                }
+            }
+            help.textContent = "В Samsung Internet откройте меню ≡ и выберите «Добавить страницу в» → «Главный экран». В Chrome нажмите ⋮ → «Установить приложение».";
+            help.hidden = false;
+        });
+
+        const yearElement = document.getElementById("year");
+        if (yearElement) yearElement.textContent = new Date().getFullYear();
         loadProductListHistory();
         loadProductHistory();
         loadProducts();
+        prepareOffline();
     </script>
 </body>
 </html>
