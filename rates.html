@@ -926,6 +926,7 @@
         }
         .periods::-webkit-scrollbar { display: none; }
         .period-btn {
+            -webkit-tap-highlight-color: transparent;
             flex: 0 0 auto;
             min-width: 48px;
             height: 36px;
@@ -944,6 +945,8 @@
             background: var(--button-bg);
             color: var(--button-text);
         }
+        .period-btn:focus:not(:focus-visible) { outline: none; }
+        .period-btn:focus-visible { outline: 2px solid var(--button-bg); outline-offset: 2px; }
         .period-custom-btn {
             display: inline-flex;
             align-items: center;
