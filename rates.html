@@ -188,13 +188,16 @@
             height: 100vh;
             height: 100dvh;
             min-height: 0;
+            overflow: hidden;
             padding: 0;
         }
 
         .content {
-            flex: 1 0 auto;
+            flex: 1 1 0;
+            min-height: 0;
+            overflow-y: auto;
             display: flex;
-            align-items: center;
+            align-items: safe center;
             justify-content: center;
             width: 100%;
             padding: 20px 10px;
@@ -2816,6 +2819,15 @@ setInterval(() => { if (navigator.onLine) fetchAllRates(false).then(() => render
 window.addEventListener("online", () => fetchAllRates(true).then(() => renderList()));
 
 init();
+// Use the visible viewport in installed Android apps, including after reload.
+function syncAppViewport() {
+    if (!window.matchMedia('(display-mode: standalone)').matches) return;
+    document.body.style.height = `${window.visualViewport ? window.visualViewport.height : window.innerHeight}px`;
+}
+syncAppViewport();
+window.addEventListener('resize', syncAppViewport);
+window.addEventListener('pageshow', syncAppViewport);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', syncAppViewport);
 </script>
 
 <footer>
