@@ -662,6 +662,7 @@
             background: var(--button-bg);
             color: var(--button-text);
         }
+        .period-short { display: none; }
         .custom-range {
             display: none;
             grid-template-columns: 1fr 1fr auto;
@@ -781,6 +782,15 @@
             .history-header { padding: 15px 16px; }
             .history-body { padding: 14px 14px 20px; }
             .history-controls { grid-template-columns: minmax(0, 1fr) 108px; }
+            .periods { gap: 5px; }
+            .period-btn {
+                min-width: 40px;
+                padding: 0 8px;
+                overflow: hidden;
+                text-overflow: clip;
+            }
+            .period-long { display: none; }
+            .period-short { display: inline; }
             .chart-wrap { height: 270px; }
             .history-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .custom-range { grid-template-columns: 1fr 1fr; }
@@ -860,13 +870,13 @@
                 </div>
 
                 <div class="periods" id="historyPeriods" aria-label="Период графика">
-                    <button class="period-btn" type="button" data-period="1d">1 день</button>
-                    <button class="period-btn" type="button" data-period="7d">7 дней</button>
-                    <button class="period-btn active" type="button" data-period="1m">1 месяц</button>
-                    <button class="period-btn" type="button" data-period="3m">3 месяца</button>
-                    <button class="period-btn" type="button" data-period="6m">6 месяцев</button>
-                    <button class="period-btn" type="button" data-period="1y">1 год</button>
-                    <button class="period-btn" type="button" data-period="custom">Свой период</button>
+                    <button class="period-btn" type="button" data-period="1d" aria-label="1 день"><span class="period-long">1 день</span><span class="period-short">1д</span></button>
+                    <button class="period-btn" type="button" data-period="7d" aria-label="7 дней"><span class="period-long">7 дней</span><span class="period-short">7д</span></button>
+                    <button class="period-btn active" type="button" data-period="1m" aria-label="1 месяц"><span class="period-long">1 месяц</span><span class="period-short">1м</span></button>
+                    <button class="period-btn" type="button" data-period="3m" aria-label="3 месяца"><span class="period-long">3 месяца</span><span class="period-short">3м</span></button>
+                    <button class="period-btn" type="button" data-period="6m" aria-label="6 месяцев"><span class="period-long">6 месяцев</span><span class="period-short">6м</span></button>
+                    <button class="period-btn" type="button" data-period="1y" aria-label="1 год"><span class="period-long">1 год</span><span class="period-short">1г</span></button>
+                    <button class="period-btn" type="button" data-period="custom" aria-label="Свой период"><span class="period-long">Свой период</span><span class="period-short">Свой</span></button>
                 </div>
 
                 <div class="custom-range" id="customRange">
