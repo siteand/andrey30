@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?rev=20260802pad">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?rev=20260802pad">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?rev=20260802pad">
-  <link rel="manifest" href="site.webmanifest?rev=20260929-scope-v1">
+  <link rel="manifest" href="site.webmanifest?rev=20260930-offline-v1">
   <meta name="theme-color" content="#e60000">
   <meta name="apple-mobile-web-app-title" content="Гран-при 26">
 
@@ -1998,7 +1998,7 @@
         <div class="install-offer-label">Быстрый доступ</div>
         <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
         <p class="install-offer-text" id="install-offer-text">
-          Добавьте «Гран-при 26» на главный экран и открывайте календарь и результаты одним нажатием.
+          Добавьте «Гран-при 26» на главный экран и пользуйтесь календарём и последними результатами даже без интернета.
         </p>
       </div>
       <div class="install-offer-actions">
@@ -5205,7 +5205,7 @@
 
       function configureNativeOffer() {
         title.textContent = 'Установить приложение?';
-        text.textContent = 'Добавьте «Гран-при 26» на главный экран и открывайте календарь и результаты одним нажатием.';
+        text.textContent = 'Добавьте «Гран-при 26» на главный экран и пользуйтесь календарём и последними результатами даже без интернета.';
         installButton.textContent = 'Установить';
         installButton.dataset.mode = 'native';
         laterButton.hidden = false;
@@ -5319,7 +5319,7 @@
               return registration.unregister();
             }));
 
-            await navigator.serviceWorker.register('./sw.js', {
+            await navigator.serviceWorker.register('./sw.js?rev=20260930-offline-v1', {
               scope: './granpri26.html',
               updateViaCache: 'none'
             });
