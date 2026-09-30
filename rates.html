@@ -2727,7 +2727,6 @@ function renderModalList(query) {
             row.addEventListener('click', () => {
                 selected.push(code);
                 saveState();
-                setEditing(false);
                 renderList();
                 closeModal();
             });
