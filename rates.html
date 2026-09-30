@@ -177,7 +177,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { min-height: 100%; }
+        html { min-height: 100%; }
 
         body {
             font-family: Arial, sans-serif;
@@ -185,17 +185,13 @@
             color: var(--text-color);
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
-            min-height: 0;
-            overflow: hidden;
+            min-height: 100vh;
+            min-height: var(--app-viewport-height, 100dvh);
             padding: 0;
         }
 
         .content {
-            flex: 1 1 0;
-            min-height: 0;
-            overflow-y: auto;
+            flex: 1 0 auto;
             display: flex;
             align-items: safe center;
             justify-content: center;
@@ -2822,7 +2818,7 @@ init();
 // Use the visible viewport in installed Android apps, including after reload.
 function syncAppViewport() {
     if (!window.matchMedia('(display-mode: standalone)').matches) return;
-    document.body.style.height = `${window.visualViewport ? window.visualViewport.height : window.innerHeight}px`;
+    document.documentElement.style.setProperty('--app-viewport-height', `${window.visualViewport ? window.visualViewport.height : window.innerHeight}px`);
 }
 syncAppViewport();
 window.addEventListener('resize', syncAppViewport);
