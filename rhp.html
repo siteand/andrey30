@@ -655,12 +655,16 @@
             white-space: nowrap;
         }
         .history-picker-flag {
-            width: 23px;
-            height: 17px;
+            width: 36px;
+            height: 27px;
             flex: 0 0 auto;
-            border-radius: 2px;
+            border-radius: 3px;
             object-fit: cover;
-            box-shadow: 0 0 0 1px rgba(127, 127, 127, 0.2);
+            background: var(--divider);
+        }
+        .history-picker-flag[data-currency="CHF"] {
+            height: 36px;
+            background: transparent;
         }
         .history-picker-chevron {
             width: 14px;
@@ -1499,6 +1503,7 @@ function historyPickerParts(select) {
 }
 
 function setHistoryPickerFlag(image, code) {
+    image.dataset.currency = code;
     const meta = CURRENCY_META[code];
     if (!meta) {
         image.hidden = true;
