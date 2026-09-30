@@ -270,8 +270,8 @@
         .rates-list.is-editing .drag-handle { display: inline-flex; }
 
         .flag-img {
-            width: 36px;
-            height: 27px;
+            width: 32px;
+            height: 24px;
             border-radius: 3px;
             object-fit: cover;
             flex-shrink: 0;
@@ -279,8 +279,8 @@
         }
 
         .flag-img[alt="CHF"] {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             object-fit: cover;
             background: transparent;
         }
@@ -655,15 +655,15 @@
             white-space: nowrap;
         }
         .history-picker-flag {
-            width: 36px;
-            height: 27px;
+            width: 32px;
+            height: 24px;
             flex: 0 0 auto;
             border-radius: 3px;
             object-fit: cover;
             background: var(--divider);
         }
         .history-picker-flag[data-currency="CHF"] {
-            height: 36px;
+            height: 32px;
             background: transparent;
         }
         .history-picker-chevron {
@@ -1035,7 +1035,6 @@
                         <label id="historyBaseLabel">В валюте</label>
                         <div class="history-picker" data-picker="historyBase">
                             <button class="history-select-button" id="historyBaseButton" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="historyBaseLabel historyBaseValue">
-                                <img class="history-picker-flag" id="historyBaseFlag" alt="" aria-hidden="true">
                                 <span class="history-picker-value" id="historyBaseValue">—</span>
                                 <svg class="history-picker-chevron" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
                             </button>
@@ -1503,6 +1502,7 @@ function historyPickerParts(select) {
 }
 
 function setHistoryPickerFlag(image, code) {
+    if (!image) return;
     image.dataset.currency = code;
     const meta = CURRENCY_META[code];
     if (!meta) {
