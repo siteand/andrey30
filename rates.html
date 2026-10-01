@@ -961,16 +961,37 @@
         .period-short { display: none; }
         .custom-range {
             display: none;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 10px;
-            align-items: end;
-            margin-top: 12px;
-            padding: 12px;
-            border-radius: 9px;
-            background: var(--row-hover);
+            position: fixed;
+            inset: 0;
+            margin: auto;
+            width: min(420px, calc(100% - 28px));
+            max-height: calc(100dvh - 40px);
+            padding: 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 16px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            box-shadow: 0 14px 50px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
         }
-        .custom-range.open { display: grid; }
+        .custom-range[open] { display: block; }
+        .custom-range::backdrop { background: rgba(0, 0, 0, 0.55); }
+        .custom-range-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .custom-range-header h3 { font-size: 19px; }
+        .custom-range-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 14px 10px;
+        }
         .custom-apply {
+            grid-column: 1 / -1;
+            width: 100%;
             height: 42px;
             padding: 0 16px;
             border: 0;
@@ -1107,8 +1128,6 @@
             .period-short { display: inline; }
             .chart-wrap { height: 270px; }
             .history-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .custom-range { grid-template-columns: 1fr 1fr; }
-            .custom-apply { grid-column: 1 / -1; width: 100%; }
         }
     </style>
 </head>
@@ -1210,24 +1229,6 @@
                     </button>
                 </div>
 
-                <div class="custom-range" id="customRange">
-                    <div class="history-field">
-                        <label for="historyFrom">С даты</label>
-                        <div class="history-date-wrap">
-                            <input class="history-date" id="historyFrom" type="date">
-                            <svg class="history-date-arrow" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
-                        </div>
-                    </div>
-                    <div class="history-field">
-                        <label for="historyTo">По дату</label>
-                        <div class="history-date-wrap">
-                            <input class="history-date" id="historyTo" type="date">
-                            <svg class="history-date-arrow" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
-                        </div>
-                    </div>
-                    <button class="custom-apply" id="customApply" type="button">Показать</button>
-                </div>
-
                 <div class="history-status" id="historyStatus">Выберите инструмент и период</div>
 
                 <div class="chart-wrap" id="chartWrap">
@@ -1259,6 +1260,31 @@
             </div>
         </section>
     </div>
+
+    <dialog class="custom-range" id="customRange" aria-labelledby="customRangeTitle">
+        <div class="custom-range-header">
+            <h3 id="customRangeTitle">Выберите даты</h3>
+            <button class="history-close" id="customRangeClose" type="button" aria-label="Закрыть выбор дат" autofocus>✕</button>
+        </div>
+        <form class="custom-range-form" id="customRangeForm">
+                    <div class="history-field">
+                        <label for="historyFrom">С даты</label>
+                        <div class="history-date-wrap">
+                            <input class="history-date" id="historyFrom" type="date" required>
+                            <svg class="history-date-arrow" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
+                        </div>
+                    </div>
+                    <div class="history-field">
+                        <label for="historyTo">По дату</label>
+                        <div class="history-date-wrap">
+                            <input class="history-date" id="historyTo" type="date" required>
+                            <svg class="history-date-arrow" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
+                        </div>
+                    </div>
+                    <button class="custom-apply" id="customApply" type="submit">Показать</button>
+        </form>
+    </dialog>
+
 
     <div class="modal-bg" id="modal">
         <div class="modal">
@@ -2337,7 +2363,51 @@ function populateHistoryBaseSelect(code, preferredBase) {
     renderHistoryPicker(historyBase);
 }
 
-function setHistoryPeriod(period) {
+const customRangeDialog = document.getElementById('customRange');
+const historyFromInput = document.getElementById('historyFrom');
+const historyToInput = document.getElementById('historyTo');
+let customRangeDraft = null;
+
+function openCustomRange() {
+    if (customRangeDialog.open) return;
+    closeHistoryPickers();
+    customRangeDraft = { from: historyFromInput.value, to: historyToInput.value };
+    if (currentHistoryPeriod !== 'custom') {
+        const range = historyRange(currentHistoryPeriod);
+        historyFromInput.value = dateKey(range.start);
+        historyToInput.value = dateKey(range.end);
+    }
+    historyToInput.setCustomValidity('');
+    customRangeDialog.showModal();
+}
+
+customRangeDialog.addEventListener('close', () => {
+    if (customRangeDraft) {
+        historyFromInput.value = customRangeDraft.from;
+        historyToInput.value = customRangeDraft.to;
+        customRangeDraft = null;
+    }
+    historyToInput.setCustomValidity('');
+});
+document.getElementById('customRangeClose').addEventListener('click', () => customRangeDialog.close());
+[historyFromInput, historyToInput].forEach(input => input.addEventListener('input', () => historyToInput.setCustomValidity('')));
+document.getElementById('customRangeForm').addEventListener('submit', event => {
+    event.preventDefault();
+    if (historyFromInput.value > historyToInput.value) {
+        historyToInput.setCustomValidity('Конечная дата должна быть не раньше начальной');
+        historyToInput.reportValidity();
+        return;
+    }
+    customRangeDraft = null;
+    customRangeDialog.close();
+    setHistoryPeriod('custom', true);
+});
+
+function setHistoryPeriod(period, applyCustom = false) {
+    if (period === 'custom' && !applyCustom) {
+        openCustomRange();
+        return;
+    }
     currentHistoryPeriod = period;
     let activeButton = null;
     document.querySelectorAll('.period-btn').forEach(btn => {
@@ -2350,8 +2420,7 @@ function setHistoryPeriod(period) {
         const left = activeButton.offsetLeft - periodsRow.offsetLeft - (periodsRow.clientWidth - activeButton.offsetWidth) / 2;
         periodsRow.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
     }
-    document.getElementById('customRange').classList.toggle('open', period === 'custom');
-    if (period !== 'custom') loadHistory();
+    loadHistory();
 }
 
 function openHistory(code) {
@@ -2366,6 +2435,7 @@ function openHistory(code) {
 }
 
 function closeHistory() {
+    if (customRangeDialog.open) customRangeDialog.close();
     historyRequestId++;
     closeHistoryPickers();
     historyModal.classList.remove('open');
@@ -2401,9 +2471,9 @@ document.getElementById('historyPeriods').addEventListener('click', event => {
     const button = event.target.closest('.period-btn');
     if (button) setHistoryPeriod(button.dataset.period);
 });
-document.getElementById('customApply').addEventListener('click', loadHistory);
 document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !historyModal.classList.contains('open')) return;
+    if (customRangeDialog.open) return;
     if (document.querySelector('.history-picker-menu.open')) {
         closeHistoryPickers();
         return;
