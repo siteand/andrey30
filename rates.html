@@ -1070,12 +1070,15 @@
         }
 
         @media (max-width: 600px) {
-            .history-modal-bg { padding: 0; align-items: flex-end; }
+            .history-modal-bg {
+                padding: 0 0 calc(16px + env(safe-area-inset-bottom, 0px));
+                align-items: flex-end;
+            }
             .history-modal {
                 width: 100%;
-                max-height: 96vh;
-                max-height: 96dvh;
-                border-radius: 16px 16px 0 0;
+                max-height: calc(96vh - 16px - env(safe-area-inset-bottom, 0px));
+                max-height: calc(96dvh - 16px - env(safe-area-inset-bottom, 0px));
+                border-radius: 16px;
             }
             .history-header { padding: 15px 16px; }
             .history-body { padding: 14px 14px 20px; }
