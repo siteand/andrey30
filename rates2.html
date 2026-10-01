@@ -7,12 +7,158 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Курсы">
-    <title>Курсы валют</title>
+    <title>Курсы валют — история и график</title>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="icons2/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons2/favicon-16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons2/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons3/rates-icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons3/rates-icon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons3/rates-icon-180.png">
+    <link rel="manifest" href="rates.webmanifest">
     <style>
+        .install-offer {
+            position: fixed;
+            inset: 0;
+            z-index: 1900;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 18px 12px calc(28px + env(safe-area-inset-bottom));
+            background: rgba(0, 0, 0, 0.36);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.24s ease, visibility 0.24s ease;
+        }
+        .install-offer[hidden] { display: none !important; }
+        .install-offer.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .install-offer-inner {
+            position: relative;
+            width: min(560px, 100%);
+            display: grid;
+            grid-template-columns: 54px minmax(0, 1fr);
+            gap: 14px;
+            align-items: start;
+            padding: 22px 20px 18px;
+            border: 2px solid rgba(0, 123, 255, 0.34);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.99);
+            color: #222;
+            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.38), 0 0 0 5px rgba(255, 255, 255, 0.18);
+            overflow: hidden;
+            transform: translateY(34px) scale(0.96);
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .install-offer-inner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--button-bg), #248eff, var(--button-bg));
+        }
+        .install-offer.show .install-offer-inner {
+            transform: translateY(0) scale(1);
+        }
+        .install-offer-icon {
+            width: 54px;
+            height: 54px;
+            display: inline-flex;
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.28);
+            overflow: hidden;
+            user-select: none;
+        }
+        .install-offer-icon img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+        .install-offer-label {
+            display: inline-block;
+            margin: 0 0 5px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #e7f2ff;
+            color: #0069d9;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: 0.25px;
+            text-transform: uppercase;
+        }
+        .install-offer-title {
+            margin: 0 0 6px;
+            color: var(--button-bg);
+            font-size: 20px;
+            line-height: 1.25;
+            text-align: left;
+        }
+        .install-offer-text {
+            margin: 0;
+            color: #444;
+            font-size: 14.5px;
+            line-height: 1.48;
+        }
+        .install-offer-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .install-offer-button {
+            width: auto;
+            min-height: 44px;
+            margin: 0;
+            padding: 10px 18px;
+            border-radius: 11px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .install-offer-button.primary {
+            border: 1px solid #007bff;
+            background: linear-gradient(180deg, #248eff, #007bff);
+            color: #fff;
+            box-shadow: 0 5px 14px rgba(0, 123, 255, 0.30);
+        }
+        .install-offer-button.primary:hover { background: linear-gradient(180deg, #248eff, #0069d9); }
+        .install-offer-button.secondary {
+            border: 1px solid #cfcfcf;
+            background: #f2f2f2;
+            color: #444;
+        }
+        .install-offer-button.secondary:hover { background: #e7e7e7; }
+        .install-offer.show .install-offer-button.primary {
+            animation: installButtonPulse 1.15s ease-in-out 0.45s 2;
+        }
+        @keyframes installButtonPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 5px 14px rgba(0, 123, 255, 0.30); }
+            50% { transform: scale(1.045); box-shadow: 0 7px 22px rgba(0, 123, 255, 0.50); }
+        }
+        @media (max-width: 600px), (pointer: coarse) {
+            .install-offer { padding: 12px 10px calc(20px + env(safe-area-inset-bottom)); }
+            .install-offer-inner {
+                grid-template-columns: 48px minmax(0, 1fr);
+                gap: 12px;
+                padding: 19px 16px 15px;
+                border-radius: 18px;
+            }
+            .install-offer-icon { width: 48px; height: 48px; border-radius: 14px; }
+            .install-offer-title { font-size: 18px; }
+            .install-offer-text { font-size: 13.5px; }
+            .install-offer-actions { justify-content: stretch; margin-top: 13px; }
+            .install-offer-button { flex: 1; min-height: 45px; padding: 10px 12px; }
+        }
+
+
         :root {
             --bg-color: #f0f2f5;
             --text-color: #333;
@@ -26,11 +172,12 @@
             --shadow: rgba(0, 60, 150, 0.08);
             --up-color: #2e7d32;
             --down-color: #c62828;
+            --warning-color: #936200;
             --neutral-color: #888;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { min-height: 100%; }
+        html { min-height: 100%; }
 
         body {
             font-family: Arial, sans-serif;
@@ -39,14 +186,14 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            min-height: 100dvh;
+            min-height: var(--app-viewport-height, 100dvh);
             padding: 0;
         }
 
         .content {
-            flex: 1;
+            flex: 1 0 auto;
             display: flex;
-            align-items: center;
+            align-items: safe center;
             justify-content: center;
             width: 100%;
             padding: 20px 10px;
@@ -269,8 +416,8 @@
         .rates-list.is-editing .drag-handle { display: inline-flex; }
 
         .flag-img {
-            width: 36px;
-            height: 27px;
+            width: 32px;
+            height: 24px;
             border-radius: 3px;
             object-fit: cover;
             flex-shrink: 0;
@@ -278,8 +425,8 @@
         }
 
         .flag-img[alt="CHF"] {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             object-fit: cover;
             background: transparent;
         }
@@ -400,6 +547,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .currency-list-divider {
+            height: 0;
+            border-top: 1px solid var(--divider);
+            margin: 8px 12px;
+        }
         .modal-row:hover { background: var(--row-hover); }
         .modal-row.disabled { opacity: 0.5; cursor: default; }
         .modal-row.disabled:hover { background: transparent; }
@@ -417,12 +569,24 @@
         .empty { text-align: center; padding: 24px; color: var(--text-muted); font-size: 14px; }
 
         footer {
+            flex-shrink: 0;
             text-align: center;
             padding: 20px 10px 10px;
             background-color: var(--bg-color);
             width: 100%;
             color: gray;
             font-size: 14px;
+        }
+
+        footer a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        footer a:hover,
+        footer a:focus-visible {
+            color: var(--button-bg);
+            text-decoration: underline;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -437,6 +601,7 @@
                 --shadow: rgba(0, 0, 0, 0.3);
                 --up-color: #66bb6a;
                 --down-color: #ef5350;
+                --warning-color: #e2a33a;
             }
             .btn-done:hover { background: #2b8aff; border-color: #2b8aff; }
             .search-wrap input:focus { background: #404650; }
@@ -494,6 +659,484 @@
                 display: block;
             }
         }
+
+        body:not(.editing) .rate-row {
+            cursor: pointer;
+        }
+        body:not(.editing) .rate-row:hover {
+            background: var(--row-hover);
+        }
+
+        .history-open-btn {
+            flex: 0 0 auto;
+            width: 46px;
+            align-self: stretch;
+            padding: 0;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--button-bg);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .history-open-btn:hover {
+            background: var(--row-hover);
+            border-color: var(--button-bg);
+        }
+        .history-open-btn svg {
+            display: block;
+            flex: 0 0 auto;
+            transition: transform 0.2s;
+        }
+        .history-open-btn:active svg { transform: scale(0.9); }
+        body.editing .history-open-btn { display: none; }
+
+        body.history-open { overflow: hidden; }
+        .history-modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.58);
+            align-items: center;
+            justify-content: center;
+        }
+        .history-modal-bg.open { display: flex; }
+        .history-modal {
+            width: min(760px, 100%);
+            max-height: min(92vh, 780px);
+            max-height: min(92dvh, 780px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            border-radius: 14px;
+            background: var(--input-bg);
+            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+        }
+        .history-header {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 17px 20px;
+            background: var(--input-bg);
+            border-bottom: 1px solid var(--divider);
+        }
+        .history-heading { min-width: 0; }
+        .history-heading h3 {
+            font-size: 19px;
+            line-height: 1.2;
+            color: var(--text-color);
+        }
+        .history-pair {
+            margin-top: 3px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        .history-close {
+            width: 38px;
+            height: 38px;
+            flex: 0 0 auto;
+            border: 0;
+            border-radius: 50%;
+            background: var(--row-hover);
+            color: var(--text-color);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .history-body {
+            padding: 18px 20px 22px;
+        }
+        .history-controls {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: end;
+        }
+        .history-field label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        .history-pair-control { min-width: 108px; }
+        .history-picker { position: relative; }
+        .history-picker-native { display: none; }
+        .history-select-button,
+        .history-date {
+            width: 100%;
+            height: 42px;
+            padding: 0 11px;
+            border: 1px solid var(--input-border);
+            border-radius: 7px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font: 14px Arial, sans-serif;
+        }
+        .history-select-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: left;
+            padding-left: 12px;
+            padding-right: 12px;
+            cursor: pointer;
+        }
+        .history-select-button[aria-expanded="true"] {
+            border-color: var(--button-bg);
+            outline: 2px solid color-mix(in srgb, var(--button-bg) 24%, transparent);
+            outline-offset: 1px;
+        }
+        .history-picker-value {
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .history-picker-flag {
+            width: 32px;
+            height: 24px;
+            flex: 0 0 auto;
+            border-radius: 3px;
+            object-fit: cover;
+            background: var(--divider);
+        }
+        .history-picker-flag[data-currency="CHF"] {
+            height: 32px;
+            background: transparent;
+        }
+        .history-picker-chevron {
+            width: 14px;
+            height: 9px;
+            flex: 0 0 auto;
+            color: var(--text-muted);
+            transition: transform 0.16s ease;
+        }
+        .history-select-button[aria-expanded="true"] .history-picker-chevron {
+            transform: rotate(180deg);
+        }
+        .history-picker-menu {
+            display: none;
+            position: absolute;
+            z-index: 8;
+            top: calc(100% + 6px);
+            left: 0;
+            width: max-content;
+            min-width: 100%;
+            max-width: min(360px, calc(100vw - 28px));
+            max-height: min(330px, 48vh);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 6px;
+            border: 1px solid var(--input-border);
+            border-radius: 9px;
+            background: var(--input-bg);
+            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
+        }
+        .history-picker-menu.open { display: block; }
+        .history-pair-control .history-picker-menu { right: 0; left: auto; }
+        .history-picker-group {
+            padding: 8px 10px 5px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .history-picker-option {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            min-height: 40px;
+            padding: 7px 9px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-color);
+            font: 14px Arial, sans-serif;
+            text-align: left;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .history-picker-option:hover,
+        .history-picker-option:focus-visible { background: var(--row-hover); outline: none; }
+        .history-picker-option.active {
+            background: color-mix(in srgb, var(--button-bg) 14%, transparent);
+            color: var(--button-bg);
+            font-weight: 700;
+        }
+        .history-picker-option-text { flex: 1; }
+        .history-picker-check { width: 16px; color: var(--button-bg); }
+        .history-picker-option:not(.active) .history-picker-check { visibility: hidden; }
+        .history-date-wrap { position: relative; }
+        .history-date {
+            position: relative;
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            min-width: 0;
+            padding: 0 40px 0 12px;
+            cursor: pointer;
+        }
+        .history-date::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .history-date-arrow {
+            position: absolute;
+            top: 50%;
+            right: 13px;
+            width: 14px;
+            height: 9px;
+            color: var(--text-muted);
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .history-select-button:focus-visible,
+        .history-date:focus-visible {
+            outline: 2px solid color-mix(in srgb, var(--button-bg) 24%, transparent);
+            outline-offset: 1px;
+            border-color: var(--button-bg);
+        }
+        .periods {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px;
+            width: 100%;
+            max-width: 100%;
+            margin-top: 14px;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
+            padding: 2px 2px 6px;
+            scrollbar-width: none;
+        }
+        .periods::-webkit-scrollbar { display: none; }
+        .period-btn {
+            -webkit-tap-highlight-color: transparent;
+            flex: 0 0 auto;
+            min-width: 48px;
+            height: 36px;
+            padding: 0 11px;
+            border: 1px solid var(--input-border);
+            border-radius: 18px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font: 600 13px Arial, sans-serif;
+            white-space: nowrap;
+            cursor: pointer;
+            scroll-snap-align: start;
+        }
+        .period-btn.active {
+            border-color: var(--button-bg);
+            background: var(--button-bg);
+            color: var(--button-text);
+        }
+        .period-btn:focus:not(:focus-visible) { outline: none; }
+        .period-btn:focus-visible { outline: 2px solid var(--button-bg); outline-offset: 2px; }
+        .period-custom-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 36px;
+            width: 36px;
+            padding: 0;
+        }
+        .period-custom-btn svg { width: 15px; height: 15px; flex: 0 0 auto; }
+        .period-short { display: none; }
+        .custom-range {
+            display: none;
+            position: fixed;
+            inset: 0;
+            margin: auto;
+            width: min(420px, calc(100% - 28px));
+            max-height: calc(100dvh - 40px);
+            padding: 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 16px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            box-shadow: 0 14px 50px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+        .custom-range[open] { display: block; }
+        .custom-range::backdrop { background: rgba(0, 0, 0, 0.55); }
+        .custom-range-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .custom-range-header h3 { font-size: 19px; }
+        .custom-range-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 14px 10px;
+        }
+        .custom-apply {
+            grid-column: 1 / -1;
+            width: 100%;
+            height: 42px;
+            padding: 0 16px;
+            border: 0;
+            border-radius: 7px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            font: 600 14px Arial, sans-serif;
+            cursor: pointer;
+        }
+        .history-status {
+            min-height: 21px;
+            margin: 14px 0 8px;
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        .history-status.error { color: var(--down-color); }
+        .history-status.warning { color: var(--warning-color); }
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 310px;
+            border: 1px solid var(--divider);
+            border-radius: 11px;
+            background: var(--input-bg);
+            overflow: hidden;
+        }
+        #historyCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: pan-y;
+        }
+        .chart-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        }
+        .chart-placeholder.hidden { display: none; }
+        .chart-tooltip {
+            display: none;
+            position: absolute;
+            z-index: 2;
+            min-width: 118px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(25, 29, 36, 0.92);
+            color: #fff;
+            font-size: 12px;
+            line-height: 1.45;
+            pointer-events: none;
+            max-width: calc(100% - 16px);
+            box-sizing: border-box;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.25);
+        }
+        .chart-tooltip strong { display: block; font-size: 13px; }
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .history-stat {
+            min-width: 0;
+            padding: 10px;
+            border-radius: 9px;
+            background: var(--row-hover);
+        }
+        .history-stat-label {
+            color: var(--text-muted);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .history-stat-value {
+            margin-top: 4px;
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .history-stat-value.up { color: var(--up-color); }
+        .history-stat-value.down { color: var(--down-color); }
+        .history-note {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 600px) {
+            .history-modal-bg {
+                padding: 0 0 calc(12mm + env(safe-area-inset-bottom, 0px));
+                align-items: flex-end;
+            }
+            .history-modal {
+                width: 100%;
+                max-height: calc(96vh - 12mm - env(safe-area-inset-bottom, 0px));
+                max-height: calc(96dvh - 12mm - env(safe-area-inset-bottom, 0px));
+                border-radius: 16px;
+            }
+            .history-header { padding: 15px 16px; }
+            .history-body { padding: 14px 14px 20px; }
+            .history-controls { grid-template-columns: minmax(0, 1fr) 108px; }
+            .periods {
+                display: grid;
+                grid-template-columns: repeat(6, minmax(0, 1fr)) 36px;
+                gap: 6px;
+                overflow: visible;
+                padding: 2px 0 0;
+                scroll-snap-type: none;
+            }
+            .period-btn {
+                width: 100%;
+                min-width: 0;
+                padding: 0 4px;
+                overflow: hidden;
+                text-overflow: clip;
+            }
+            .period-custom-btn[data-period="custom"] {
+                grid-column: auto;
+                width: 100%;
+                min-width: 0;
+            }
+            .period-long { display: none; }
+            .period-short { display: inline; }
+            .chart-wrap { height: 270px; }
+            .history-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
     </style>
 </head>
 <body>
@@ -510,6 +1153,12 @@
         <h2>Курсы валют</h2>
 
         <div class="actions-row">
+            <button class="history-open-btn" id="historyBtn" type="button" title="История и график" aria-label="История и график">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 19V9"></path><path d="M10 19V5"></path><path d="M16 19v-7"></path><path d="M22 19V3"></path>
+                </svg>
+            </button>
+
             <button class="status-btn" id="refreshBtn" title="Обновить курсы">
                 <svg class="refresh-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="23 4 23 10 17 10"></polyline>
@@ -538,6 +1187,112 @@
         <div class="source-note" id="sourceNote"><span id="sourceNoteText"></span></div>
     </div>
     </div>
+
+    <div class="history-modal-bg" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+        <section class="history-modal">
+            <header class="history-header">
+                <div class="history-heading">
+                    <h3 id="historyTitle">История курса</h3>
+                    <div class="history-pair" id="historyPair">—</div>
+                </div>
+                <button class="history-close" id="historyClose" type="button" aria-label="Закрыть">✕</button>
+            </header>
+
+            <div class="history-body">
+                <div class="history-controls">
+                    <div class="history-field">
+                        <label id="historyInstrumentLabel">Инструмент</label>
+                        <div class="history-picker" data-picker="historyInstrument">
+                            <button class="history-select-button" id="historyInstrumentButton" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="historyInstrumentLabel historyInstrumentValue">
+                                <img class="history-picker-flag" id="historyInstrumentFlag" alt="" aria-hidden="true">
+                                <span class="history-picker-value" id="historyInstrumentValue">—</span>
+                                <svg class="history-picker-chevron" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
+                            </button>
+                            <select class="history-picker-native" id="historyInstrument" tabindex="-1" aria-hidden="true"></select>
+                            <div class="history-picker-menu" id="historyInstrumentMenu" role="listbox" aria-labelledby="historyInstrumentLabel"></div>
+                        </div>
+                    </div>
+                    <div class="history-field history-pair-control">
+                        <label id="historyBaseLabel">В валюте</label>
+                        <div class="history-picker" data-picker="historyBase">
+                            <button class="history-select-button" id="historyBaseButton" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="historyBaseLabel historyBaseValue">
+                                <span class="history-picker-value" id="historyBaseValue">—</span>
+                                <svg class="history-picker-chevron" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
+                            </button>
+                            <select class="history-picker-native" id="historyBase" tabindex="-1" aria-hidden="true"></select>
+                            <div class="history-picker-menu" id="historyBaseMenu" role="listbox" aria-labelledby="historyBaseLabel"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="periods" id="historyPeriods" aria-label="Период графика">
+                    <button class="period-btn" type="button" data-period="1d" aria-label="1 день"><span class="period-long">1 день</span><span class="period-short">1д</span></button>
+                    <button class="period-btn" type="button" data-period="7d" aria-label="7 дней"><span class="period-long">7 дней</span><span class="period-short">7д</span></button>
+                    <button class="period-btn active" type="button" data-period="1m" aria-label="1 месяц"><span class="period-long">1 месяц</span><span class="period-short">1м</span></button>
+                    <button class="period-btn" type="button" data-period="3m" aria-label="3 месяца"><span class="period-long">3 месяца</span><span class="period-short">3м</span></button>
+                    <button class="period-btn" type="button" data-period="6m" aria-label="6 месяцев"><span class="period-long">6 месяцев</span><span class="period-short">6м</span></button>
+                    <button class="period-btn" type="button" data-period="1y" aria-label="1 год"><span class="period-long">1 год</span><span class="period-short">1г</span></button>
+                    <button class="period-btn period-custom-btn" type="button" data-period="custom" aria-label="Выбрать даты">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>
+                    </button>
+                </div>
+
+                <div class="history-status" id="historyStatus">Выберите инструмент и период</div>
+
+                <div class="chart-wrap" id="chartWrap">
+                    <canvas id="historyCanvas" aria-label="График истории курса"></canvas>
+                    <div class="chart-placeholder" id="chartPlaceholder">Загрузка графика…</div>
+                    <div class="chart-tooltip" id="chartTooltip"></div>
+                </div>
+
+                <div class="history-stats">
+                    <div class="history-stat">
+                        <div class="history-stat-label">Начало</div>
+                        <div class="history-stat-value" id="historyStart">—</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">Сейчас</div>
+                        <div class="history-stat-value" id="historyEnd">—</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">Изменение</div>
+                        <div class="history-stat-value" id="historyChange">—</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-stat-label">Мин. / макс.</div>
+                        <div class="history-stat-value" id="historyMinMax">—</div>
+                    </div>
+                </div>
+
+                <p class="history-note">Источники: Frankfurter и архив курсов ЦБ РФ.</p>
+            </div>
+        </section>
+    </div>
+
+    <dialog class="custom-range" id="customRange" aria-labelledby="customRangeTitle">
+        <div class="custom-range-header">
+            <h3 id="customRangeTitle">Выберите даты</h3>
+            <button class="history-close" id="customRangeClose" type="button" aria-label="Закрыть выбор дат" autofocus>✕</button>
+        </div>
+        <form class="custom-range-form" id="customRangeForm">
+                    <div class="history-field">
+                        <label for="historyFrom">С даты</label>
+                        <div class="history-date-wrap">
+                            <input class="history-date" id="historyFrom" type="date" required>
+                            <svg class="history-date-arrow" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
+                        </div>
+                    </div>
+                    <div class="history-field">
+                        <label for="historyTo">По дату</label>
+                        <div class="history-date-wrap">
+                            <input class="history-date" id="historyTo" type="date" required>
+                            <svg class="history-date-arrow" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l5 5 5-5"></path></svg>
+                        </div>
+                    </div>
+                    <button class="custom-apply" id="customApply" type="submit">Показать</button>
+        </form>
+    </dialog>
+
 
     <div class="modal-bg" id="modal">
         <div class="modal">
@@ -583,6 +1338,8 @@ const CURRENCY_META = {
     AED: { country: 'ae', name: 'Дирхам ОАЭ' },
     ILS: { country: 'il', name: 'Израильский шекель' },
     SAR: { country: 'sa', name: 'Саудовский риял' },
+    QAR: { country: 'qa', name: 'Катарский риал' },
+    EGP: { country: 'eg', name: 'Египетский фунт' },
     KZT: { country: 'kz', name: 'Казахстанский тенге' },
     BYN: { country: 'by', name: 'Белорусский рубль' },
     UAH: { country: 'ua', name: 'Украинская гривна' },
@@ -591,15 +1348,40 @@ const CURRENCY_META = {
     AZN: { country: 'az', name: 'Азербайджанский манат' },
     KGS: { country: 'kg', name: 'Киргизский сом' },
     UZS: { country: 'uz', name: 'Узбекский сум' },
+    TJS: { country: 'tj', name: 'Таджикский сомони' },
+    TMT: { country: 'tm', name: 'Туркменский манат' },
+    MDL: { country: 'md', name: 'Молдавский лей' },
     PLN: { country: 'pl', name: 'Польский злотый' },
     CZK: { country: 'cz', name: 'Чешская крона' },
     SEK: { country: 'se', name: 'Шведская крона' },
     NOK: { country: 'no', name: 'Норвежская крона' },
+    DKK: { country: 'dk', name: 'Датская крона' },
+    HUF: { country: 'hu', name: 'Венгерский форинт' },
+    RON: { country: 'ro', name: 'Румынский лей' },
+    BGN: { country: 'bg', name: 'Болгарский лев' },
+    RSD: { country: 'rs', name: 'Сербский динар' },
     BRL: { country: 'br', name: 'Бразильский реал' },
     THB: { country: 'th', name: 'Тайский бат' },
+    VND: { country: 'vn', name: 'Вьетнамский донг' },
     NZD: { country: 'nz', name: 'Новозеландский доллар' },
     MXN: { country: 'mx', name: 'Мексиканское песо' },
     ZAR: { country: 'za', name: 'Южноафриканский рэнд' },
+    MYR: { country: 'my', name: 'Малайзийский ринггит' },
+    IDR: { country: 'id', name: 'Индонезийская рупия' },
+    PHP: { country: 'ph', name: 'Филиппинское песо' },
+    PKR: { country: 'pk', name: 'Пакистанская рупия' },
+    BDT: { country: 'bd', name: 'Бангладешская така' },
+    TWD: { country: 'tw', name: 'Тайваньский доллар' },
+    CLP: { country: 'cl', name: 'Чилийское песо' },
+    ARS: { country: 'ar', name: 'Аргентинское песо' },
+    COP: { country: 'co', name: 'Колумбийское песо' },
+    PEN: { country: 'pe', name: 'Перуанский соль' },
+    NGN: { country: 'ng', name: 'Нигерийская найра' },
+    KWD: { country: 'kw', name: 'Кувейтский динар' },
+    BHD: { country: 'bh', name: 'Бахрейнский динар' },
+    OMR: { country: 'om', name: 'Оманский риал' },
+    JOD: { country: 'jo', name: 'Иорданский динар' },
+    LKR: { country: 'lk', name: 'Шри-ланкийская рупия' },
     XAU_U: { country: 'metal-gold', name: 'Золото (унция)', metal: 'xau', perGram: false },
     XAG_U: { country: 'metal-silver', name: 'Серебро (унция)', metal: 'xag', perGram: false },
     XPT_U: { country: 'metal-platinum', name: 'Платина (унция)', metal: 'xpt', perGram: false },
@@ -639,6 +1421,14 @@ function flagUrl(country) {
 }
 
 const DEFAULT_SELECTED = ['USD', 'EUR', 'RUB', 'BTC', 'XAU'];
+const POPULAR_CURRENCIES = ['RUB', 'USD', 'EUR', 'CNY', 'GBP'];
+
+function compareCurrencyCodes(a, b) {
+    const ai = POPULAR_CURRENCIES.indexOf(a);
+    const bi = POPULAR_CURRENCIES.indexOf(b);
+    if (ai !== -1 || bi !== -1) return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
+    return a.localeCompare(b);
+}
 
 const STORAGE_KEY = 'ratesPage_v1';
 const CACHE_KEY = 'ratesPage_cache_v1';
@@ -650,10 +1440,15 @@ let rateDate = null;
 let lastFetchTime = 0;
 let selected = [];
 let baseCurrency = 'RUB';
+let historyInstrumentCode = '';
 
 function saveState() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ selected, baseCurrency }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            selected,
+            baseCurrency,
+            historyInstrument: historyInstrumentCode
+        }));
     } catch (e) {}
 }
 
@@ -669,6 +1464,9 @@ function loadState() {
         let base = s.baseCurrency;
         if (base && MIGRATE[base]) base = MIGRATE[base];
         if (base && CURRENCY_META[base]) baseCurrency = base;
+        let historyCode = s.historyInstrument;
+        if (historyCode && MIGRATE[historyCode]) historyCode = MIGRATE[historyCode];
+        if (historyCode && CURRENCY_META[historyCode]) historyInstrumentCode = historyCode;
     } catch (e) {}
 }
 
@@ -857,6 +1655,882 @@ function formatChange(pct) {
     if (!isFinite(pct)) return '';
     const sign = pct > 0 ? '+' : '';
     return `${sign}${pct.toFixed(2)}%`;
+}
+
+const HISTORY_CACHE_KEY = 'ratesHistory_cache_v5';
+const FAWAZ_HISTORY_START = '2024-03-02';
+const FRANKFURTER_HISTORY_API = 'https://api.frankfurter.dev/v2/rates';
+const historyDateCache = new Map();
+const historyRangeCache = new Map();
+const cbrArchiveCache = new Map();
+let historyChartData = [];
+let historyDrawPoints = [];
+let currentHistoryPeriod = '1m';
+let historyRequestId = 0;
+let cbrLastRequestAt = 0;
+const cbrRecentRequests = [];
+
+const historyModal = document.getElementById('historyModal');
+const historyInstrument = document.getElementById('historyInstrument');
+const historyBase = document.getElementById('historyBase');
+const historyStatus = document.getElementById('historyStatus');
+const chartPlaceholder = document.getElementById('chartPlaceholder');
+const historyCanvas = document.getElementById('historyCanvas');
+const chartTooltip = document.getElementById('chartTooltip');
+
+function historyPickerParts(select) {
+    const root = select.closest('.history-picker');
+    return {
+        root,
+        button: root.querySelector('.history-select-button'),
+        value: root.querySelector('.history-picker-value'),
+        flag: root.querySelector('.history-picker-flag'),
+        menu: root.querySelector('.history-picker-menu')
+    };
+}
+
+function setHistoryPickerFlag(image, code) {
+    if (!image) return;
+    image.dataset.currency = code;
+    const meta = CURRENCY_META[code];
+    if (!meta) {
+        image.hidden = true;
+        image.removeAttribute('src');
+        return;
+    }
+    image.hidden = false;
+    image.src = flagUrl(meta.country);
+    image.onerror = () => { image.hidden = true; };
+}
+
+function syncHistoryPicker(select) {
+    const parts = historyPickerParts(select);
+    const option = select.options[select.selectedIndex];
+    const code = select.value;
+    parts.value.textContent = option ? option.textContent : '—';
+    if (select === historyBase) parts.value.textContent = code || '—';
+    setHistoryPickerFlag(parts.flag, code);
+    parts.menu.querySelectorAll('.history-picker-option').forEach(button => {
+        const active = button.dataset.value === code;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+    });
+}
+
+function addHistoryPickerOption(select, menu, option) {
+    const code = option.value;
+    const previous = menu.querySelector('.history-picker-option:last-of-type');
+    if (previous && POPULAR_CURRENCIES.includes(previous.dataset.value) && !POPULAR_CURRENCIES.includes(code)) {
+        const divider = document.createElement('div');
+        divider.className = 'currency-list-divider';
+        divider.setAttribute('role', 'separator');
+        menu.appendChild(divider);
+    }
+    const meta = CURRENCY_META[code];
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'history-picker-option';
+    button.dataset.value = code;
+    button.setAttribute('role', 'option');
+
+    const image = document.createElement('img');
+    image.className = 'history-picker-flag';
+    image.alt = '';
+    image.setAttribute('aria-hidden', 'true');
+    setHistoryPickerFlag(image, code);
+
+    const text = document.createElement('span');
+    text.className = 'history-picker-option-text';
+    text.textContent = select === historyBase && meta
+        ? `${code} — ${meta.name}`
+        : option.textContent;
+
+    const check = document.createElement('span');
+    check.className = 'history-picker-check';
+    check.textContent = '✓';
+    check.setAttribute('aria-hidden', 'true');
+
+    button.append(image, text, check);
+    menu.appendChild(button);
+}
+
+function renderHistoryPicker(select) {
+    const parts = historyPickerParts(select);
+    parts.menu.textContent = '';
+    Array.from(select.children).forEach(child => {
+        if (child.tagName === 'OPTGROUP') {
+            const heading = document.createElement('div');
+            heading.className = 'history-picker-group';
+            heading.textContent = child.label;
+            parts.menu.appendChild(heading);
+            Array.from(child.children).forEach(option => addHistoryPickerOption(select, parts.menu, option));
+        } else if (child.tagName === 'OPTION') {
+            addHistoryPickerOption(select, parts.menu, child);
+        }
+    });
+    syncHistoryPicker(select);
+}
+
+function closeHistoryPickers(except = null) {
+    document.querySelectorAll('.history-picker-menu.open').forEach(menu => {
+        if (menu === except) return;
+        menu.classList.remove('open');
+        const button = menu.closest('.history-picker').querySelector('.history-select-button');
+        button.setAttribute('aria-expanded', 'false');
+    });
+}
+
+function initHistoryPickers() {
+    document.querySelectorAll('.history-picker').forEach(root => {
+        const select = document.getElementById(root.dataset.picker);
+        const parts = historyPickerParts(select);
+        parts.button.addEventListener('click', () => {
+            const opening = !parts.menu.classList.contains('open');
+            closeHistoryPickers(parts.menu);
+            parts.menu.classList.toggle('open', opening);
+            parts.button.setAttribute('aria-expanded', String(opening));
+            if (opening) {
+                requestAnimationFrame(() => {
+                    const active = parts.menu.querySelector('.history-picker-option.active');
+                    if (active) active.scrollIntoView({ block: 'nearest' });
+                });
+            }
+        });
+        parts.menu.addEventListener('click', event => {
+            const optionButton = event.target.closest('.history-picker-option');
+            if (!optionButton) return;
+            const changed = select.value !== optionButton.dataset.value;
+            select.value = optionButton.dataset.value;
+            syncHistoryPicker(select);
+            closeHistoryPickers();
+            parts.button.focus();
+            if (changed) select.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    });
+    document.addEventListener('click', event => {
+        if (!event.target.closest('.history-picker')) closeHistoryPickers();
+    });
+}
+
+function dateKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function dateFromKey(key) {
+    return new Date(`${key}T12:00:00`);
+}
+
+function shiftDate(date, days) {
+    const out = new Date(date);
+    out.setDate(out.getDate() + days);
+    return out;
+}
+
+function isCbrFiat(code) {
+    const meta = CURRENCY_META[code];
+    return code === 'RUB' || Boolean(meta && !meta.metal && !String(meta.country).startsWith('crypto-'));
+}
+
+function parseCbrRubData(data) {
+    if (!data || !data.Valute) return null;
+    const result = { RUB: 1 };
+    Object.keys(CURRENCY_META).forEach(code => {
+        const entry = data.Valute[code];
+        if (!entry) return;
+        const value = Number(entry.Value);
+        const nominal = Number(entry.Nominal) || 1;
+        if (value > 0 && nominal > 0) result[code] = value / nominal;
+    });
+    return result;
+}
+
+function cbrCandidateKeys(key) {
+    let cursor = dateFromKey(key);
+    // В начале января берём последний опубликованный курс прошлого года.
+    if (cursor.getMonth() === 0 && cursor.getDate() <= 8) {
+        cursor = dateFromKey(`${cursor.getFullYear() - 1}-12-31`);
+    }
+    const keys = [];
+    while (keys.length < 4) {
+        const weekday = cursor.getDay();
+        if (weekday !== 0 && weekday !== 1) keys.push(dateKey(cursor));
+        cursor = shiftDate(cursor, -1);
+    }
+    return keys;
+}
+
+async function fetchCbrArchiveExact(key, budget) {
+    if (cbrArchiveCache.has(key)) return cbrArchiveCache.get(key);
+    if (budget.used >= budget.max) return null;
+    const recent = Date.now() - 60000;
+    while (cbrRecentRequests.length && cbrRecentRequests[0] < recent) cbrRecentRequests.shift();
+    if (cbrRecentRequests.length >= 30) return null;
+    budget.used++;
+
+    const promise = (async () => {
+        const wait = Math.max(0, 1025 - (Date.now() - cbrLastRequestAt));
+        if (wait) await new Promise(resolve => setTimeout(resolve, wait));
+        cbrLastRequestAt = Date.now();
+        cbrRecentRequests.push(cbrLastRequestAt);
+        const [year, month, day] = key.split('-');
+        const url = `https://www.cbr-xml-daily.ru/archive/${year}/${month}/${day}/daily_json.js`;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        try {
+            const response = await fetch(url, { cache: 'force-cache', signal: controller.signal });
+            if (!response.ok) return null;
+            return parseCbrRubData(await response.json());
+        } catch (e) {
+            // Сетевой сбой не должен навсегда блокировать повторную попытку.
+            cbrArchiveCache.delete(key);
+            return null;
+        } finally {
+            clearTimeout(timeout);
+        }
+    })();
+    cbrArchiveCache.set(key, promise);
+    return promise;
+}
+
+function evenlySpacedItems(items, maxItems) {
+    if (items.length <= maxItems) return items;
+    const selectedItems = [];
+    for (let i = 0; i < maxItems; i++) {
+        const index = Math.round((items.length - 1) * i / (maxItems - 1));
+        const item = items[index];
+        if (selectedItems[selectedItems.length - 1] !== item) selectedItems.push(item);
+    }
+    return selectedItems;
+}
+
+function historyRange(period) {
+    const end = new Date();
+    end.setHours(12, 0, 0, 0);
+    const days = { '1d': 1, '7d': 6, '1m': 29, '3m': 89, '6m': 179, '1y': 364 }[period] || 29;
+    return { start: shiftDate(end, -days), end };
+}
+
+function sampledDateKeys(start, end, maxPoints = 48) {
+    const dayMs = 86400000;
+    const totalDays = Math.max(0, Math.round((end - start) / dayMs));
+    const count = Math.min(totalDays + 1, maxPoints);
+    if (count <= 1) return [dateKey(start)];
+    const keys = [];
+    for (let i = 0; i < count; i++) {
+        const offset = Math.round((totalDays * i) / (count - 1));
+        const key = dateKey(shiftDate(start, offset));
+        if (keys[keys.length - 1] !== key) keys.push(key);
+    }
+    return keys;
+}
+
+function defaultHistoryBase(code) {
+    if (CURRENCY_META[code] && (CURRENCY_META[code].metal || CG_IDS[code])) return 'USD';
+    return code === 'RUB' ? 'USD' : 'RUB';
+}
+
+function effectiveHistoryBase(code) {
+    const selectedBase = historyBase.value;
+    if (selectedBase && selectedBase !== code && CURRENCY_META[selectedBase]) return selectedBase;
+    return defaultHistoryBase(code);
+}
+
+function setHistoryPair(code, base) {
+    const codeName = CURRENCY_META[code] ? CURRENCY_META[code].name : code;
+    document.getElementById('historyPair').textContent = `${code} / ${base} · ${codeName}`;
+}
+
+function historyCacheRead(key) {
+    try {
+        const all = JSON.parse(localStorage.getItem(HISTORY_CACHE_KEY) || '{}');
+        const item = all[key];
+        if (item && Array.isArray(item.points) && item.points.length > 1) return item;
+    } catch (e) {}
+    return null;
+}
+
+function historyCacheWrite(key, points) {
+    try {
+        const all = JSON.parse(localStorage.getItem(HISTORY_CACHE_KEY) || '{}');
+        all[key] = { savedAt: Date.now(), points };
+        const entries = Object.entries(all).sort((a, b) => (b[1].savedAt || 0) - (a[1].savedAt || 0));
+        localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(Object.fromEntries(entries.slice(0, 8))));
+    } catch (e) {}
+}
+
+async function historyRatesForDate(key) {
+    if (key < FAWAZ_HISTORY_START) return null;
+    if (historyDateCache.has(key)) return historyDateCache.get(key);
+    const promise = fetchRatesForDate(key === dateKey(new Date()) ? 'latest' : key)
+        .then(result => result ? result.rates : null)
+        .catch(() => null);
+    historyDateCache.set(key, promise);
+    return promise;
+}
+
+async function historyRatesForRange(code, base, keys) {
+    if (!keys.length || !isCbrFiat(code) || !isCbrFiat(base)) return null;
+    const requestFrom = dateKey(shiftDate(dateFromKey(keys[0]), -14));
+    const requestTo = keys[keys.length - 1];
+    const cacheKey = `${code}_${base}_${requestFrom}_${requestTo}`;
+    if (historyRangeCache.has(cacheKey)) return historyRangeCache.get(cacheKey);
+
+    const promise = (async () => {
+        const params = new URLSearchParams({
+            from: requestFrom,
+            to: requestTo,
+            base: code,
+            quotes: base
+        });
+        const rangeDays = Math.max(0, Math.round((dateFromKey(requestTo) - dateFromKey(requestFrom)) / 86400000));
+        if (rangeDays > 730) params.set('group', 'month');
+        else if (rangeDays > 120) params.set('group', 'week');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+        try {
+            const response = await fetch(`${FRANKFURTER_HISTORY_API}?${params}`, {
+                cache: 'force-cache',
+                signal: controller.signal
+            });
+            if (!response.ok) return null;
+            const rows = await response.json();
+            if (!Array.isArray(rows)) return null;
+
+            const observations = rows
+                .filter(row => row && row.quote === base && /^\d{4}-\d{2}-\d{2}$/.test(row.date))
+                .map(row => ({ date: row.date, value: Number(row.rate) }))
+                .filter(point => isFinite(point.value) && point.value > 0)
+                .sort((a, b) => a.date.localeCompare(b.date));
+            if (!observations.length) return null;
+
+            const points = new Array(keys.length).fill(null);
+            let observationIndex = 0;
+            let lastPublished = null;
+            keys.forEach((key, index) => {
+                while (observationIndex < observations.length && observations[observationIndex].date <= key) {
+                    lastPublished = observations[observationIndex++];
+                }
+                if (lastPublished) points[index] = { date: key, value: lastPublished.value };
+            });
+            return points;
+        } catch (e) {
+            historyRangeCache.delete(cacheKey);
+            return null;
+        } finally {
+            clearTimeout(timeout);
+        }
+    })();
+
+    historyRangeCache.set(cacheKey, promise);
+    const result = await promise;
+    if (!result) historyRangeCache.delete(cacheKey);
+    return result;
+}
+
+function formatHistoryValue(value) {
+    if (!isFinite(value)) return '—';
+    let max = 4;
+    if (Math.abs(value) >= 10000) max = 0;
+    else if (Math.abs(value) >= 100) max = 2;
+    else if (Math.abs(value) < 1) max = 6;
+    return value.toLocaleString('ru-RU', { maximumFractionDigits: max });
+}
+
+function formatAxisValue(value) {
+    if (!isFinite(value)) return '—';
+    if (Math.abs(value) >= 1000000) return `${(value / 1000000).toFixed(1)} млн`;
+    if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)} тыс.`;
+    if (Math.abs(value) >= 10) return value.toFixed(1);
+    if (Math.abs(value) >= 1) return value.toFixed(2);
+    return value.toFixed(4);
+}
+
+function shortDateLabel(key, includeYear = false) {
+    const options = { day: 'numeric', month: 'short' };
+    if (includeYear) options.year = '2-digit';
+    return dateFromKey(key).toLocaleDateString('ru-RU', options).replace('.', '');
+}
+
+function fullDateLabel(key) {
+    const [year, month, day] = key.split('-');
+    return `${day}.${month}.${year}`;
+}
+
+function updateHistoryStats(points, base) {
+    const values = points.map(p => p.value);
+    const first = values[0];
+    const last = values[values.length - 1];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const pct = first ? ((last - first) / first) * 100 : 0;
+    const symbol = CURRENCY_SYMBOLS[base] || base;
+
+    document.getElementById('historyStart').textContent = `${formatHistoryValue(first)} ${symbol}`;
+    document.getElementById('historyEnd').textContent = `${formatHistoryValue(last)} ${symbol}`;
+    document.getElementById('historyMinMax').textContent = `${formatHistoryValue(min)} / ${formatHistoryValue(max)}`;
+
+    const change = document.getElementById('historyChange');
+    change.className = 'history-stat-value ' + (pct > 0 ? 'up' : pct < 0 ? 'down' : '');
+    change.textContent = `${pct > 0 ? '+' : ''}${pct.toFixed(2)}%`;
+}
+
+function drawHistoryChart() {
+    if (!historyChartData.length || !historyModal.classList.contains('open')) return;
+
+    const wrap = document.getElementById('chartWrap');
+    const rect = wrap.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    historyCanvas.width = Math.round(rect.width * dpr);
+    historyCanvas.height = Math.round(rect.height * dpr);
+    const ctx = historyCanvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const css = getComputedStyle(document.documentElement);
+    const textColor = css.getPropertyValue('--text-muted').trim() || '#888';
+    const divider = css.getPropertyValue('--divider').trim() || '#e5e7eb';
+    const upColor = css.getPropertyValue('--up-color').trim() || '#2e7d32';
+    const downColor = css.getPropertyValue('--down-color').trim() || '#c62828';
+
+    const width = rect.width;
+    const height = rect.height;
+    const margin = { left: width < 430 ? 50 : 62, right: 14, top: 18, bottom: 36 };
+    const plotW = width - margin.left - margin.right;
+    const plotH = height - margin.top - margin.bottom;
+    const values = historyChartData.map(p => p.value);
+    let min = Math.min(...values);
+    let max = Math.max(...values);
+    let spread = max - min;
+    if (!spread) spread = Math.abs(max || 1) * 0.02;
+    min -= spread * 0.12;
+    max += spread * 0.12;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.font = '11px Arial';
+    ctx.lineWidth = 1;
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i <= 4; i++) {
+        const y = margin.top + (plotH * i / 4);
+        ctx.strokeStyle = divider;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+        const value = max - ((max - min) * i / 4);
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'right';
+        ctx.fillText(formatAxisValue(value), margin.left - 7, y);
+    }
+
+    historyDrawPoints = historyChartData.map((point, index) => {
+        const x = margin.left + (historyChartData.length === 1 ? 0 : plotW * index / (historyChartData.length - 1));
+        const y = margin.top + ((max - point.value) / (max - min)) * plotH;
+        return { ...point, x, y };
+    });
+
+    const rising = values[values.length - 1] >= values[0];
+    const lineColor = rising ? upColor : downColor;
+    const gradient = ctx.createLinearGradient(0, margin.top, 0, height - margin.bottom);
+    gradient.addColorStop(0, rising ? 'rgba(46,125,50,0.22)' : 'rgba(198,40,40,0.20)');
+    gradient.addColorStop(1, rising ? 'rgba(46,125,50,0.01)' : 'rgba(198,40,40,0.01)');
+
+    ctx.beginPath();
+    historyDrawPoints.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    ctx.lineTo(historyDrawPoints[historyDrawPoints.length - 1].x, height - margin.bottom);
+    ctx.lineTo(historyDrawPoints[0].x, height - margin.bottom);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.beginPath();
+    historyDrawPoints.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    const labels = [0, Math.floor((historyChartData.length - 1) / 2), historyChartData.length - 1];
+    ctx.fillStyle = textColor;
+    ctx.textBaseline = 'top';
+    labels.forEach((index, position) => {
+        const p = historyDrawPoints[index];
+        ctx.textAlign = position === 0 ? 'left' : position === 2 ? 'right' : 'center';
+        ctx.fillText(shortDateLabel(p.date, currentHistoryPeriod === '1y' || currentHistoryPeriod === 'custom'), p.x, height - margin.bottom + 10);
+    });
+}
+
+function clearHistoryStats() {
+    ['historyStart', 'historyEnd', 'historyChange', 'historyMinMax'].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'history-stat-value';
+        el.textContent = '—';
+    });
+}
+
+function setLoadedHistoryStatus(points, requestedKeys) {
+    historyStatus.classList.remove('error', 'warning');
+    const first = points[0].date;
+    const last = points[points.length - 1].date;
+    const loadedText = `${fullDateLabel(first)} — ${fullDateLabel(last)} (${points.length} точек)`;
+    if (points.length < requestedKeys.length || first !== requestedKeys[0] || last !== requestedKeys[requestedKeys.length - 1]) {
+        historyStatus.classList.add('warning');
+        historyStatus.textContent = `${loadedText} · выбранный период загружен не полностью`;
+        return;
+    }
+    historyStatus.textContent = loadedText;
+}
+
+function historyPointFromRates(dayRates, code, base, key) {
+    if (!dayRates) return null;
+    const codeRub = code === 'RUB' ? 1 : dayRates[code];
+    const baseRub = base === 'RUB' ? 1 : dayRates[base];
+    if (!isFinite(codeRub) || !isFinite(baseRub) || baseRub <= 0) return null;
+    return { date: key, value: codeRub / baseRub };
+}
+
+async function loadHistory() {
+    const requestId = ++historyRequestId;
+    const code = historyInstrument.value;
+    if (!code) return;
+    const base = effectiveHistoryBase(code);
+    setHistoryPair(code, base);
+    chartTooltip.style.display = 'none';
+    chartPlaceholder.classList.remove('hidden');
+    chartPlaceholder.textContent = 'Загрузка графика…';
+    historyStatus.classList.remove('error', 'warning');
+    historyStatus.textContent = 'Получаем исторические данные…';
+    clearHistoryStats();
+
+    let range;
+    if (currentHistoryPeriod === 'custom') {
+        const from = document.getElementById('historyFrom').value;
+        const to = document.getElementById('historyTo').value;
+        if (!from || !to || from > to) {
+            historyStatus.classList.add('error');
+            historyStatus.textContent = 'Проверьте начальную и конечную даты';
+            chartPlaceholder.textContent = 'Выберите правильный период';
+            return;
+        }
+        range = { start: dateFromKey(from), end: dateFromKey(to) };
+    } else {
+        range = historyRange(currentHistoryPeriod);
+    }
+
+    const keys = sampledDateKeys(range.start, range.end, currentHistoryPeriod === '1d' ? 2 : 48);
+    const cacheId = `${code}_${base}_${keys[0]}_${keys[keys.length - 1]}_${keys.length}`;
+    const stored = historyCacheRead(cacheId);
+    const cacheAgeLimit = stored && stored.points.length === keys.length ? ONE_HOUR : 5 * 60 * 1000;
+    if (stored && (!navigator.onLine || Date.now() - stored.savedAt < cacheAgeLimit)) {
+        historyChartData = stored.points;
+        chartPlaceholder.classList.add('hidden');
+        updateHistoryStats(historyChartData, base);
+        setLoadedHistoryStatus(historyChartData, keys);
+        requestAnimationFrame(drawHistoryChart);
+        return;
+    }
+
+    const points = new Array(keys.length).fill(null);
+
+    if (isCbrFiat(code) && isCbrFiat(base)) {
+        historyStatus.textContent = 'Загружаем выбранный период…';
+        const rangePoints = await historyRatesForRange(code, base, keys);
+        if (requestId !== historyRequestId) return;
+        if (rangePoints) {
+            rangePoints.forEach((point, index) => {
+                if (point) points[index] = point;
+            });
+        }
+    }
+
+    const pendingIndexes = Array.from({ length: keys.length }, (_, index) => index)
+        .filter(index => !points[index]);
+    let cursor = 0;
+    let completed = 0;
+
+    async function worker() {
+        while (cursor < pendingIndexes.length) {
+            const index = pendingIndexes[cursor++];
+            const key = keys[index];
+            const dayRates = await historyRatesForDate(key);
+            points[index] = historyPointFromRates(dayRates, code, base, key);
+            completed++;
+            if (requestId === historyRequestId) {
+                historyStatus.textContent = `Загрузка резерва: ${completed} из ${pendingIndexes.length}`;
+            }
+        }
+    }
+
+    if (pendingIndexes.length) {
+        await Promise.all(Array.from({ length: Math.min(6, pendingIndexes.length) }, worker));
+    }
+    if (requestId !== historyRequestId) return;
+
+    // Array.from посещает и пустые ячейки, в отличие от Array.prototype.map.
+    const missingIndexes = Array.from({ length: keys.length }, (_, index) => index)
+        .filter(index => !points[index]);
+    if (missingIndexes.length && isCbrFiat(code) && isCbrFiat(base)) {
+        const fallbackIndexes = evenlySpacedItems(missingIndexes, 24);
+        const budget = { used: 0, max: 30 };
+        let pending = fallbackIndexes.map(index => ({ index, candidates: cbrCandidateKeys(keys[index]) }));
+        for (let attempt = 0; attempt < 4 && pending.length && budget.used < budget.max; attempt++) {
+            const unresolved = [];
+            let attempted = 0;
+            for (const item of pending) {
+                if (requestId !== historyRequestId) return;
+                if (budget.used >= budget.max) break;
+                historyStatus.textContent = attempt === 0
+                    ? `Догружаем архив: ${++attempted} из ${fallbackIndexes.length}`
+                    : 'Ищем ближайший опубликованный курс…';
+                const dayRates = await fetchCbrArchiveExact(item.candidates[attempt], budget);
+                const point = historyPointFromRates(dayRates, code, base, keys[item.index]);
+                if (point) points[item.index] = point;
+                else unresolved.push(item);
+            }
+            pending = unresolved;
+        }
+    }
+    if (requestId !== historyRequestId) return;
+
+    const todayKey = dateKey(new Date());
+    const lastIndex = keys.length - 1;
+    if (keys[lastIndex] === todayKey) {
+        const currentPoint = historyPointFromRates(rates, code, base, todayKey);
+        if (currentPoint) points[lastIndex] = currentPoint;
+    }
+
+    const valid = points.filter(Boolean);
+    if (valid.length < 2) {
+        const fallback = stored && stored.points ? stored.points : [];
+        if (fallback.length > 1) {
+            historyChartData = fallback;
+            historyStatus.textContent = 'Нет сети · показана сохранённая история';
+            chartPlaceholder.classList.add('hidden');
+            updateHistoryStats(historyChartData, base);
+            requestAnimationFrame(drawHistoryChart);
+            return;
+        }
+        historyChartData = [];
+        historyStatus.classList.add('error');
+        historyStatus.textContent = 'Не удалось загрузить историю. Проверьте подключение к сети.';
+        chartPlaceholder.textContent = 'Исторические данные временно недоступны';
+        return;
+    }
+
+    historyChartData = valid;
+    historyCacheWrite(cacheId, valid);
+    chartPlaceholder.classList.add('hidden');
+    updateHistoryStats(valid, base);
+    setLoadedHistoryStatus(valid, keys);
+    requestAnimationFrame(drawHistoryChart);
+}
+
+function populateHistorySelect(preferredCode) {
+    const groups = [
+        { label: 'Валюты', test: code => !CURRENCY_META[code].metal && !CG_IDS[code] },
+        { label: 'Металлы', test: code => Boolean(CURRENCY_META[code].metal) },
+        { label: 'Криптовалюты', test: code => Boolean(CG_IDS[code]) }
+    ];
+    historyInstrument.innerHTML = '';
+    groups.forEach(group => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group.label;
+        Object.keys(CURRENCY_META).filter(group.test).sort(compareCurrencyCodes).forEach(code => {
+            const option = document.createElement('option');
+            option.value = code;
+            option.textContent = `${code} — ${CURRENCY_META[code].name}`;
+            optgroup.appendChild(option);
+        });
+        if (optgroup.children.length) historyInstrument.appendChild(optgroup);
+    });
+    const wanted = preferredCode || historyInstrumentCode || selected.find(code => code !== 'RUB') || 'USD';
+    if (Array.from(historyInstrument.options).some(o => o.value === wanted)) {
+        historyInstrument.value = wanted;
+    }
+    renderHistoryPicker(historyInstrument);
+}
+
+function populateHistoryBaseSelect(code, preferredBase) {
+    historyBase.innerHTML = '';
+    const fiatCodes = Object.keys(CURRENCY_META)
+        .filter(item => !CURRENCY_META[item].metal && !CG_IDS[item] && item !== code)
+        .sort(compareCurrencyCodes);
+
+    fiatCodes.forEach(base => {
+        const option = document.createElement('option');
+        option.value = base;
+        option.textContent = base;
+        option.title = CURRENCY_META[base].name;
+        historyBase.appendChild(option);
+    });
+
+    const wanted = preferredBase && preferredBase !== code && fiatCodes.includes(preferredBase)
+        ? preferredBase
+        : defaultHistoryBase(code);
+    historyBase.value = fiatCodes.includes(wanted) ? wanted : fiatCodes[0];
+    renderHistoryPicker(historyBase);
+}
+
+const customRangeDialog = document.getElementById('customRange');
+const historyFromInput = document.getElementById('historyFrom');
+const historyToInput = document.getElementById('historyTo');
+let customRangeDraft = null;
+
+function openCustomRange() {
+    if (customRangeDialog.open) return;
+    closeHistoryPickers();
+    customRangeDraft = { from: historyFromInput.value, to: historyToInput.value };
+    if (currentHistoryPeriod !== 'custom') {
+        const range = historyRange(currentHistoryPeriod);
+        historyFromInput.value = dateKey(range.start);
+        historyToInput.value = dateKey(range.end);
+    }
+    historyToInput.setCustomValidity('');
+    customRangeDialog.showModal();
+}
+
+customRangeDialog.addEventListener('close', () => {
+    if (customRangeDraft) {
+        historyFromInput.value = customRangeDraft.from;
+        historyToInput.value = customRangeDraft.to;
+        customRangeDraft = null;
+    }
+    historyToInput.setCustomValidity('');
+});
+document.getElementById('customRangeClose').addEventListener('click', () => customRangeDialog.close());
+[historyFromInput, historyToInput].forEach(input => {
+    input.addEventListener('input', () => historyToInput.setCustomValidity(''));
+    input.addEventListener('click', event => {
+        if (typeof input.showPicker !== 'function') return;
+        try {
+            input.showPicker();
+            event.preventDefault();
+        } catch (error) {
+            // Если браузер ограничил showPicker, сохраняем обычное открытие календаря.
+        }
+    });
+});
+document.getElementById('customRangeForm').addEventListener('submit', event => {
+    event.preventDefault();
+    if (historyFromInput.value > historyToInput.value) {
+        historyToInput.setCustomValidity('Конечная дата должна быть не раньше начальной');
+        historyToInput.reportValidity();
+        return;
+    }
+    customRangeDraft = null;
+    customRangeDialog.close();
+    setHistoryPeriod('custom', true);
+});
+
+function setHistoryPeriod(period, applyCustom = false) {
+    if (period === 'custom' && !applyCustom) {
+        openCustomRange();
+        return;
+    }
+    currentHistoryPeriod = period;
+    let activeButton = null;
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        const active = btn.dataset.period === period;
+        btn.classList.toggle('active', active);
+        if (active) activeButton = btn;
+    });
+    const periodsRow = document.getElementById('historyPeriods');
+    if (activeButton && periodsRow.scrollWidth > periodsRow.clientWidth) {
+        const left = activeButton.offsetLeft - periodsRow.offsetLeft - (periodsRow.clientWidth - activeButton.offsetWidth) / 2;
+        periodsRow.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+    }
+    loadHistory();
+}
+
+function openHistory(code) {
+    populateHistorySelect(code);
+    historyInstrumentCode = historyInstrument.value;
+    populateHistoryBaseSelect(historyInstrument.value, baseCurrency);
+    saveState();
+    historyModal.classList.add('open');
+    document.body.classList.add('history-open');
+    chartTooltip.style.display = 'none';
+    loadHistory();
+}
+
+function closeHistory() {
+    if (customRangeDialog.open) customRangeDialog.close();
+    historyRequestId++;
+    closeHistoryPickers();
+    historyModal.classList.remove('open');
+    document.body.classList.remove('history-open');
+    chartTooltip.style.display = 'none';
+}
+
+initHistoryPickers();
+document.getElementById('historyBtn').addEventListener('click', () => openHistory());
+document.getElementById('historyClose').addEventListener('click', closeHistory);
+historyModal.addEventListener('click', event => { if (event.target === historyModal) closeHistory(); });
+historyInstrument.addEventListener('change', () => {
+    const preferredBase = historyBase.value || baseCurrency;
+    historyInstrumentCode = historyInstrument.value;
+    syncHistoryPicker(historyInstrument);
+    populateHistoryBaseSelect(historyInstrument.value, preferredBase);
+    saveState();
+    loadHistory();
+});
+historyBase.addEventListener('change', () => {
+    const nextBase = historyBase.value;
+    syncHistoryPicker(historyBase);
+    if (nextBase && CURRENCY_META[nextBase]) {
+        baseCurrency = nextBase;
+        baseSelect.value = nextBase;
+        baseBtnText.textContent = nextBase;
+        saveState();
+        renderList();
+    }
+    loadHistory();
+});
+document.getElementById('historyPeriods').addEventListener('click', event => {
+    const button = event.target.closest('.period-btn');
+    if (button) setHistoryPeriod(button.dataset.period);
+});
+document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !historyModal.classList.contains('open')) return;
+    if (customRangeDialog.open) return;
+    if (document.querySelector('.history-picker-menu.open')) {
+        closeHistoryPickers();
+        return;
+    }
+    closeHistory();
+});
+
+historyCanvas.addEventListener('pointermove', event => {
+    if (!historyDrawPoints.length) return;
+    const rect = historyCanvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    let closest = historyDrawPoints[0];
+    for (const point of historyDrawPoints) {
+        if (Math.abs(point.x - x) < Math.abs(closest.x - x)) closest = point;
+    }
+    const base = effectiveHistoryBase(historyInstrument.value);
+    const symbol = CURRENCY_SYMBOLS[base] || base;
+    chartTooltip.innerHTML = `<strong>${formatHistoryValue(closest.value)} ${symbol}</strong>${dateFromKey(closest.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    chartTooltip.style.display = 'block';
+    const width = chartTooltip.offsetWidth;
+    const height = chartTooltip.offsetHeight;
+    const left = Math.max(8, Math.min(rect.width - width - 8, closest.x - width / 2));
+    const above = closest.y - height - 12;
+    const top = Math.max(8, Math.min(rect.height - height - 8, above >= 8 ? above : closest.y + 12));
+    chartTooltip.style.left = `${left}px`;
+    chartTooltip.style.top = `${top}px`;
+});
+historyCanvas.addEventListener('pointerleave', () => { chartTooltip.style.display = 'none'; });
+
+if ('ResizeObserver' in window) {
+    new ResizeObserver(() => requestAnimationFrame(drawHistoryChart)).observe(document.getElementById('chartWrap'));
+} else {
+    window.addEventListener('resize', () => requestAnimationFrame(drawHistoryChart));
 }
 
 function setupDragAndDrop() {
@@ -1055,6 +2729,12 @@ function renderList() {
             </div>
             <button class="remove-btn" data-remove="${code}" title="Убрать">✕</button>
         `;
+        row.title = `Открыть историю ${code}`;
+        row.addEventListener('click', event => {
+            if (document.body.classList.contains('editing')) return;
+            if (event.target.closest('.remove-btn, .drag-handle')) return;
+            openHistory(code);
+        });
         list.appendChild(row);
     });
 
@@ -1104,7 +2784,7 @@ function renderModalList(query) {
     modalList.innerHTML = '';
     const q = query.trim().toLowerCase();
 
-    const allCodes = Object.keys(CURRENCY_META).sort();
+    const allCodes = Object.keys(CURRENCY_META).sort(compareCurrencyCodes);
     const filtered = allCodes.filter(code => {
         const meta = CURRENCY_META[code];
         const name = (meta && meta.name) ? meta.name.toLowerCase() : '';
@@ -1116,7 +2796,13 @@ function renderModalList(query) {
         return;
     }
 
-    filtered.forEach(code => {
+    filtered.forEach((code, index) => {
+        if (index > 0 && POPULAR_CURRENCIES.includes(filtered[index - 1]) && !POPULAR_CURRENCIES.includes(code)) {
+            const divider = document.createElement('div');
+            divider.className = 'currency-list-divider';
+            divider.setAttribute('role', 'separator');
+            modalList.appendChild(divider);
+        }
         const meta = CURRENCY_META[code];
         const isSelected = selected.includes(code);
         const row = document.createElement('div');
@@ -1164,11 +2850,7 @@ const baseBtnText = document.getElementById('baseBtnText');
 
 function populateBaseSelect() {
     baseSelect.innerHTML = '';
-    const codes = Object.keys(CURRENCY_META).sort((a, b) => {
-        if (a === 'RUB') return -1;
-        if (b === 'RUB') return 1;
-        return a.localeCompare(b);
-    });
+    const codes = Object.keys(CURRENCY_META).sort(compareCurrencyCodes);
     for (const code of codes) {
         const opt = document.createElement('option');
         opt.value = code;
@@ -1183,6 +2865,7 @@ baseSelect.addEventListener('change', () => {
     baseCurrency = baseSelect.value;
     baseBtnText.textContent = baseCurrency;
     saveState();
+    setEditing(false);
     renderList();
 });
 
@@ -1213,34 +2896,216 @@ async function init() {
     }
 
     populateBaseSelect();
+    const defaultHistoryRange = historyRange('1m');
+    const today = dateKey(defaultHistoryRange.end);
+    document.getElementById('historyFrom').value = dateKey(defaultHistoryRange.start);
+    document.getElementById('historyTo').value = today;
+    document.getElementById('historyFrom').max = today;
+    document.getElementById('historyTo').max = today;
     renderList();
-    await fetchAllRates(false);
+    if (navigator.onLine) await fetchAllRates(false);
     renderList();
 }
 
-setInterval(() => fetchAllRates(false).then(() => renderList()), ONE_HOUR);
+setInterval(() => { if (navigator.onLine) fetchAllRates(false).then(() => renderList()); }, ONE_HOUR);
+window.addEventListener("online", () => fetchAllRates(true).then(() => renderList()));
 
 init();
+// Use the visible viewport in installed Android apps, including after reload.
+function syncAppViewport() {
+    if (!window.matchMedia('(display-mode: standalone)').matches) return;
+    document.documentElement.style.setProperty('--app-viewport-height', `${window.visualViewport ? window.visualViewport.height : window.innerHeight}px`);
+}
+syncAppViewport();
+window.addEventListener('resize', syncAppViewport);
+window.addEventListener('pageshow', syncAppViewport);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', syncAppViewport);
 </script>
 
-<footer style="
-  text-align: center;
-  margin-top: 30px;
-  padding: 15px;
-  color: #666;
-  font-size: 14px;
-  font-family: Arial, sans-serif;
-">
-  © Andrey30
-  <span aria-hidden="true"> · </span>
-  <a href="privacy.html" style="
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  ">
-    Политика конфиденциальности
-  </a>
+<footer>
+    ©<span id="year"></span> Andrey30
+    <span aria-hidden="true"> · </span>
+    <a href="privacy.html">Политика конфиденциальности</a>
 </footer>
 <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+    <aside class="install-offer" id="install-offer" role="dialog" aria-modal="true" aria-labelledby="install-offer-title" aria-describedby="install-offer-text" hidden>
+        <div class="install-offer-inner">
+            <div class="install-offer-icon" aria-hidden="true"><img src="icons3/rates-icon-192.png" alt=""></div>
+            <div>
+                <div class="install-offer-label">Быстрый доступ</div>
+                <h2 class="install-offer-title" id="install-offer-title">Установить приложение?</h2>
+                <p class="install-offer-text" id="install-offer-text">Добавьте «Курс валют» на главный экран и просматривайте последние загруженные курсы даже без интернета.</p>
+            </div>
+            <div class="install-offer-actions">
+                <button type="button" class="install-offer-button secondary" id="install-offer-later">Не сейчас</button>
+                <button type="button" class="install-offer-button primary" id="install-offer-install">Установить</button>
+            </div>
+        </div>
+    </aside>
+
+<script>
+        (function initInstallOffer() {
+            const OFFER_KEY = "rates_install_offer_shown_v1";
+            let deferredInstallPrompt = null;
+
+            const offer = document.getElementById("install-offer");
+            const title = document.getElementById("install-offer-title");
+            const text = document.getElementById("install-offer-text");
+            const installButton = document.getElementById("install-offer-install");
+            const laterButton = document.getElementById("install-offer-later");
+
+            if (!offer || !title || !text || !installButton || !laterButton) return;
+
+            const userAgent = navigator.userAgent || "";
+            const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+            const isAndroid = /android/i.test(userAgent);
+            const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+                || window.matchMedia("(display-mode: fullscreen)").matches
+                || navigator.standalone === true;
+            const isSecureEnough = window.isSecureContext
+                || location.hostname === "localhost"
+                || location.hostname === "127.0.0.1";
+
+            function wasShown() {
+                try {
+                    return localStorage.getItem(OFFER_KEY) === "1";
+                } catch (error) {
+                    return false;
+                }
+            }
+
+            function rememberShown() {
+                try {
+                    localStorage.setItem(OFFER_KEY, "1");
+                } catch (error) {
+                    // Если localStorage недоступен, окно может появиться повторно.
+                }
+            }
+
+            function closeOffer() {
+                offer.classList.remove("show");
+                setTimeout(function() {
+                    offer.hidden = true;
+                }, 360);
+            }
+
+            function configureNativeOffer() {
+                title.textContent = "Установить приложение?";
+                text.textContent = "Добавьте «Курс валют» на главный экран и просматривайте последние загруженные курсы даже без интернета.";
+                installButton.textContent = "Установить";
+                installButton.dataset.mode = "native";
+                laterButton.hidden = false;
+            }
+
+            function configureManualOffer() {
+                title.textContent = "Установить приложение?";
+                if (isIOS) {
+                    text.textContent = "В Safari нажмите «Поделиться», затем выберите «На экран Домой».";
+                    installButton.textContent = "Понятно";
+                    installButton.dataset.mode = "instructions";
+                    laterButton.hidden = true;
+                    return;
+                }
+
+                text.textContent = "Нажмите «Установить». Если системное окно не откроется, выберите в меню браузера «Добавить на главный экран».";
+                installButton.textContent = "Установить";
+                installButton.dataset.mode = "manual";
+                laterButton.hidden = false;
+            }
+
+            function showOffer(mode) {
+                if (isStandalone || wasShown() || !isSecureEnough) return;
+                if (document.body.classList.contains('history-open')) return;
+                mode === "native" ? configureNativeOffer() : configureManualOffer();
+                rememberShown();
+                offer.hidden = false;
+                requestAnimationFrame(function() {
+                    offer.classList.add("show");
+                });
+            }
+
+            window.addEventListener("beforeinstallprompt", function(event) {
+                event.preventDefault();
+                deferredInstallPrompt = event;
+
+                if (!offer.hidden) {
+                    configureNativeOffer();
+                    return;
+                }
+
+                if (!wasShown() && !isStandalone) {
+                    setTimeout(function() {
+                        showOffer("native");
+                    }, 900);
+                }
+            });
+
+            window.addEventListener("appinstalled", function() {
+                rememberShown();
+                deferredInstallPrompt = null;
+                closeOffer();
+            });
+
+            laterButton.addEventListener("click", function() {
+                rememberShown();
+                closeOffer();
+            });
+
+            installButton.addEventListener("click", async function() {
+                const mode = installButton.dataset.mode;
+                if (mode === "instructions") {
+                    closeOffer();
+                    return;
+                }
+
+                if (deferredInstallPrompt) {
+                    const promptEvent = deferredInstallPrompt;
+                    deferredInstallPrompt = null;
+                    try {
+                        await promptEvent.prompt();
+                        await promptEvent.userChoice;
+                    } catch (error) {
+                        console.warn("Не удалось открыть системное окно установки.", error);
+                    }
+                    closeOffer();
+                    return;
+                }
+
+                title.textContent = "Как установить";
+                text.textContent = isAndroid
+                    ? "В Samsung Internet откройте меню ≡ и выберите «Добавить страницу в» → «Главный экран». В Chrome откройте меню ⋮ и выберите «Установить приложение»."
+                    : "Откройте меню браузера и выберите установку приложения или добавление на главный экран.";
+                installButton.textContent = "Понятно";
+                installButton.dataset.mode = "instructions";
+                laterButton.hidden = true;
+            });
+
+            if ("serviceWorker" in navigator && isSecureEnough) {
+                navigator.serviceWorker.register("./rates-sw.js?page=" + encodeURIComponent(location.pathname), {
+                    scope: location.pathname,
+                    updateViaCache: "none"
+                }).then(async function(registration) {
+                    await navigator.serviceWorker.ready;
+                    const worker = registration.active;
+                    if (worker) worker.postMessage({type: 'cache-flags', urls: [...new Set(Object.values(CURRENCY_META).map(meta => new URL(flagUrl(meta.country), location.href).href))]});
+                }).catch(function(error) {
+                    console.warn("Не удалось подготовить страницу курсов для работы без сети:", error);
+                });
+            }
+
+            const historyVisibilityObserver = new MutationObserver(function() {
+                if (document.body.classList.contains('history-open')) {
+                    if (!offer.hidden) closeOffer();
+                } else {
+                    showOffer(deferredInstallPrompt ? "native" : "manual");
+                }
+            });
+            historyVisibilityObserver.observe(document.body, {attributes: true, attributeFilter: ['class']});
+            setTimeout(function() {
+                showOffer(deferredInstallPrompt ? "native" : "manual");
+            }, 900);
+        })();
+
+</script>
 </body>
 </html>

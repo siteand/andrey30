@@ -279,6 +279,20 @@
             transition: max-height 0.25s ease, opacity 0.2s ease;
         }
         .source-note > span { display: block; padding: 8px 4px 0; }
+        .data-credit {
+            margin-top: 8px;
+            color: var(--text-color);
+            font-size: 12px;
+            line-height: 1.5;
+            text-align: center;
+        }
+        .data-credit[hidden], .data-credit [hidden] { display: none !important; }
+        .data-credit a, .history-note a {
+            color: var(--button-bg);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
         .note-sep {
             display: inline-block;
             width: 1px;
@@ -287,6 +301,51 @@
             vertical-align: middle;
             background: var(--input-border);
         }
+        .index-chart { position: relative; width: 100%; height: clamp(260px, 42vh, 420px); margin-top: 16px; }
+        .index-chart tv-mini-chart { display: block; width: 100%; height: 100%; }
+        .index-chart:not(.index-ready) tv-mini-chart { opacity: 0; }
+        .index-chart .index-load-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: var(--text-muted); padding: 20px; }
+        .index-chart.index-ready .index-load-state { display: none; }
+        .index-periods { display: flex; flex-wrap: wrap; gap: 8px; }
+        .index-periods .period-btn { flex: 1 1 55px; min-width: 0; padding: 9px 10px; }
+        .index-retry { border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--button-bg); padding: 6px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+        .index-credit { font-size: 11px; text-align: center; line-height: 1.4; }
+        .index-credit a { color: var(--button-bg); }
+        .index-offline { padding: 20px 4px; color: var(--text-muted); text-align: center; font-size: 13px; }
+        .rate-row-index { cursor: pointer; }
+        .index-badge {
+            width: 32px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+            background: var(--button-bg);
+            color: #fff;
+            font-weight: 700;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        .rate-row-index .index-ticker-host {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            height: 94px;
+            --tv-widget-background-color: transparent;
+            --tv-widget-attribution-border-color: transparent;
+            --tv-widget-font-family: Arial, sans-serif;
+            --tv-widget-text-color: var(--text-color);
+            --tv-widget-price-text-color: var(--text-color);
+            --tv-widget-positive-color: var(--up-color);
+            --tv-widget-negative-color: var(--down-color);
+        }
+        .rate-row-index tv-single-ticker { display: block; width: 100%; height: 100%; }
+        .rate-row-index .index-ticker-host:not(.index-ready) tv-single-ticker { opacity: 0; }
+        .rate-row-index .index-load-state { position: absolute; inset: 0; display: flex; align-items: center; gap: 12px; }
+        .rate-row-index .index-ready .index-load-state { display: none; }
+        .rate-row-index .index-load-message { text-align: right; color: var(--text-muted); font-size: 12px; }
+        .rate-row-index .index-load-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .rates-list.is-editing .rate-row-index .index-ticker-host { opacity: 0.5; pointer-events: none; }
         body.editing .source-note {
             max-height: 40px;
             opacity: 1;
@@ -462,6 +521,11 @@
         .rate-change {
             font-size: 12px;
             font-weight: 600;
+            max-width: min(52vw, 210px);
+            text-align: right;
+            line-height: 1.25;
+            font-variant-numeric: tabular-nums;
+            overflow-wrap: anywhere;
         }
         .rate-change.up { color: var(--up-color); }
         .rate-change.down { color: var(--down-color); }
@@ -965,6 +1029,26 @@
         }
         .period-custom-btn svg { width: 15px; height: 15px; flex: 0 0 auto; }
         .period-short { display: none; }
+        .list-comparison { display: grid; gap: 7px; }
+        .comparison-title { color: var(--text-color); font-size: 12px; font-weight: 600; }
+        .list-comparison .periods {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr)) 36px;
+            gap: 5px;
+            overflow: visible;
+            margin: 0;
+            padding: 0;
+        }
+        .list-comparison .period-btn { width: 100%; min-width: 0; padding: 0 2px; }
+        .comparison-caption {
+            color: var(--text-muted);
+            font-size: 11px;
+            line-height: 1.35;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .comparison-caption.error { color: var(--down-color); }
+        body:not(.editing) .list-comparison { display: none; }
         .custom-range {
             display: none;
             position: fixed;
@@ -1093,8 +1177,8 @@
         .history-stat-value.down { color: var(--down-color); }
         .history-note {
             margin-top: 12px;
-            color: var(--text-muted);
-            font-size: 11px;
+            color: var(--text-color);
+            font-size: 12px;
             line-height: 1.45;
         }
 
@@ -1136,6 +1220,23 @@
             .period-short { display: inline; }
             .chart-wrap { height: 270px; }
             .history-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .rates-list.is-editing .rate-row:not(.rate-row-index) {
+                display: grid;
+                grid-template-columns: 18px 32px minmax(0, 1fr) 28px;
+                gap: 4px 8px;
+            }
+            .rates-list.is-editing .drag-handle { grid-column: 1; grid-row: 1 / 3; }
+            .rates-list.is-editing .flag-img { grid-column: 2; grid-row: 1; }
+            .rates-list.is-editing .rate-info { grid-column: 3; grid-row: 1; }
+            .rates-list.is-editing .rate-values {
+                grid-column: 2 / 4;
+                grid-row: 2;
+                align-items: flex-start;
+                max-width: 100%;
+                padding-top: 4px;
+            }
+            .rates-list.is-editing .rate-change { max-width: 100%; text-align: left; }
+            .rates-list.is-editing .remove-btn { grid-column: 4; grid-row: 1 / 3; }
         }
     </style>
 </head>
@@ -1182,10 +1283,50 @@
             </button>
         </div>
 
+        <div class="list-comparison" aria-label="Изменение курсов за период">
+            <div class="comparison-title">Изменение в процентах за период</div>
+            <div class="periods" id="listPeriods" aria-label="Период сравнения в списке">
+                <button class="period-btn active" type="button" data-period="1d" aria-label="1 день">1д</button>
+                <button class="period-btn" type="button" data-period="7d" aria-label="7 дней">7д</button>
+                <button class="period-btn" type="button" data-period="1m" aria-label="1 месяц">1м</button>
+                <button class="period-btn" type="button" data-period="3m" aria-label="3 месяца">3м</button>
+                <button class="period-btn" type="button" data-period="6m" aria-label="6 месяцев">6м</button>
+                <button class="period-btn" type="button" data-period="1y" aria-label="1 год">1г</button>
+                <button class="period-btn period-custom-btn" type="button" data-period="custom" aria-label="Выбрать даты" title="Выбрать даты">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="comparison-caption" id="comparisonCaption" role="status" aria-live="polite"></div>
+
         <div class="rates-list" id="ratesList"></div>
 
+        <p class="data-credit" id="ratesCoinGeckoCredit" hidden>Powered by <a href="https://www.coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko</a></p>
+        <p class="data-credit" id="ratesOilCredit" hidden>Нефть Brent: <a href="https://eurooilwatch.com" target="_blank" rel="noopener noreferrer">EuroOilWatch</a> (котировки фьючерса, $/баррель).</p>
         <div class="source-note" id="sourceNote"><span id="sourceNoteText"></span></div>
     </div>
+    </div>
+
+    <div class="history-modal-bg" id="sp500Modal" role="dialog" aria-modal="true" aria-labelledby="sp500Title">
+        <section class="history-modal">
+            <header class="history-header">
+                <div class="history-heading"><h3 id="sp500Title">История S&amp;P 500</h3><div class="history-pair">OANDA · CFD на S&amp;P 500 · пункты</div></div>
+                <button class="history-close" id="sp500Close" type="button" aria-label="Закрыть">✕</button>
+            </header>
+            <div class="history-body">
+                <div class="index-periods" id="sp500Periods" aria-label="Период графика S&amp;P 500">
+                    <button class="period-btn" type="button" data-frame="1D">1д</button>
+                    <button class="period-btn" type="button" data-frame="7D">7д</button>
+                    <button class="period-btn active" type="button" data-frame="1M">1м</button>
+                    <button class="period-btn" type="button" data-frame="3M">3м</button>
+                    <button class="period-btn" type="button" data-frame="6M">6м</button>
+                    <button class="period-btn" type="button" data-frame="12M">1г</button>
+                    <button class="period-btn" type="button" data-frame="ALL">Всё</button>
+                </div>
+                <div class="index-chart" id="sp500Chart"></div>
+                <p class="history-note">Источник: OANDA через TradingView. Показана котировка CFD, отслеживающего S&amp;P 500; она может отличаться от официального значения индекса.</p>
+            </div>
+        </section>
     </div>
 
     <div class="history-modal-bg" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
@@ -1264,7 +1405,7 @@
                     </div>
                 </div>
 
-                <p class="history-note">Источники: Frankfurter и архив курсов ЦБ РФ.</p>
+                <p class="history-note">Источники: Frankfurter и <a href="https://www.cbr-xml-daily.ru/" target="_blank" rel="noopener noreferrer">API для курсов ЦБ РФ</a> (архив).<span id="historyCoinGeckoCredit" hidden> · Powered by <a href="https://www.coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko</a></span><span id="historyOilCredit" hidden> · Brent: <a href="https://eurooilwatch.com" target="_blank" rel="noopener noreferrer">EuroOilWatch</a> ($/баррель, фьючерс)</span></p>
             </div>
         </section>
     </div>
@@ -1397,12 +1538,14 @@ const CURRENCY_META = {
     SOL: { country: 'crypto-sol', name: 'Solana' },
     XRP: { country: 'crypto-xrp', name: 'XRP (Ripple)' },
     DOGE: { country: 'crypto-doge', name: 'Dogecoin' },
-    TON: { country: 'crypto-ton', name: 'Toncoin' }
+    TON: { country: 'crypto-ton', name: 'Toncoin' },
+    BRENT: { country: 'oil-brent', name: 'Нефть Brent (баррель)', oil: true }
 };
 
 const TROY_OUNCE_GRAMS = 31.1034768;
 
 function flagUrl(country) {
+    if (country === 'oil-brent') return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" rx="3" fill="#434a52"/><path d="M16 3C13 8 9 11 9 15a7 7 0 0014 0c0-4-4-7-7-12z" fill="#f5a623"/><path d="M16 12c-1.5 2-2.5 3-2.5 4a2.5 2.5 0 005 0c0-1-1-2-2.5-4z" fill="#ffdc83"/></svg>');
     if (country === 'metal-gold')      return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#d4af37"/><text x="16" y="17" font-family="Arial" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">Au</text></svg>');
     if (country === 'metal-silver')    return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#c0c0c0"/><text x="16" y="17" font-family="Arial" font-size="14" font-weight="bold" fill="#000" text-anchor="middle">Ag</text></svg>');
     if (country === 'metal-platinum')  return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24"><rect width="32" height="24" fill="#e5e4e2"/><text x="16" y="17" font-family="Arial" font-size="12" font-weight="bold" fill="#000" text-anchor="middle">Pt</text></svg>');
@@ -1421,6 +1564,12 @@ function flagUrl(country) {
 }
 
 const DEFAULT_SELECTED = ['USD', 'EUR', 'RUB', 'BTC', 'XAU'];
+const INDEX_CODE = 'SP500';
+const INDEX_META = { name: 'S&P 500 · OANDA (CFD)' };
+const INDEX_SYMBOL = 'OANDA:SPX500USD';
+const OIL_CODE = 'BRENT';
+const OIL_CACHE_KEY = 'ratesBrent_cache_v1';
+const OIL_API = 'https://eurooilwatch.com/api/v1';
 const POPULAR_CURRENCIES = ['RUB', 'USD', 'EUR', 'CNY', 'GBP'];
 
 function compareCurrencyCodes(a, b) {
@@ -1437,17 +1586,31 @@ const ONE_HOUR = 60 * 60 * 1000;
 let rates = {};      
 let prevRates = {};   
 let rateDate = null;
+let prevRateDate = null;
 let lastFetchTime = 0;
 let selected = [];
 let baseCurrency = 'RUB';
 let historyInstrumentCode = '';
+let listPeriod = '1d';
+let listCustomFrom = '';
+let listCustomTo = '';
+let comparisonRows = new Map();
+let comparisonLoading = false;
+let comparisonOffline = false;
+let comparisonRequestId = 0;
+let oilHistory = [];
+let oilQuote = null;
+let oilLoading = false;
 
 function saveState() {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             selected,
             baseCurrency,
-            historyInstrument: historyInstrumentCode
+            historyInstrument: historyInstrumentCode,
+            listPeriod,
+            listCustomFrom,
+            listCustomTo
         }));
     } catch (e) {}
 }
@@ -1463,17 +1626,26 @@ function loadState() {
         }
         let base = s.baseCurrency;
         if (base && MIGRATE[base]) base = MIGRATE[base];
-        if (base && CURRENCY_META[base]) baseCurrency = base;
+        if (base && CURRENCY_META[base] && !CURRENCY_META[base].oil) baseCurrency = base;
         let historyCode = s.historyInstrument;
         if (historyCode && MIGRATE[historyCode]) historyCode = MIGRATE[historyCode];
-        if (historyCode && CURRENCY_META[historyCode]) historyInstrumentCode = historyCode;
+        if (historyCode && (CURRENCY_META[historyCode] || historyCode === INDEX_CODE)) historyInstrumentCode = historyCode;
+        if (['1d', '7d', '1m', '3m', '6m', '1y', 'custom'].includes(s.listPeriod)) listPeriod = s.listPeriod;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s.listCustomFrom || '') && /^\d{4}-\d{2}-\d{2}$/.test(s.listCustomTo || '')) {
+            listCustomFrom = s.listCustomFrom;
+            listCustomTo = s.listCustomTo;
+        }
+        if (listPeriod === 'custom' && (!listCustomFrom || !listCustomTo ||
+            dateKey(dateFromKey(listCustomFrom)) !== listCustomFrom ||
+            dateKey(dateFromKey(listCustomTo)) !== listCustomTo ||
+            listCustomFrom > listCustomTo || listCustomTo > dateKey(new Date()))) listPeriod = '1d';
     } catch (e) {}
 }
 
 function saveCache() {
     try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({
-            rates, prevRates, rateDate, fetchedAt: lastFetchTime
+            rates, prevRates, rateDate, prevRateDate, fetchedAt: lastFetchTime
         }));
     } catch (e) {}
 }
@@ -1485,6 +1657,7 @@ function loadCache() {
             rates = c.rates;
             prevRates = c.prevRates || {};
             rateDate = c.rateDate ? new Date(c.rateDate) : null;
+            prevRateDate = c.prevRateDate ? new Date(c.prevRateDate) : null;
             lastFetchTime = c.fetchedAt;
             return true;
         }
@@ -1497,6 +1670,7 @@ function parseJsDelivrRubData(data) {
     const result = { RUB: 1 };
     for (const code in CURRENCY_META) {
         const meta = CURRENCY_META[code];
+        if (meta.oil) continue;
         const lookupKey = meta.metal ? meta.metal : code.toLowerCase();
         const value = data.rub[lookupKey];
         if (value && value > 0) {
@@ -1569,6 +1743,58 @@ async function fetchCryptoFromCoinGecko() {
     }
 }
 
+function loadOilCache() {
+    try {
+        const data = JSON.parse(localStorage.getItem(OIL_CACHE_KEY) || '{}');
+        if (Array.isArray(data.history)) oilHistory = normalizeOilHistory(data.history);
+        if (data.quote && Number(data.quote.priceUsd) > 0 && /^\d{4}-\d{2}-\d{2}$/.test(data.quote.date)) oilQuote = data.quote;
+    } catch (e) {}
+}
+
+function normalizeOilHistory(entries) {
+    if (!Array.isArray(entries)) return [];
+    return entries.filter(row => row && /^\d{4}-\d{2}-\d{2}$/.test(row.date) &&
+        Number.isFinite(Number(row.priceUsd)) && Number(row.priceUsd) > 0 && row.date <= dateKey(new Date()))
+        .map(row => ({ date: row.date, priceUsd: Number(row.priceUsd) }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function oilJson(path) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+        const response = await fetch(`${OIL_API}/${path}`, { cache: 'no-store', signal: controller.signal });
+        return response.ok ? await response.json() : null;
+    } catch (e) { return null; }
+    finally { clearTimeout(timer); }
+}
+
+async function fetchOil() {
+    if (!selected.includes(OIL_CODE)) return false;
+    if (oilLoading) return Boolean(oilQuote);
+    oilLoading = true;
+    try {
+        const [historyResponse, live] = await Promise.all([oilJson('brent-history'), oilJson('brent')]);
+        const fetchedHistory = normalizeOilHistory(historyResponse && historyResponse.entries);
+        if (fetchedHistory.length) oilHistory = fetchedHistory;
+        const last = oilHistory[oilHistory.length - 1];
+        const liveDate = live && (live.sessionDate || (live.observedAt || '').slice(0, 10));
+        const liveValid = last && /^\d{4}-\d{2}-\d{2}$/.test(liveDate || '') &&
+            liveDate >= last.date && liveDate <= dateKey(new Date()) && Number(live.priceUsd) > 0 &&
+            live.quoteStatus !== 'stale';
+        if (liveValid) oilQuote = { date: liveDate, priceUsd: Number(live.priceUsd) };
+        else if (last && (fetchedHistory.length || !oilQuote || oilQuote.date < last.date)) oilQuote = { ...last };
+        if (oilQuote && (fetchedHistory.length || liveValid)) {
+            try { localStorage.setItem(OIL_CACHE_KEY, JSON.stringify({ history: oilHistory, quote: oilQuote })); } catch (e) {}
+        }
+        return Boolean(oilQuote);
+    } finally {
+        oilLoading = false;
+        renderList();
+        refreshListComparison();
+    }
+}
+
 async function fetchAllRates(force = false) {
     const now = Date.now();
     if (!force && lastFetchTime && (now - lastFetchTime < ONE_HOUR)) {
@@ -1598,6 +1824,7 @@ async function fetchAllRates(force = false) {
 
     if (prevResult) {
         prevRates = prevResult.rates;
+        prevRateDate = prevResult.date;
     }
 
     if (cryptoResult) {
@@ -1615,9 +1842,11 @@ async function fetchAllRates(force = false) {
         if (!rateDate) rateDate = new Date();
         saveCache();
         updateStatus();
+        if (selected.includes(OIL_CODE)) fetchOil();
         return true;
     } else {
         document.getElementById('statusText').textContent = 'Нет сети';
+        if (selected.includes(OIL_CODE) && navigator.onLine) fetchOil();
         return false;
     }
 }
@@ -1627,7 +1856,7 @@ function updateStatus() {
     const fetched = new Date(lastFetchTime);
     const d = fetched.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
     const t = fetched.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('statusText').textContent = `Обновлено ${d} · ${t}`;
+    document.getElementById('statusText').textContent = `Проверено ${d} · ${t}`;
 
     const note = document.getElementById('sourceNoteText');
     if (note) {
@@ -1653,8 +1882,21 @@ function formatRate(n) {
 
 function formatChange(pct) {
     if (!isFinite(pct)) return '';
-    const sign = pct > 0 ? '+' : '';
-    return `${sign}${pct.toFixed(2)}%`;
+    if (pct === 0) return '0%';
+    const sign = pct > 0 ? '+' : pct < 0 ? '-' : '';
+    return `${sign}${Math.abs(pct).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+}
+
+function formatChangeAmount(delta, symbol) {
+    if (delta === 0) return `0 ${symbol}`;
+    const absolute = Math.abs(delta);
+    const decimals = absolute >= 10000 ? 0 : absolute >= 1 ? 2 : absolute >= 0.01 ? 4 : 6;
+    const formatted = absolute.toLocaleString('ru-RU', {
+        minimumFractionDigits: symbol === '₽' ? Math.min(2, decimals) : 0,
+        maximumFractionDigits: decimals
+    });
+    const sign = delta > 0 ? '+' : delta < 0 ? '-' : '';
+    return `${sign}${formatted} ${symbol}`;
 }
 
 const HISTORY_CACHE_KEY = 'ratesHistory_cache_v5';
@@ -1831,7 +2073,7 @@ function shiftDate(date, days) {
 
 function isCbrFiat(code) {
     const meta = CURRENCY_META[code];
-    return code === 'RUB' || Boolean(meta && !meta.metal && !String(meta.country).startsWith('crypto-'));
+    return code === 'RUB' || Boolean(meta && !meta.metal && !meta.oil && !String(meta.country).startsWith('crypto-'));
 }
 
 function parseCbrRubData(data) {
@@ -1928,7 +2170,7 @@ function sampledDateKeys(start, end, maxPoints = 48) {
 }
 
 function defaultHistoryBase(code) {
-    if (CURRENCY_META[code] && (CURRENCY_META[code].metal || CG_IDS[code])) return 'USD';
+    if (CURRENCY_META[code] && (CURRENCY_META[code].metal || CURRENCY_META[code].oil || CG_IDS[code])) return 'USD';
     return code === 'RUB' ? 'USD' : 'RUB';
 }
 
@@ -1968,6 +2210,7 @@ async function historyRatesForDate(key) {
         .then(result => result ? result.rates : null)
         .catch(() => null);
     historyDateCache.set(key, promise);
+    promise.then(result => { if (!result && historyDateCache.get(key) === promise) historyDateCache.delete(key); });
     return promise;
 }
 
@@ -2028,6 +2271,211 @@ async function historyRatesForRange(code, base, keys) {
     const result = await promise;
     if (!result) historyRangeCache.delete(cacheKey);
     return result;
+}
+
+function comparisonRange() {
+    if (listPeriod === 'custom') return { start: dateFromKey(listCustomFrom), end: dateFromKey(listCustomTo) };
+    return historyRange(listPeriod);
+}
+
+const COMPARISON_CACHE_KEY = 'ratesComparison_cache_v1';
+function comparisonCacheRead(key) {
+    try {
+        const entry = JSON.parse(localStorage.getItem(COMPARISON_CACHE_KEY) || '{}')[key];
+        if (entry && Array.isArray(entry.rows)) return new Map(entry.rows);
+    } catch (e) {}
+    return new Map();
+}
+
+function comparisonCacheWrite(key, rows) {
+    try {
+        const all = JSON.parse(localStorage.getItem(COMPARISON_CACHE_KEY) || '{}');
+        all[key] = { savedAt: Date.now(), rows: [...rows] };
+        const recent = Object.entries(all).sort((a, b) => (b[1].savedAt || 0) - (a[1].savedAt || 0));
+        localStorage.setItem(COMPARISON_CACHE_KEY, JSON.stringify(Object.fromEntries(recent.slice(0, 8))));
+    } catch (e) {}
+}
+
+function comparisonPair(dayRates, code, base) {
+    return historyPointFromRates(dayRates, code, base, '')?.value || null;
+}
+
+async function comparisonArchivedRub(code, key) {
+    if (code === 'RUB') return 1;
+    if (!isCbrFiat(code)) return null;
+    const archived = await historyRatesForRange(code, 'RUB', [key]);
+    if (archived && archived[0]) return archived[0].value;
+    const budget = { used: 0, max: 4 };
+    for (const candidate of cbrCandidateKeys(key)) {
+        const cbrRates = await fetchCbrArchiveExact(candidate, budget);
+        if (cbrRates && cbrRates[code] > 0) return cbrRates[code];
+    }
+    return null;
+}
+
+async function comparisonValue(code, base, key, dayRates) {
+    if (code === OIL_CODE) {
+        const today = key === dateKey(new Date());
+        const quote = today && oilQuote ? oilQuote : oilObservation(key);
+        return oilValue(quote, base, null, today && quote === oilQuote);
+    }
+    const direct = comparisonPair(dayRates, code, base);
+    if (direct) return direct;
+    const codeRub = code === 'RUB' ? 1 : dayRates && dayRates[code];
+    const baseRub = base === 'RUB' ? 1 : dayRates && dayRates[base];
+    if (!isCbrFiat(code) || !isCbrFiat(base)) {
+        if (codeRub > 0 && isCbrFiat(base)) {
+            const missingBase = await comparisonArchivedRub(base, key);
+            if (missingBase > 0) return codeRub / missingBase;
+        }
+        if (baseRub > 0 && isCbrFiat(code)) {
+            const missingCode = await comparisonArchivedRub(code, key);
+            if (missingCode > 0) return missingCode / baseRub;
+        }
+        return null;
+    }
+    const archived = await historyRatesForRange(code, base, [key]);
+    if (archived && archived[0]) return archived[0].value;
+    const budget = { used: 0, max: 4 };
+    for (const candidate of cbrCandidateKeys(key)) {
+        const cbrRates = await fetchCbrArchiveExact(candidate, budget);
+        const value = comparisonPair(cbrRates, code, base);
+        if (value) return value;
+    }
+    return null;
+}
+
+function oilObservation(key) {
+    for (let i = oilHistory.length - 1; i >= 0; i--) {
+        if (oilHistory[i].date <= key) return oilHistory[i];
+    }
+    return null;
+}
+
+async function oilValue(quote, base, dayRates = null, currentFx = false) {
+    if (!quote || !(quote.priceUsd > 0)) return null;
+    if (base === 'USD') return quote.priceUsd;
+    const fx = currentFx ? rates : await historyRatesForDate(quote.date);
+    if (!fx || !(fx.USD > 0)) return null;
+    const baseRub = base === 'RUB' ? 1 : fx[base];
+    return baseRub > 0 ? quote.priceUsd * fx.USD / baseRub : null;
+}
+
+function updateComparisonCaption() {
+    const caption = document.getElementById('comparisonCaption');
+    if (!caption) return;
+    const range = comparisonRange();
+    const start = dateKey(range.start);
+    const end = dateKey(range.end);
+    const ending = end === dateKey(new Date()) ? 'цены сейчас' : `цены на ${fullDateLabel(end)}`;
+    const periodText = listPeriod === '1d' ? 'За 1 день' : `${fullDateLabel(start)} — ${fullDateLabel(end)}`;
+    const priceLabel = listPeriod === '1d' ? `котировки в ${baseCurrency}` : `${ending} в ${baseCurrency}`;
+    const published = rateDate instanceof Date && isFinite(rateDate.getTime())
+        ? rateDate.toISOString().slice(0, 10) : '';
+    const previousPublished = prevRateDate instanceof Date && isFinite(prevRateDate.getTime())
+        ? prevRateDate.toISOString().slice(0, 10) : '';
+    const dailyPublication = listPeriod === '1d' && published && selected.some(code =>
+        code !== baseCurrency && CURRENCY_META[code] && !CG_IDS[code] && code !== OIL_CODE)
+        ? ` · валюты/металлы: ${previousPublished ? `${fullDateLabel(previousPublished)} → ` : ''}${fullDateLabel(published)}`
+        : '';
+    const unchangedDaily = listPeriod === '1d' && selected.some(code => {
+        if (code === baseCurrency || code === INDEX_CODE || code === OIL_CODE || CG_IDS[code]) return false;
+        const current = comparisonPair(rates, code, baseCurrency);
+        const previous = comparisonPair(prevRates, code, baseCurrency)
+            || comparisonRows.get(code)?.previous;
+        return current > 0 && previous > 0 && current === previous;
+    });
+    const missing = !comparisonLoading && selected.some(code => {
+        if (code === baseCurrency || code === INDEX_CODE) return false;
+        const row = comparisonRows.get(code);
+        if (code === OIL_CODE) return !oilQuote || (!comparisonLoading && (!row || !row.previous || !row.current));
+        if (listPeriod === '1d') {
+            return !comparisonPair(rates, code, baseCurrency) ||
+                !(comparisonPair(prevRates, code, baseCurrency) || (row && row.previous));
+        }
+        return !row || !row.previous || !row.current;
+    });
+    caption.classList.toggle('error', missing);
+    const state = comparisonLoading ? 'загружаем…'
+        : comparisonOffline ? (comparisonRows.size ? 'сохранённые данные' : 'для истории нужен интернет')
+        : '';
+    const oilDate = selected.includes(OIL_CODE) && oilQuote && end === dateKey(new Date())
+        ? ` · Brent на ${fullDateLabel(oilQuote.date)}` : '';
+    caption.textContent = `${periodText} · ${priceLabel}${dailyPublication}${oilDate}${unchangedDaily ? ' · 0%: одинаковый курс в источнике' : ''}${state ? ` · ${state}` : ''}${missing ? ' · часть изменений недоступна' : ''}${selected.includes(INDEX_CODE) ? ' · S&P 500 отдельно' : ''}`;
+    document.querySelectorAll('#listPeriods [data-period]').forEach(button => {
+        const active = button.dataset.period === listPeriod;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+}
+
+async function refreshListComparison() {
+    const requestId = ++comparisonRequestId;
+    const range = comparisonRange();
+    const startKey = dateKey(range.start);
+    const endKey = dateKey(range.end);
+    const cacheKey = `${baseCurrency}_${startKey}_${endKey}`;
+    const isOneDay = listPeriod === '1d';
+    const codes = selected.filter(code => code !== baseCurrency && code !== INDEX_CODE);
+    comparisonRows = isOneDay ? comparisonCacheRead(cacheKey) : new Map();
+    const pendingCodes = isOneDay ? codes.filter(code => code === OIL_CODE
+        ? Boolean(oilQuote) && (!comparisonRows.get(code) || comparisonRows.get(code).quoteDate !== oilQuote.date || comparisonRows.get(code).quotePrice !== oilQuote.priceUsd || comparisonRows.get(code).base !== baseCurrency)
+        : comparisonPair(rates, code, baseCurrency) &&
+          !comparisonPair(prevRates, code, baseCurrency) &&
+          !(comparisonRows.get(code) && comparisonRows.get(code).previous)
+    ) : codes;
+    comparisonLoading = !isOneDay || pendingCodes.length > 0;
+    comparisonOffline = false;
+    updateComparisonCaption();
+    updateListValues();
+    if (!comparisonLoading) return;
+
+    if (!navigator.onLine) {
+        comparisonRows = comparisonCacheRead(cacheKey);
+        comparisonLoading = false;
+        comparisonOffline = true;
+        updateComparisonCaption();
+        updateListValues();
+        return;
+    }
+    const endToday = endKey === dateKey(new Date());
+    const needsCurrencyHistory = pendingCodes.some(code => code !== OIL_CODE);
+    const [startRates, historicalEnd] = await Promise.all([
+        needsCurrencyHistory ? historyRatesForDate(startKey) : Promise.resolve(null),
+        !needsCurrencyHistory || endToday ? Promise.resolve(null) : historyRatesForDate(endKey)
+    ]);
+    if (requestId !== comparisonRequestId) return;
+    const endRates = endToday ? rates : historicalEnd;
+    const results = isOneDay ? new Map(comparisonRows) : new Map();
+    let cursor = 0;
+    async function worker() {
+        while (cursor < pendingCodes.length) {
+            const code = pendingCodes[cursor++];
+            if (code === OIL_CODE && isOneDay) {
+                const previousQuote = oilHistory.filter(point => point.date < oilQuote.date).at(-1);
+                const [previous, current] = await Promise.all([
+                    oilValue(previousQuote, baseCurrency), oilValue(oilQuote, baseCurrency, null, true)
+                ]);
+                if (requestId !== comparisonRequestId) return;
+                results.set(code, { previous, current, quoteDate: oilQuote.date, quotePrice: oilQuote.priceUsd, base: baseCurrency });
+                continue;
+            }
+            const [previous, current] = await Promise.all([
+                comparisonValue(code, baseCurrency, startKey, startRates),
+                isOneDay ? Promise.resolve(comparisonPair(endRates, code, baseCurrency))
+                    : comparisonValue(code, baseCurrency, endKey, endRates)
+            ]);
+            if (requestId !== comparisonRequestId) return;
+            results.set(code, { previous, current });
+        }
+    }
+    await Promise.all(Array.from({ length: Math.min(4, pendingCodes.length) }, worker));
+    if (requestId !== comparisonRequestId) return;
+    comparisonRows = results;
+    comparisonLoading = false;
+    if (results.size) comparisonCacheWrite(cacheKey, results);
+    updateComparisonCaption();
+    updateListValues();
 }
 
 function formatHistoryValue(value) {
@@ -2222,15 +2670,65 @@ async function loadHistory() {
         range = historyRange(currentHistoryPeriod);
     }
 
-    const keys = sampledDateKeys(range.start, range.end, currentHistoryPeriod === '1d' ? 2 : 48);
+    let keys = sampledDateKeys(range.start, range.end, currentHistoryPeriod === '1d' ? 2 : 48);
+    if (code === OIL_CODE && currentHistoryPeriod === '1d' && oilQuote) {
+        const previousOil = oilHistory.filter(point => point.date < oilQuote.date).at(-1);
+        if (previousOil) keys = [previousOil.date, oilQuote.date];
+    }
+    document.getElementById('historyCoinGeckoCredit').hidden = !(CG_IDS[code] && keys[keys.length - 1] === dateKey(new Date()) && rates[code] > 0);
+    document.getElementById('historyOilCredit').hidden = code !== OIL_CODE;
     const cacheId = `${code}_${base}_${keys[0]}_${keys[keys.length - 1]}_${keys.length}`;
     const stored = historyCacheRead(cacheId);
-    const cacheAgeLimit = stored && stored.points.length === keys.length ? ONE_HOUR : 5 * 60 * 1000;
+    const cacheAgeLimit = code === OIL_CODE ? 60 * 1000
+        : stored && stored.points.length === keys.length ? ONE_HOUR : 5 * 60 * 1000;
     if (stored && (!navigator.onLine || Date.now() - stored.savedAt < cacheAgeLimit)) {
         historyChartData = stored.points;
         chartPlaceholder.classList.add('hidden');
         updateHistoryStats(historyChartData, base);
         setLoadedHistoryStatus(historyChartData, keys);
+        requestAnimationFrame(drawHistoryChart);
+        return;
+    }
+
+    if (code === OIL_CODE) {
+        if (!oilHistory.length && navigator.onLine) await fetchOil();
+        if (requestId !== historyRequestId) return;
+        const oilPoints = new Array(keys.length).fill(null);
+        let cursor = 0;
+        async function oilWorker() {
+            while (cursor < keys.length) {
+                const index = cursor++;
+                const key = keys[index];
+                const useLatest = index === keys.length - 1 && oilQuote && oilQuote.date <= key;
+                const quote = useLatest
+                    ? oilQuote : oilObservation(key);
+                if (!quote) continue;
+                const value = await oilValue(quote, base, null, useLatest && (currentHistoryPeriod === '1d' || key === dateKey(new Date())));
+                if (value > 0) oilPoints[index] = { date: key, value };
+            }
+        }
+        await Promise.all(Array.from({ length: Math.min(6, keys.length) }, oilWorker));
+        if (requestId !== historyRequestId) return;
+        const valid = oilPoints.filter(Boolean);
+        if (valid.length < 2 && stored && stored.points.length > 1) {
+            historyChartData = stored.points;
+            historyStatus.textContent = 'Показана сохранённая история Brent';
+        } else {
+            historyChartData = valid;
+        }
+        if (historyChartData.length < 2) {
+            historyStatus.classList.add('error');
+            historyStatus.textContent = 'Нет котировок Brent за выбранный период';
+            chartPlaceholder.textContent = 'Выберите другой период или проверьте сеть';
+            return;
+        }
+        if (valid.length >= 2) {
+            historyCacheWrite(cacheId, valid);
+            setLoadedHistoryStatus(valid, keys);
+            if (oilQuote && keys.at(-1) > oilQuote.date) historyStatus.textContent += ` · последняя котировка ${fullDateLabel(oilQuote.date)}`;
+        }
+        chartPlaceholder.classList.add('hidden');
+        updateHistoryStats(historyChartData, base);
         requestAnimationFrame(drawHistoryChart);
         return;
     }
@@ -2332,9 +2830,10 @@ async function loadHistory() {
 
 function populateHistorySelect(preferredCode) {
     const groups = [
-        { label: 'Валюты', test: code => !CURRENCY_META[code].metal && !CG_IDS[code] },
+        { label: 'Валюты', test: code => !CURRENCY_META[code].metal && !CURRENCY_META[code].oil && !CG_IDS[code] },
         { label: 'Металлы', test: code => Boolean(CURRENCY_META[code].metal) },
-        { label: 'Криптовалюты', test: code => Boolean(CG_IDS[code]) }
+        { label: 'Криптовалюты', test: code => Boolean(CG_IDS[code]) },
+        { label: 'Сырьё', test: code => Boolean(CURRENCY_META[code].oil) }
     ];
     historyInstrument.innerHTML = '';
     groups.forEach(group => {
@@ -2348,6 +2847,15 @@ function populateHistorySelect(preferredCode) {
         });
         if (optgroup.children.length) historyInstrument.appendChild(optgroup);
     });
+    if (selected.includes(INDEX_CODE)) {
+        const indexes = document.createElement('optgroup');
+        indexes.label = 'Индексы';
+        const option = document.createElement('option');
+        option.value = INDEX_CODE;
+        option.textContent = 'S&P 500 — индикативная котировка';
+        indexes.appendChild(option);
+        historyInstrument.appendChild(indexes);
+    }
     const wanted = preferredCode || historyInstrumentCode || selected.find(code => code !== 'RUB') || 'USD';
     if (Array.from(historyInstrument.options).some(o => o.value === wanted)) {
         historyInstrument.value = wanted;
@@ -2358,7 +2866,7 @@ function populateHistorySelect(preferredCode) {
 function populateHistoryBaseSelect(code, preferredBase) {
     historyBase.innerHTML = '';
     const fiatCodes = Object.keys(CURRENCY_META)
-        .filter(item => !CURRENCY_META[item].metal && !CG_IDS[item] && item !== code)
+        .filter(item => !CURRENCY_META[item].metal && !CURRENCY_META[item].oil && !CG_IDS[item] && item !== code)
         .sort(compareCurrencyCodes);
 
     fiatCodes.forEach(base => {
@@ -2381,11 +2889,15 @@ const historyFromInput = document.getElementById('historyFrom');
 const historyToInput = document.getElementById('historyTo');
 let customRangeDraft = null;
 
-function openCustomRange() {
+function openCustomRange(target = 'history') {
     if (customRangeDialog.open) return;
     closeHistoryPickers();
-    customRangeDraft = { from: historyFromInput.value, to: historyToInput.value };
-    if (currentHistoryPeriod !== 'custom') {
+    customRangeDraft = { from: historyFromInput.value, to: historyToInput.value, target };
+    if (target === 'list') {
+        const range = comparisonRange();
+        historyFromInput.value = listPeriod === 'custom' ? listCustomFrom : dateKey(range.start);
+        historyToInput.value = listPeriod === 'custom' ? listCustomTo : dateKey(range.end);
+    } else if (currentHistoryPeriod !== 'custom') {
         const range = historyRange(currentHistoryPeriod);
         historyFromInput.value = dateKey(range.start);
         historyToInput.value = dateKey(range.end);
@@ -2422,9 +2934,34 @@ document.getElementById('customRangeForm').addEventListener('submit', event => {
         historyToInput.reportValidity();
         return;
     }
+    const draft = customRangeDraft;
+    const from = historyFromInput.value;
+    const to = historyToInput.value;
     customRangeDraft = null;
     customRangeDialog.close();
-    setHistoryPeriod('custom', true);
+    if (draft && draft.target === 'list') {
+        historyFromInput.value = draft.from;
+        historyToInput.value = draft.to;
+        listCustomFrom = from;
+        listCustomTo = to;
+        listPeriod = 'custom';
+        saveState();
+        refreshListComparison();
+    } else {
+        setHistoryPeriod('custom', true);
+    }
+});
+
+document.getElementById('listPeriods').addEventListener('click', event => {
+    const button = event.target.closest('[data-period]');
+    if (!button) return;
+    if (button.dataset.period === 'custom') {
+        openCustomRange('list');
+        return;
+    }
+    listPeriod = button.dataset.period;
+    saveState();
+    refreshListComparison();
 });
 
 function setHistoryPeriod(period, applyCustom = false) {
@@ -2434,7 +2971,7 @@ function setHistoryPeriod(period, applyCustom = false) {
     }
     currentHistoryPeriod = period;
     let activeButton = null;
-    document.querySelectorAll('.period-btn').forEach(btn => {
+    document.querySelectorAll('#historyPeriods .period-btn').forEach(btn => {
         const active = btn.dataset.period === period;
         btn.classList.toggle('active', active);
         if (active) activeButton = btn;
@@ -2448,9 +2985,18 @@ function setHistoryPeriod(period, applyCustom = false) {
 }
 
 function openHistory(code) {
+    if (code === INDEX_CODE) {
+        openSp500Chart();
+        return;
+    }
     populateHistorySelect(code);
     historyInstrumentCode = historyInstrument.value;
-    populateHistoryBaseSelect(historyInstrument.value, baseCurrency);
+    if (historyInstrumentCode === INDEX_CODE) {
+        saveState();
+        openSp500Chart();
+        return;
+    }
+    populateHistoryBaseSelect(historyInstrument.value, historyInstrument.value === OIL_CODE ? 'USD' : baseCurrency);
     saveState();
     historyModal.classList.add('open');
     document.body.classList.add('history-open');
@@ -2472,6 +3018,13 @@ document.getElementById('historyBtn').addEventListener('click', () => openHistor
 document.getElementById('historyClose').addEventListener('click', closeHistory);
 historyModal.addEventListener('click', event => { if (event.target === historyModal) closeHistory(); });
 historyInstrument.addEventListener('change', () => {
+    if (historyInstrument.value === INDEX_CODE) {
+        historyInstrumentCode = INDEX_CODE;
+        saveState();
+        closeHistory();
+        openSp500Chart();
+        return;
+    }
     const preferredBase = historyBase.value || baseCurrency;
     historyInstrumentCode = historyInstrument.value;
     syncHistoryPicker(historyInstrument);
@@ -2488,6 +3041,7 @@ historyBase.addEventListener('change', () => {
         baseBtnText.textContent = nextBase;
         saveState();
         renderList();
+        refreshListComparison();
     }
     loadHistory();
 });
@@ -2676,45 +3230,94 @@ function setupDragAndDrop() {
     document.addEventListener('touchcancel', onEnd);
 }
 
+function comparisonRowMarkup(code) {
+    const baseRubRate = baseCurrency === 'RUB' ? 1 : (rates[baseCurrency] || null);
+    const prevBaseRubRate = baseCurrency === 'RUB' ? 1 : (prevRates[baseCurrency] || null);
+    const baseSymbol = CURRENCY_SYMBOLS[baseCurrency] || baseCurrency;
+    const comparison = comparisonRows.get(code);
+    const currentRub = rates[code];
+    const previousRub = prevRates[code];
+    const latest = code === OIL_CODE
+        ? (oilQuote && rates.USD && baseRubRate ? oilQuote.priceUsd * rates.USD / baseRubRate : baseCurrency === 'USD' && oilQuote ? oilQuote.priceUsd : null)
+        : (currentRub && baseRubRate) ? currentRub / baseRubRate : null;
+    const current = listPeriod === '1d' ? latest
+        : comparison ? comparison.current
+        : comparisonLoading && dateKey(comparisonRange().end) === dateKey(new Date()) ? latest : null;
+    const previous = listPeriod === '1d'
+        ? code === OIL_CODE ? comparison?.previous || null
+        : (previousRub && prevBaseRubRate) ? previousRub / prevBaseRubRate : comparison?.previous || null
+        : comparison ? comparison.previous : null;
+
+    let changeHtml = '<span class="rate-change loading">…</span>';
+    if (current && previous && previous > 0) {
+        const pct = ((current - previous) / previous) * 100;
+        const delta = current - previous;
+        const cls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'neutral';
+        const arrow = delta > 0 ? '▲ ' : delta < 0 ? '▼ ' : '';
+        changeHtml = `<span class="rate-change ${cls}">${arrow}${formatChangeAmount(delta, baseSymbol)} (${formatChange(pct)})</span>`;
+    } else if (!comparisonLoading && (current || lastFetchTime)) {
+        changeHtml = listPeriod === '1d'
+            ? '<span class="rate-change neutral">Нет данных за день</span>'
+            : '<span class="rate-change neutral">—</span>';
+    }
+    const valueText = !current ? '—' : code === OIL_CODE
+        ? current.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : formatRate(current);
+    return { rateStr: current ? `${valueText} ${baseSymbol}` : '—', changeHtml };
+}
+
+function updateListValues() {
+    const list = document.getElementById('ratesList');
+    document.getElementById('ratesCoinGeckoCredit').hidden = !selected.some(code => CG_IDS[code] && rates[code] > 0);
+    document.getElementById('ratesOilCredit').hidden = !selected.includes(OIL_CODE);
+    list.querySelectorAll('.rate-row:not(.rate-row-index)').forEach(row => {
+        const { rateStr, changeHtml } = comparisonRowMarkup(row.dataset.code);
+        row.querySelector('.rate-value').textContent = rateStr;
+        row.querySelector('.rate-change').outerHTML = changeHtml;
+    });
+}
+
 function renderList() {
     const list = document.getElementById('ratesList');
     list.innerHTML = '';
+    updateComparisonCaption();
+    document.getElementById('ratesCoinGeckoCredit').hidden = !selected.some(code => CG_IDS[code] && rates[code] > 0);
+    document.getElementById('ratesOilCredit').hidden = !selected.includes(OIL_CODE);
 
     if (!selected.length) {
         list.innerHTML = '<div class="empty">Список пуст. Нажмите карандаш, затем «Добавить валюту».</div>';
         return;
     }
 
-    const baseRubRate = baseCurrency === 'RUB' ? 1 : (rates[baseCurrency] || null);
-    const prevBaseRubRate = baseCurrency === 'RUB' ? 1 : (prevRates[baseCurrency] || null);
-    const baseSymbol = CURRENCY_SYMBOLS[baseCurrency] || baseCurrency;
-
     selected.forEach(code => {
         if (code === baseCurrency) return;
+
+        if (code === INDEX_CODE) {
+            const row = document.createElement('div');
+            row.className = 'rate-row rate-row-index';
+            row.dataset.code = code;
+            row.innerHTML = `
+                <span class="drag-handle">≡</span>
+                <div class="index-ticker-host" aria-label="S&P 500: котировка OANDA"></div>
+                <button class="remove-btn" data-remove="${code}" title="Убрать">✕</button>
+            `;
+            row.title = 'Открыть историю S&P 500';
+            row.addEventListener('click', event => {
+                if (document.body.classList.contains('editing')) return;
+                if (event.target.closest('.remove-btn, .drag-handle, .index-retry, tv-single-ticker, a')) return;
+                openSp500Chart();
+            });
+            list.appendChild(row);
+            mountIndexWidget(row.querySelector('.index-ticker-host'), 'tv-single-ticker');
+            return;
+        }
 
         const meta = CURRENCY_META[code] || { country: 'un', name: code };
         const row = document.createElement('div');
         row.className = 'rate-row';
         row.dataset.code = code;
 
-        const currentRub = rates[code];
-        const previousRub = prevRates[code];
-        const current = (currentRub && baseRubRate) ? currentRub / baseRubRate : null;
-        const previous = (previousRub && prevBaseRubRate) ? previousRub / prevBaseRubRate : null;
-
-        let changeHtml = '<span class="rate-change loading">…</span>';
-        if (current && previous && previous > 0) {
-            const pct = ((current - previous) / previous) * 100;
-            let cls = 'neutral';
-            let arrow = '';
-            if (pct > 0.01) { cls = 'up'; arrow = '▲ '; }
-            else if (pct < -0.01) { cls = 'down'; arrow = '▼ '; }
-            changeHtml = `<span class="rate-change ${cls}">${arrow}${formatChange(pct)}</span>`;
-        } else if (current && !previous) {
-            changeHtml = '<span class="rate-change neutral">—</span>';
-        }
-
-        const rateStr = current ? `${formatRate(current)} ${baseSymbol}` : '—';
+        const { rateStr, changeHtml } = comparisonRowMarkup(code);
 
         row.innerHTML = `
             <span class="drag-handle">≡</span>
@@ -2744,6 +3347,7 @@ function renderList() {
             selected = selected.filter(c => c !== code);
             saveState();
             renderList();
+            refreshListComparison();
         });
     });
 
@@ -2784,9 +3388,9 @@ function renderModalList(query) {
     modalList.innerHTML = '';
     const q = query.trim().toLowerCase();
 
-    const allCodes = Object.keys(CURRENCY_META).sort(compareCurrencyCodes);
+    const allCodes = [...Object.keys(CURRENCY_META).filter(code => !CURRENCY_META[code].oil).sort(compareCurrencyCodes), OIL_CODE, INDEX_CODE];
     const filtered = allCodes.filter(code => {
-        const meta = CURRENCY_META[code];
+        const meta = code === INDEX_CODE ? INDEX_META : CURRENCY_META[code];
         const name = (meta && meta.name) ? meta.name.toLowerCase() : '';
         return code.toLowerCase().includes(q) || name.includes(q);
     });
@@ -2803,18 +3407,24 @@ function renderModalList(query) {
             divider.setAttribute('role', 'separator');
             modalList.appendChild(divider);
         }
-        const meta = CURRENCY_META[code];
+        if ((code === INDEX_CODE || code === OIL_CODE) && index > 0) {
+            const divider = document.createElement('div');
+            divider.className = 'currency-list-divider';
+            divider.setAttribute('role', 'separator');
+            modalList.appendChild(divider);
+        }
+        const meta = code === INDEX_CODE ? INDEX_META : CURRENCY_META[code];
         const isSelected = selected.includes(code);
         const row = document.createElement('div');
         row.className = 'modal-row' + (isSelected ? ' disabled' : '');
         const baseRubRate = baseCurrency === 'RUB' ? 1 : (rates[baseCurrency] || 1);
         const baseSymbol = CURRENCY_SYMBOLS[baseCurrency] || baseCurrency;
         const inBase = rates[code] ? rates[code] / baseRubRate : null;
-        const rateInfo = inBase ? `${formatRate(inBase)} ${baseSymbol}` : '';
+        const rateInfo = code === INDEX_CODE ? 'Индекс' : code === OIL_CODE ? '$/баррель' : inBase ? `${formatRate(inBase)} ${baseSymbol}` : '';
         row.innerHTML = `
-            <img class="flag-img" src="${flagUrl(meta.country)}" alt="${code}" loading="lazy" onerror="this.style.visibility='hidden'">
+            ${code === INDEX_CODE ? '<span class="index-badge" aria-hidden="true">SPX</span>' : `<img class="flag-img" src="${flagUrl(meta.country)}" alt="${code}" loading="lazy" onerror="this.style.visibility='hidden'">`}
             <div class="modal-row-info">
-                <div class="modal-row-code">${code}</div>
+                <div class="modal-row-code">${code === INDEX_CODE ? 'S&amp;P 500' : code}</div>
                 <div class="modal-row-name">${meta.name}</div>
             </div>
             <div class="modal-row-rate">${rateInfo}</div>
@@ -2825,6 +3435,8 @@ function renderModalList(query) {
                 selected.push(code);
                 saveState();
                 renderList();
+                refreshListComparison();
+                if (code === OIL_CODE && navigator.onLine) fetchOil();
                 closeModal();
             });
         }
@@ -2850,7 +3462,7 @@ const baseBtnText = document.getElementById('baseBtnText');
 
 function populateBaseSelect() {
     baseSelect.innerHTML = '';
-    const codes = Object.keys(CURRENCY_META).sort(compareCurrencyCodes);
+    const codes = Object.keys(CURRENCY_META).filter(code => !CURRENCY_META[code].oil).sort(compareCurrencyCodes);
     for (const code of codes) {
         const opt = document.createElement('option');
         opt.value = code;
@@ -2865,8 +3477,8 @@ baseSelect.addEventListener('change', () => {
     baseCurrency = baseSelect.value;
     baseBtnText.textContent = baseCurrency;
     saveState();
-    setEditing(false);
     renderList();
+    refreshListComparison();
 });
 
 doneBtn.addEventListener('click', () => {
@@ -2879,16 +3491,118 @@ document.getElementById('refreshBtn').addEventListener('click', async () => {
     btn.disabled = true;
     try {
         await fetchAllRates(true);
-        renderList();
+        refreshListComparison();
     } finally {
         btn.classList.remove('spinning');
         btn.disabled = false;
     }
 });
 
+const indexModulePromises = new Map();
+function loadIndexModule(tag) {
+    if (customElements.get(tag)) return Promise.resolve();
+    if (indexModulePromises.has(tag)) return indexModulePromises.get(tag);
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = `https://widgets.tradingview-widget.com/w/ru/${tag}.js`;
+    const promise = new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Время загрузки истекло')), 20000);
+        script.onload = () => {
+            clearTimeout(timer);
+            if (customElements.get(tag)) resolve();
+            else reject(new Error('Виджет не зарегистрирован'));
+        };
+        script.onerror = () => { clearTimeout(timer); reject(new Error('Не удалось загрузить виджет')); };
+        document.head.appendChild(script);
+    });
+    indexModulePromises.set(tag, promise);
+    promise.catch(() => { indexModulePromises.delete(tag); script.remove(); });
+    return promise;
+}
+
+function mountIndexWidget(host, tag, timeFrame = '1M') {
+    host.classList.remove('index-ready');
+    host.innerHTML = tag === 'tv-single-ticker'
+        ? '<div class="index-load-state"><span class="index-badge" aria-hidden="true">SPX</span><div class="rate-info"><div class="rate-code">S&amp;P 500</div><div class="rate-name">OANDA · CFD · пункты</div></div><div class="index-load-actions"><span class="index-load-message"></span><button class="index-retry" type="button" hidden>Повторить</button></div></div>'
+        : '<div class="index-load-state"><span class="index-load-message"></span><button class="index-retry" type="button" hidden>Повторить загрузку</button></div>';
+    const message = host.querySelector('.index-load-message');
+    const retry = host.querySelector('.index-retry');
+    const widget = document.createElement(tag);
+    widget.setAttribute('symbol', INDEX_SYMBOL);
+    widget.setAttribute('transparent', '');
+    widget.setAttribute('hide-market-status', '');
+    widget.setAttribute('theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (tag === 'tv-mini-chart') {
+        widget.setAttribute('time-frame', timeFrame);
+        widget.setAttribute('show-time-scale', '');
+    }
+    let timer;
+    const current = () => host.isConnected && host.contains(widget);
+    const fail = () => {
+        clearTimeout(timer);
+        if (!current()) return;
+        host.classList.remove('index-ready');
+        message.textContent = navigator.onLine ? 'Не удалось загрузить данные' : 'Для S&P 500 нужен интернет';
+        retry.hidden = false;
+    };
+    retry.addEventListener('click', event => {
+        event.stopPropagation();
+        mountIndexWidget(host, tag, timeFrame);
+    });
+    widget.addEventListener('tv-widget-ready', () => {
+        clearTimeout(timer);
+        if (current()) host.classList.add('index-ready');
+    });
+    widget.addEventListener('tv-widget-error', fail);
+    widget.addEventListener('tv-link-open', event => {
+        if (tag !== 'tv-single-ticker' || !event.detail || !event.detail.context || !event.detail.context.symbol) return;
+        event.preventDefault();
+        if (!document.body.classList.contains('editing')) openSp500Chart();
+    });
+    host.appendChild(widget);
+    if (!navigator.onLine) { fail(); return; }
+    message.textContent = tag === 'tv-single-ticker' ? 'Загрузка…' : 'Загружаем историю S&P 500…';
+    timer = setTimeout(fail, 18000);
+    loadIndexModule(tag).catch(fail);
+}
+
+const sp500Modal = document.getElementById('sp500Modal');
+const sp500Chart = document.getElementById('sp500Chart');
+let sp500TimeFrame = '1M';
+function openSp500Chart() {
+    sp500Modal.classList.add('open');
+    document.body.classList.add('history-open');
+    loadSp500Chart();
+}
+function closeSp500Chart() {
+    sp500Modal.classList.remove('open');
+    document.body.classList.remove('history-open');
+}
+function loadSp500Chart() {
+    if (!sp500Modal.classList.contains('open')) return;
+    document.querySelectorAll('#sp500Periods [data-frame]').forEach(item => item.classList.toggle('active', item.dataset.frame === sp500TimeFrame));
+    mountIndexWidget(sp500Chart, 'tv-mini-chart', sp500TimeFrame);
+}
+document.getElementById('sp500Periods').addEventListener('click', event => {
+    const button = event.target.closest('[data-frame]');
+    if (!button) return;
+    sp500TimeFrame = button.dataset.frame;
+    document.querySelectorAll('#sp500Periods [data-frame]').forEach(item => item.classList.toggle('active', item === button));
+    loadSp500Chart();
+});
+document.getElementById('sp500Close').addEventListener('click', closeSp500Chart);
+sp500Modal.addEventListener('click', event => { if (event.target === sp500Modal) closeSp500Chart(); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && sp500Modal.classList.contains('open')) closeSp500Chart(); });
+window.addEventListener('online', loadSp500Chart);
+window.addEventListener('offline', () => {
+    loadSp500Chart();
+    if (selected.includes(INDEX_CODE)) renderList();
+});
+
 async function init() {
     loadState();
-    loadCache();
+    if (loadCache()) updateStatus();
+    loadOilCache();
 
     if (!Array.isArray(selected) || selected.length === 0) {
         selected = [...DEFAULT_SELECTED];
@@ -2904,11 +3618,11 @@ async function init() {
     document.getElementById('historyTo').max = today;
     renderList();
     if (navigator.onLine) await fetchAllRates(false);
-    renderList();
+    refreshListComparison();
 }
 
-setInterval(() => { if (navigator.onLine) fetchAllRates(false).then(() => renderList()); }, ONE_HOUR);
-window.addEventListener("online", () => fetchAllRates(true).then(() => renderList()));
+setInterval(() => { if (navigator.onLine) fetchAllRates(false).then(refreshListComparison); }, ONE_HOUR);
+window.addEventListener("online", () => fetchAllRates(true).then(refreshListComparison));
 
 init();
 // Use the visible viewport in installed Android apps, including after reload.
