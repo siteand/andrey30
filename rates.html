@@ -2166,7 +2166,7 @@ function setLoadedHistoryStatus(points, requestedKeys) {
     historyStatus.classList.remove('error', 'warning');
     const first = points[0].date;
     const last = points[points.length - 1].date;
-    const loadedText = `${points.length} точек · ${shortDateLabel(first, true)} — ${shortDateLabel(last, true)}`;
+    const loadedText = `${shortDateLabel(first, true)} — ${shortDateLabel(last, true)} (${points.length} точек)`;
     if (points.length < requestedKeys.length || first !== requestedKeys[0] || last !== requestedKeys[requestedKeys.length - 1]) {
         historyStatus.classList.add('warning');
         historyStatus.textContent = `${loadedText} · выбранный период загружен не полностью`;
