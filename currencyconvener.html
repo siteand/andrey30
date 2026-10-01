@@ -177,23 +177,43 @@
             text-align: center;
             overflow-wrap: anywhere;
         }
-        .install-app-btn {
+        .offline-note[hidden] { display: none !important; }
+        .install-offer {
+            position: fixed;
+            inset: auto 0 calc(24px + env(safe-area-inset-bottom, 0px));
+            margin: 0 auto;
+            width: min(420px, calc(100% - 24px));
+            max-height: calc(100dvh - 48px - env(safe-area-inset-bottom, 0px));
+            overflow-y: auto;
+            padding: 22px;
+            border: 1px solid var(--input-border);
+            border-radius: 18px;
             background: var(--input-bg);
-            color: var(--button-bg);
-            border: 1px solid var(--button-bg);
+            color: var(--text-color);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.3);
+        }
+        .install-offer::backdrop { background: rgba(0, 0, 0, 0.4); }
+        .install-offer-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .install-offer-icon { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 12px; }
+        .install-offer h3 { font-size: 20px; line-height: 1.3; }
+        .install-offer p {
             font-size: 14px;
-            padding: 10px 12px;
-        }
-        .install-app-btn:hover { background: var(--row-hover); }
-        .install-app-btn[hidden], .install-help[hidden] { display: none !important; }
-        .install-help {
-            font-size: 11px;
             line-height: 1.5;
-            color: var(--text-muted);
-            text-align: center;
+            color: var(--text-color);
         }
-        @media (display-mode: standalone) {
-            .install-app-btn, .install-help { display: none !important; }
+        .install-offer-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .install-offer-actions button { flex: 1; min-height: 44px; padding: 10px 12px; font-size: 14px; }
+        .install-offer-actions button[hidden] { display: none !important; }
+        .install-offer-later {
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+        .install-offer-later:hover { background: var(--row-hover); }
+        .install-offer-actions button:disabled { cursor: wait; opacity: 0.7; }
+        @media (max-width: 400px) {
+            .install-offer { padding: 18px; }
+            .install-offer h3 { font-size: 18px; }
         }
         .source-note { line-height: 1.5; }
         .status-btn:disabled { cursor: wait; }
@@ -570,9 +590,7 @@
         <div class="currency-list" id="currencyList"></div>
 
         <div class="source-note" id="sourceNote"><span id="sourceNoteText"></span></div>
-        <p class="offline-note" id="offlineNote" role="status" aria-live="polite">Сохраняем для работы без интернета…</p>
-        <button class="install-app-btn" id="installAppBtn" type="button" hidden>Установить приложение</button>
-        <p class="install-help" id="installHelp" role="status" aria-live="polite" hidden></p>
+        <p class="offline-note" id="offlineNote" role="status" aria-live="polite" hidden></p>
     </div>
     </div>
 
@@ -588,6 +606,18 @@
             <div class="modal-list" id="modalList"></div>
         </div>
     </div>
+
+    <dialog class="install-offer" id="installOffer" aria-labelledby="installOfferTitle" aria-describedby="installOfferText">
+        <div class="install-offer-header">
+            <img class="install-offer-icon" src="icons2/apple-touch-icon.png" alt="">
+            <h3 id="installOfferTitle">Установить приложение?</h3>
+        </div>
+        <p id="installOfferText">Добавьте «Конвертер валют» на главный экран, чтобы быстро открывать его как приложение.</p>
+        <div class="install-offer-actions">
+            <button class="install-offer-later" id="installOfferLater" type="button" autofocus>Не сейчас</button>
+            <button id="installOfferInstall" type="button">Установить</button>
+        </div>
+    </dialog>
 
 <script>
 const CURRENCY_META = {
@@ -924,8 +954,16 @@ function formatSavedAt(timestamp) {
 }
 
 function updateOfflineNote() {
-    if (!offlineReady) return;
-    document.getElementById('offlineNote').textContent = cacheWriteFailed
+    const note = document.getElementById('offlineNote');
+    note.hidden = navigator.onLine !== false;
+    if (note.hidden) return;
+    if (!offlineReady) {
+        note.textContent = lastFetchTime
+            ? 'Без интернета расчёт выполняется по сохранённым курсам.'
+            : 'Нет интернета. Сохранённые курсы пока отсутствуют.';
+        return;
+    }
+    note.textContent = cacheWriteFailed
         ? 'Страница сохранена, но новые курсы сохранить не удалось. Проверьте свободное место на устройстве.'
         : lastFetchTime
             ? 'Доступно без интернета на этом устройстве.'
@@ -1012,7 +1050,6 @@ async function prepareOffline() {
         }
         offlineReady = true;
         updateOfflineNote();
-        updateInstallButton();
     } catch (error) {
         note.textContent = 'Не удалось сохранить страницу для офлайн-режима. Откройте её ещё раз с интернетом.';
         console.warn('Не удалось подготовить конвертер для работы офлайн:', error);
@@ -1021,55 +1058,116 @@ async function prepareOffline() {
 
 function isStandaloneMode() {
     return window.matchMedia('(display-mode: standalone)').matches
+        || window.matchMedia('(display-mode: fullscreen)').matches
         || window.navigator.standalone === true;
 }
 
-function updateInstallButton() {
-    const button = document.getElementById('installAppBtn');
-    const help = document.getElementById('installHelp');
-    if (isStandaloneMode()) {
-        button.hidden = true;
-        help.hidden = true;
-        return;
-    }
-    button.hidden = !offlineReady;
+const INSTALL_OFFER_KEY = 'currency_install_offer_shown_v1';
+const installOffer = document.getElementById('installOffer');
+const installOfferButton = document.getElementById('installOfferInstall');
+const installOfferLater = document.getElementById('installOfferLater');
+let installOfferSeen = false;
+let installOfferTimer = null;
+
+function wasInstallOfferShown() {
+    if (installOfferSeen) return true;
+    try { return localStorage.getItem(INSTALL_OFFER_KEY) === '1'; }
+    catch (error) { return false; }
+}
+
+function rememberInstallOffer() {
+    installOfferSeen = true;
+    try { localStorage.setItem(INSTALL_OFFER_KEY, '1'); }
+    catch (error) { /* При недоступном хранилище отметка остаётся до закрытия страницы. */ }
+}
+
+function closeInstallOffer() {
+    if (installOffer.open) installOffer.close();
+}
+
+function showInstallOffer() {
+    if (installOffer.open || wasInstallOfferShown() || isStandaloneMode()
+        || !window.isSecureContext || navigator.onLine === false || document.hidden
+        || document.getElementById('modal').classList.contains('open')
+        || document.body.classList.contains('editing')) return;
+    installOffer.showModal();
+    rememberInstallOffer();
+}
+
+function scheduleInstallOffer() {
+    if (wasInstallOfferShown() || isStandaloneMode()) return;
+    clearTimeout(installOfferTimer);
+    installOfferTimer = setTimeout(showInstallOffer, 900);
+}
+
+function showInstallInstructions() {
+    document.getElementById('installOfferTitle').textContent = 'Как установить';
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    document.getElementById('installOfferText').textContent = isIOS
+        ? 'В Safari нажмите «Поделиться», затем выберите «На экран Домой».'
+        : /android/i.test(navigator.userAgent)
+            ? 'В Samsung Internet откройте меню ≡ и выберите «Добавить страницу в» → «Главный экран». В Chrome откройте меню ⋮ и выберите «Установить приложение».'
+            : 'Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».';
+    installOfferButton.textContent = 'Понятно';
+    installOfferButton.dataset.mode = 'instructions';
+    installOfferLater.hidden = true;
 }
 
 window.addEventListener('beforeinstallprompt', event => {
     event.preventDefault();
     deferredInstallPrompt = event;
-    updateInstallButton();
+    scheduleInstallOffer();
 });
 
 window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
-    document.getElementById('installAppBtn').hidden = true;
-    document.getElementById('installHelp').hidden = true;
+    rememberInstallOffer();
+    closeInstallOffer();
 });
 
-document.getElementById('installAppBtn').addEventListener('click', async () => {
-    const button = document.getElementById('installAppBtn');
-    const help = document.getElementById('installHelp');
+installOfferLater.addEventListener('click', closeInstallOffer);
+installOffer.addEventListener('click', event => {
+    if (event.target !== installOffer) return;
+    const bounds = installOffer.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right
+        || event.clientY < bounds.top || event.clientY > bounds.bottom) closeInstallOffer();
+});
+installOfferButton.addEventListener('click', async () => {
+    if (installOfferButton.dataset.mode === 'instructions') {
+        closeInstallOffer();
+        return;
+    }
     if (deferredInstallPrompt) {
         const promptEvent = deferredInstallPrompt;
         deferredInstallPrompt = null;
-        await promptEvent.prompt();
-        const choice = await promptEvent.userChoice;
-        if (choice && choice.outcome === 'accepted') {
-            button.hidden = true;
-            help.hidden = true;
-            return;
+        installOfferButton.disabled = true;
+        try {
+            await promptEvent.prompt();
+            await promptEvent.userChoice;
+            closeInstallOffer();
+        } catch (error) {
+            showInstallInstructions();
+        } finally {
+            installOfferButton.disabled = false;
         }
+        return;
     }
-    help.textContent = 'В Samsung Internet откройте меню ≡ и выберите «Добавить страницу в» → «Главный экран». В Chrome нажмите ⋮ → «Установить приложение».';
-    help.hidden = false;
+    showInstallInstructions();
 });
 
 document.getElementById('refreshBtn').addEventListener('click', () => fetchRates(true));
 window.addEventListener('offline', updateStatus);
-window.addEventListener('online', () => fetchRates(true));
+window.addEventListener('online', () => {
+    updateStatus();
+    scheduleInstallOffer();
+    fetchRates(true);
+});
 document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) fetchRates(false);
+    if (!document.hidden) {
+        scheduleInstallOffer();
+        fetchRates(false);
+    }
 });
 
 function convert(amount, fromCode, toCode) {
@@ -1411,6 +1509,7 @@ function closeModal() {
     modal.classList.remove('open');
     searchBox.blur();
     searchBox.setAttribute('readonly', 'readonly');
+    scheduleInstallOffer();
 }
 document.getElementById('addBtn').addEventListener('click', openModal);
 document.getElementById('modalClose').addEventListener('click', closeModal);
@@ -1480,6 +1579,7 @@ editBtn.addEventListener('click', () => {
     editBtn.classList.toggle('active', on);
     document.querySelector('.actions-row').classList.toggle('editing', on);
     document.body.classList.toggle('editing', on);
+    if (!on) scheduleInstallOffer();
 });
 
 async function init() {
@@ -1499,6 +1599,7 @@ async function init() {
 
     renderList();
 
+    scheduleInstallOffer();
     prepareOffline();
     await fetchRates(false);
 }
