@@ -882,13 +882,19 @@
             position: relative;
             -webkit-appearance: none;
             appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            min-width: 0;
             padding: 0 40px 0 12px;
+            cursor: pointer;
         }
         .history-date::-webkit-calendar-picker-indicator {
             position: absolute;
             top: 0;
+            left: 0;
             right: 0;
-            width: 42px;
+            width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
@@ -906,7 +912,7 @@
             pointer-events: none;
         }
         .history-select-button:focus-visible,
-        .history-date:focus {
+        .history-date:focus-visible {
             outline: 2px solid color-mix(in srgb, var(--button-bg) 24%, transparent);
             outline-offset: 1px;
             border-color: var(--button-bg);
@@ -2048,6 +2054,11 @@ function shortDateLabel(key, includeYear = false) {
     return dateFromKey(key).toLocaleDateString('ru-RU', options).replace('.', '');
 }
 
+function fullDateLabel(key) {
+    const [year, month, day] = key.split('-');
+    return `${day}.${month}.${year}`;
+}
+
 function updateHistoryStats(points, base) {
     const values = points.map(p => p.value);
     const first = values[0];
@@ -2166,7 +2177,7 @@ function setLoadedHistoryStatus(points, requestedKeys) {
     historyStatus.classList.remove('error', 'warning');
     const first = points[0].date;
     const last = points[points.length - 1].date;
-    const loadedText = `${shortDateLabel(first, true)} — ${shortDateLabel(last, true)} (${points.length} точек)`;
+    const loadedText = `${fullDateLabel(first)} — ${fullDateLabel(last)} (${points.length} точек)`;
     if (points.length < requestedKeys.length || first !== requestedKeys[0] || last !== requestedKeys[requestedKeys.length - 1]) {
         historyStatus.classList.add('warning');
         historyStatus.textContent = `${loadedText} · выбранный период загружен не полностью`;
@@ -2392,7 +2403,18 @@ customRangeDialog.addEventListener('close', () => {
     historyToInput.setCustomValidity('');
 });
 document.getElementById('customRangeClose').addEventListener('click', () => customRangeDialog.close());
-[historyFromInput, historyToInput].forEach(input => input.addEventListener('input', () => historyToInput.setCustomValidity('')));
+[historyFromInput, historyToInput].forEach(input => {
+    input.addEventListener('input', () => historyToInput.setCustomValidity(''));
+    input.addEventListener('click', event => {
+        if (typeof input.showPicker !== 'function') return;
+        try {
+            input.showPicker();
+            event.preventDefault();
+        } catch (error) {
+            // Если браузер ограничил showPicker, сохраняем обычное открытие календаря.
+        }
+    });
+});
 document.getElementById('customRangeForm').addEventListener('submit', event => {
     event.preventDefault();
     if (historyFromInput.value > historyToInput.value) {
