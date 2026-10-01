@@ -955,8 +955,11 @@ function formatSavedAt(timestamp) {
 
 function updateOfflineNote() {
     const note = document.getElementById('offlineNote');
-    note.hidden = navigator.onLine !== false;
-    if (note.hidden) return;
+    note.hidden = navigator.onLine !== false || (lastFetchTime > 0 && !cacheWriteFailed);
+    if (note.hidden) {
+        note.textContent = '';
+        return;
+    }
     if (!offlineReady) {
         note.textContent = lastFetchTime
             ? 'Без интернета расчёт выполняется по сохранённым курсам.'
@@ -965,9 +968,7 @@ function updateOfflineNote() {
     }
     note.textContent = cacheWriteFailed
         ? 'Страница сохранена, но новые курсы сохранить не удалось. Проверьте свободное место на устройстве.'
-        : lastFetchTime
-            ? 'Доступно без интернета на этом устройстве.'
-            : 'Страница сохранена. Для расчётов сначала загрузите курсы с интернетом.';
+        : 'Страница сохранена. Для расчётов сначала загрузите курсы с интернетом.';
 }
 
 function updateStatus() {
