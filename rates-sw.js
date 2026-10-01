@@ -1,4 +1,4 @@
-const VERSION = 'rates-offline-v13';
+const VERSION = 'rates-offline-v14';
 const page = new URL(self.location.href).searchParams.get('page') || new URL('rates.html', self.location.href).pathname;
 const CACHE = VERSION + ':' + page;
 const base = new URL('./', self.location.href);

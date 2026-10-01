@@ -1222,21 +1222,24 @@
             .history-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .rates-list.is-editing .rate-row:not(.rate-row-index) {
                 display: grid;
-                grid-template-columns: 18px 32px minmax(0, 1fr) 28px;
-                gap: 4px 8px;
+                grid-template-columns: 14px 32px minmax(0, 1fr) minmax(0, 44%) 22px;
+                column-gap: 6px;
+                align-items: center;
             }
-            .rates-list.is-editing .drag-handle { grid-column: 1; grid-row: 1 / 3; }
+            .rates-list.is-editing .drag-handle { grid-column: 1; grid-row: 1; padding: 0; font-size: 18px; justify-content: center; }
             .rates-list.is-editing .flag-img { grid-column: 2; grid-row: 1; }
             .rates-list.is-editing .rate-info { grid-column: 3; grid-row: 1; }
+            .rates-list.is-editing .rate-code { font-size: clamp(12px, 3.5vw, 15px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .rates-list.is-editing .rate-values {
-                grid-column: 2 / 4;
-                grid-row: 2;
-                align-items: flex-start;
+                grid-column: 4;
+                grid-row: 1;
+                min-width: 0;
+                align-items: flex-end;
                 max-width: 100%;
-                padding-top: 4px;
             }
-            .rates-list.is-editing .rate-change { max-width: 100%; text-align: left; }
-            .rates-list.is-editing .remove-btn { grid-column: 4; grid-row: 1 / 3; }
+            .rates-list.is-editing .rate-value { font-size: clamp(13px, 3.7vw, 16px); white-space: nowrap; }
+            .rates-list.is-editing .rate-change { max-width: 100%; font-size: clamp(10px, 3vw, 12px); text-align: right; }
+            .rates-list.is-editing .remove-btn { grid-column: 5; grid-row: 1; padding: 2px; justify-content: center; }
         }
     </style>
 </head>
