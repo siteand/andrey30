@@ -242,14 +242,14 @@
     "eighth": "",
     "ninth": "",
     "tenth": "",
-    "sprint_first": "",
-    "sprint_second": "",
-    "sprint_third": "",
-    "sprint_fourth": "",
-    "sprint_fifth": "",
-    "sprint_sixth": "",
-    "sprint_seventh": "",
-    "sprint_eighth": ""
+    "sprint_first": "Макс Ферстаппен",
+    "sprint_second": "Льюис Хэмилтон",
+    "sprint_third": "Шарль Леклер",
+    "sprint_fourth": "Кими Антонелли",
+    "sprint_fifth": "Лиам Лоусон",
+    "sprint_sixth": "Оливер Берман",
+    "sprint_seventh": "Нико Хюлькенберг",
+    "sprint_eighth": "Ландо Норрис"
   },
   "18": {
     "first": "",
