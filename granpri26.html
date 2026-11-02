@@ -4430,7 +4430,7 @@
             bio: "Французский гонщик, родился 17 сентября 1996 в Эвре. В Ф-1 с 2016 года. Победитель Гран-при Венгрии 2021 в составе Alpine. С 2025 года — в Haas." },
           { name: "Оливер Берман",  number: 87, photo: "photos/teams/haas/driver2.png",
             bio: "Британский гонщик, родился 8 мая 2005 в Челмсфорде. Дебютировал в Ф-1 в 2024 году, заменив Карлоса Сайнса в Ferrari. С 2025 — основной пилот Haas." },
-          { name: "Рё Хиракава", cardId: "team-card-hirakawa", number: 50, photo: "photos/teams/haas/hirakawa.png",
+          { name: "Рё Хиракава", cardId: "team-card-hirakawa", number: 50, photo: "photos/teams/haas/hirakawa.png?photo-rev=20261102",
             bio: "Родился 7 марта 1994 года в Куре, Япония. В составе экипажа Toyota выиграл «24 часа Ле-Мана» в 2022 году. В сезонах 2022 и 2023 годов стал чемпионом мира по гонкам на выносливость. В 2025 году присоединился к Haas как резервный пилот.\n\nКого заменил в Мехико. В пятницу, 30 октября 2026 года, Хиракава провёл первую тренировку за Haas, а во второй за руль вернулся Эстебан Окон. Утром в субботу команда передала машину Хиракаве до конца этапа. Так он получил возможность впервые выйти на старт гонки Формулы-1. В официальном заявлении Haas причину замены Окона не раскрыла." }
         ]
       },
@@ -4512,7 +4512,36 @@
     }
 
 
-    function loadTeamPhotoImage(img) {
+    let hirakawaPhotoCacheRefresh = null;
+
+    function refreshHirakawaPhotoCache(src) {
+      const url = new URL(src, window.location.href);
+      if (!url.pathname.endsWith('/photos/teams/haas/hirakawa.png')) return null;
+      if (!hirakawaPhotoCacheRefresh) {
+        hirakawaPhotoCacheRefresh = (async () => {
+          const revisionKey = 'f1_hirakawa_photo_cache_20261102_v1';
+          try { if (localStorage.getItem(revisionKey) === '1') return; } catch(e) {}
+          try {
+            if (!('caches' in window)) return;
+            const prefix = 'granpri26-images:' + new URL('./', window.location.href).pathname + ':';
+            const key = url.origin + url.pathname;
+            const names = await caches.keys();
+            await Promise.all(names.filter(name => name.startsWith(prefix)).map(async name => {
+              const cache = await caches.open(name);
+              await cache.delete(key);
+            }));
+            // Новый адрес также обходит старую копию в обычном кэше браузера.
+            url.searchParams.set('photo-rev', '20261102');
+            return url.href;
+          } catch(e) {
+            // При недоступном кэше всё равно пробуем обычную загрузку фотографии.
+          }
+        })();
+      }
+      return hirakawaPhotoCacheRefresh;
+    }
+
+    function assignTeamPhotoSource(img) {
       if (!img || !img.dataset || !img.dataset.src || img.src) return;
       img.src = img.dataset.src;
       delete img.dataset.src;
@@ -4520,6 +4549,24 @@
         const wrap = img.closest('.team-photo');
         if (wrap) delete wrap.dataset.loading;
       }
+    }
+
+    function loadTeamPhotoImage(img) {
+      if (!img || !img.dataset || !img.dataset.src || img.src || img.dataset.preparing) return;
+      const refresh = refreshHirakawaPhotoCache(img.dataset.src);
+      if (!refresh) { assignTeamPhotoSource(img); return; }
+      img.dataset.preparing = '1';
+      refresh.then(freshSrc => {
+        delete img.dataset.preparing;
+        if (!img.isConnected) return;
+        if (freshSrc) {
+          img.dataset.src = freshSrc;
+          img.addEventListener('load', () => {
+            try { localStorage.setItem('f1_hirakawa_photo_cache_20261102_v1', '1'); } catch(e) {}
+          }, { once: true });
+        }
+        assignTeamPhotoSource(img);
+      });
     }
 
     let teamImagesLazyObserver = null;
