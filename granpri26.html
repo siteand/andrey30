@@ -139,11 +139,12 @@
     .input-group label { min-width: 70px; margin-right: 10px; font-weight: bold; }
     input { flex: 1; padding: 6px; box-sizing: border-box; }
     #results {
+      position: relative;
       background: #fff; border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       margin-top: 20px; margin-bottom: 40px; padding: 20px;
     }
-    #results h3:first-of-type { margin-top: 0; }
+    #results h3:first-of-type { margin-top: 0; padding-right: 26px; }
     #results h3 { margin-top: 16px; margin-bottom: 8px; }
     #results h3, .track-anchors h3 { font-size: 1.1rem; }
     #results h3:nth-of-type(2) {
@@ -631,13 +632,14 @@
         row-gap: 4px;
         align-items: start;
       }
-      #results > h3:nth-of-type(1) { grid-area: h-drivers; margin-top: 0; }
+      #results > h3:nth-of-type(1) { grid-area: h-drivers; margin-top: 0; padding-right: 0; }
       #results > #drivers          { grid-area: ul-drivers; margin-top: 0; }
       #results > h3:nth-of-type(2) {
         grid-area: h-constructors;
         margin-top: 0;
         border-top: none;
         padding-top: 0;
+        padding-right: 26px;
       }
       #results > #constructors     { grid-area: ul-constructors; margin-top: 0; }
       #results::before {
@@ -1884,6 +1886,7 @@
         </div>
         <h2>🏆 Общий зачёт</h2>
         <div id="results">
+          <div class="card-actions"><button type="button" class="share-card-btn" onclick="copyCardLink('results', this);return false;" aria-label="Скопировать ссылку на общий зачёт" title="Скопировать ссылку на общий зачёт"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg></button></div>
           <h3>Личный зачёт:</h3>
           <ul id="drivers"></ul>
           <h3>Кубок конструкторов:</h3>
