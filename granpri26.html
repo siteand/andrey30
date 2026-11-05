@@ -201,6 +201,8 @@
     .race-number-empty { visibility: hidden; }
     .race-card.next .race-number, .race-card.upcoming .race-number { color: #cc0000; }
     .race-flag { font-size: 28px; line-height: 1; padding-top: 2px; flex-shrink: 0; }
+    .flags-disabled .race-flag { display: none; }
+    .flags-disabled .race-card { grid-template-columns: auto 1fr; }
     .race-info { min-width: 0; }
     .race-info h2 { margin: 0 0 4px 0; font-size: 16px; color: #cc0000; line-height: 1.3; word-break: break-word; }
     .race-card.cancelled .race-info h2 { text-decoration: line-through; color: #999; }
@@ -2121,6 +2123,9 @@
       window.addEventListener('DOMContentLoaded', initResultsFileSync);
     }
 
+    const flagImagesEnabled = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+    document.documentElement.classList.toggle('flags-disabled', !flagImagesEnabled);
+
     const flagEmoji = {
       "🇦🇺":"au","🇨🇳":"cn","🇯🇵":"jp","🇧🇭":"bh","🇸🇦":"sa",
       "🇺🇸":"us","🇨🇦":"ca","🇲🇨":"mc","🇪🇸":"es","🇦🇹":"at",
@@ -2131,6 +2136,7 @@
     };
 
     function flagHtml(emoji, size) {
+      if (!flagImagesEnabled) return '';
       size = size || 20;
       const code = flagEmoji[emoji];
       if (!code) return emoji;
@@ -2138,6 +2144,7 @@
     }
 
     function flagEl(emoji, size) {
+      if (!flagImagesEnabled) return document.createDocumentFragment();
       size = size || 20;
       const code = flagEmoji[emoji];
       if (!code) {
@@ -3560,7 +3567,9 @@
     };
     function normalizePilotName(pilotName) {
       const name = String(pilotName ?? '').trim();
-      return name === 'Ре Хиракава' ? 'Рё Хиракава' : name;
+      if (name === 'Ре Хиракава') return 'Рё Хиракава';
+      if (name === 'Рафаэл Камара') return 'Рафаэль Камара';
+      return name;
     }
     const eventDriverChanges = {
       zandvoort: {
@@ -3568,27 +3577,51 @@
           "Лиам Лоусон": "Red Bull",
           "Юки Цунода": "Racing Bulls"
         },
-        note: "Замены на этап: Лиам Лоусон — Red Bull, Юки Цунода — Racing Bulls. Исак Хаджар пропускает этап из-за травмы запястья."
+        note: "Хаджар → Лоусон (Red Bull); Лоусон → Цунода (Racing Bulls)."
       },
       monza: {
         teams: {
           "Лиам Лоусон": "Red Bull",
           "Юки Цунода": "Racing Bulls"
         },
-        note: "Замены на этап: Лиам Лоусон — Red Bull, Юки Цунода — Racing Bulls. Исак Хаджар снова пропускает этап из-за травмы запястья."
+        note: "Хаджар → Лоусон (Red Bull); Лоусон → Цунода (Racing Bulls)."
       },
       madrid: {
         teams: {
           "Лиам Лоусон": "Red Bull",
           "Юки Цунода": "Racing Bulls"
         },
-        note: "Замены на этап: Лиам Лоусон — Red Bull, Юки Цунода — Racing Bulls. Исак Хаджар снова пропускает этап из-за травмы запястья."
+        note: "Хаджар → Лоусон (Red Bull); Лоусон → Цунода (Racing Bulls)."
       },
       mexico: {
         teams: {
           "Рё Хиракава": "Haas"
         },
-        note: "Гран-при Мексики: Рё Хиракава заменяет Эстебана Окона в Haas. Оливер Берман продолжает выступать за команду."
+        note: "Окон → Хиракава (Haas)."
+      },
+      saopaulo: {
+        teams: {
+          "Рафаэль Камара": "Haas"
+        },
+        note: "Окон → Камара (Haas)."
+      },
+      lasvegas: {
+        teams: {
+          "Рафаэль Камара": "Haas"
+        },
+        note: "Окон → Камара (Haas), ожидается."
+      },
+      lusail: {
+        teams: {
+          "Рё Хиракава": "Haas"
+        },
+        note: "Окон → Хиракава (Haas), ожидается."
+      },
+      yasmarina: {
+        teams: {
+          "Рё Хиракава": "Haas"
+        },
+        note: "Окон → Хиракава (Haas), ожидается."
       }
     };
     function pilotConstructorForRace(pilotName, race) {
@@ -3597,7 +3630,7 @@
     }
     function driverChangeNoteForRace(race) {
       const note=eventDriverChanges[race?.id]?.note;
-      return note ? `<div class="driver-change-note"><strong>Изменение состава:</strong> ${note}</div>` : '';
+      return note ? `<div class="driver-change-note"><strong>Замены:</strong> ${note}</div>` : '';
     }
     const pilotCountryMap = {
       "Оскар Пиастри": "🇦🇺","Ландо Норрис": "🇬🇧","Макс Ферстаппен": "🇳🇱",
@@ -3607,7 +3640,7 @@
       "Эстебан Окон": "🇫🇷","Оливер Берман": "🇬🇧","Пьер Гасли": "🇫🇷",
       "Франко Колапинто": "🇦🇷","Серхио Перес": "🇲🇽","Вальттери Боттас": "🇫🇮",
       "Нико Хюлькенберг": "🇩🇪","Габриэл Бортолето": "🇧🇷","Лиам Лоусон": "🇳🇿","Юки Цунода": "🇯🇵","Рё Хиракава": "🇯🇵",
-      "Арвид Линблад": "🇸🇪"
+      "Арвид Линблад": "🇸🇪","Рафаэль Камара": "🇧🇷"
     };
     const constructorLogos = {
       "McLaren": "photos/teams/mclaren/logo.png",
@@ -4431,7 +4464,9 @@
           { name: "Оливер Берман",  number: 87, photo: "photos/teams/haas/driver2.png",
             bio: "Британский гонщик, родился 8 мая 2005 в Челмсфорде. Дебютировал в Ф-1 в 2024 году, заменив Карлоса Сайнса в Ferrari. С 2025 — основной пилот Haas." },
           { name: "Рё Хиракава", cardId: "team-card-hirakawa", number: 50, photo: "photos/teams/haas/hirakawa.png?photo-rev=20261102",
-            bio: "Родился 7 марта 1994 года в Куре, Япония. В составе экипажа Toyota выиграл «24 часа Ле-Мана» в 2022 году. В сезонах 2022 и 2023 годов стал чемпионом мира по гонкам на выносливость. В 2025 году присоединился к Haas как резервный пилот.\n\nКого заменил в Мехико. В пятницу, 30 октября 2026 года, Хиракава провёл первую тренировку за Haas, а во второй за руль вернулся Эстебан Окон. Утром в субботу команда передала машину Хиракаве до конца этапа. Так он получил возможность впервые выйти на старт гонки Формулы-1. В официальном заявлении Haas причину замены Окона не раскрыла." }
+            bio: "Родился 7 марта 1994 года в Куре, Япония. В составе экипажа Toyota выиграл «24 часа Ле-Мана» в 2022 году. В сезонах 2022 и 2023 годов стал чемпионом мира по гонкам на выносливость. В 2025 году присоединился к Haas как резервный пилот.\n\nКого заменил в Мехико. В пятницу, 30 октября 2026 года, Хиракава провёл первую тренировку за Haas, а во второй за руль вернулся Эстебан Окон. Утром в субботу команда передала машину Хиракаве до конца этапа. Так он получил возможность впервые выйти на старт гонки Формулы-1. В официальном заявлении Haas причину замены Окона не раскрыла." },
+          { name: "Рафаэль Камара", cardId: "team-card-camara", number: null, photo: "photos/teams/haas/camara.png",
+            bio: "Бразильский гонщик, родился 5 мая 2005 года. Чемпион европейской Формулы Regional 2024 года и Формулы-3 2025 года. В сезоне 2026 выступает в Формуле-2 за Invicta Racing и возглавляет личный зачёт. В августе прошёл тесты Haas на машине VF-25 в Портимане, а в октябре был объявлен основным пилотом команды на сезон 2027.\n\nКого заменяет. После Гран-при Мексики Haas подтвердила, что Эстебан Окон больше не будет выступать за команду в сезоне 2026. Камара займёт его место на Гран-при Сан-Паулу и станет напарником Оливера Бермана. Рё Хиракава, заменявший Окона в Мексике, пропустит Бразилию из-за участия в WEC. Подробности внутренней ситуации с Оконом команда не раскрывает.\n\nПо информации Globo, Камара также выступит в Лас-Вегасе, после чего сосредоточится на борьбе за титул в Формуле-2. Возвращение Хиракавы ожидается в Катаре и Абу-Даби; состав на эти этапы требует официального подтверждения." }
         ]
       },
       {
@@ -4853,13 +4888,14 @@
           const fullEmoji = chars.slice(0,2).join('');
           const code = flagEmoji[fullEmoji];
           if (code) {
+            text.textContent = text.textContent.replace(fullEmoji, '').trimStart();
+            if (!flagImagesEnabled) return;
             const flagNode = document.createElement('img');
             flagNode.src = `flags/${code}.png`;
             flagNode.width = 26;
             flagNode.height = 17;
             flagNode.style.cssText = 'vertical-align:middle;margin-right:8px;object-fit:cover;border-radius:2px;';
             flagNode.alt = fullEmoji;
-            text.textContent = text.textContent.replace(fullEmoji, '').trimStart();
             a.insertBefore(flagNode, a.firstChild);
           }
         }
