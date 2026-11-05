@@ -184,6 +184,12 @@
     #constructors img.constructor-logo, #constructors span.constructor-logo-fallback { vertical-align: middle; margin-top: -3px; }
     #drivers li, #constructors li { margin-bottom: 8px; display: flex; align-items: center; }
     #drivers li:last-child, #constructors li:last-child { margin-bottom: 0; }
+    .standing-rank { flex: 0 0 3ch; font-variant-numeric: tabular-nums; }
+    .standing-entry { display: flex; flex: 1; min-width: 0; align-items: baseline; }
+    .standing-name { flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+    .standing-dots { flex: 1 0 0.8em; margin: 0 6px; border-bottom: 1px dotted currentColor; opacity: 0.5; }
+    .standing-points { flex: 0 0 auto; min-width: 3ch; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .standing-entry > .constructor-logo, .standing-entry > .constructor-logo-fallback { flex-shrink: 0; align-self: center; }
     #constructors img { margin-right: 8px; vertical-align: middle; }
     .constructor-logo { width: 1.5em; height: 1.5em; margin-right: 8px; object-fit: contain; display: inline-block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
     .constructor-logo-fallback { display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.2em; margin-right: 8px; background-color: #999; color: white; font-weight: bold; font-size: 0.9em; border-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); text-transform: uppercase; line-height: 1; padding: 0; text-align: center; vertical-align: middle; text-shadow: 0 0 2px black; }
@@ -3786,6 +3792,19 @@
       if (e.key === 'f1_2026_results') { buildRaceCards(true); calculatePoints(); }
     });
 
+    function appendStandingResult(link, name, pts) {
+      const label = document.createElement('span');
+      label.className = 'standing-name';
+      label.textContent = name;
+      const dots = document.createElement('span');
+      dots.className = 'standing-dots';
+      dots.setAttribute('aria-hidden', 'true');
+      const points = document.createElement('span');
+      points.className = 'standing-points';
+      points.textContent = ' ' + pts;
+      link.append(label, dots, points);
+    }
+
     function calculatePoints() {
       const saved = JSON.parse(localStorage.getItem('f1_2026_results') || '{}');
       const driverPoints = {}, constructorPoints = {};
@@ -3831,13 +3850,16 @@
           sorted.forEach(([name,pts],i) => {
             if (i === 0 || !haveSameChampionshipRank(sorted[i], sorted[i-1], stats)) displayedRank = i + 1;
             const li = document.createElement('li');
-            li.appendChild(document.createTextNode(`${displayedRank}.`));
+            const rank = document.createElement('span');
+            rank.className = 'standing-rank';
+            rank.textContent = `${displayedRank}.`;
+            li.appendChild(rank);
             const fc = pilotCountryMap[name];
             if (fc) { li.appendChild(flagEl(fc, 17)); }
             const link = document.createElement('span');
-            link.className = 'pilot-link';
+            link.className = 'pilot-link standing-entry';
             link.dataset.pilotName = name;
-            link.textContent = name + ' ' + pts;
+            appendStandingResult(link, name, pts);
             li.appendChild(link);
             ul.appendChild(li);
           });
@@ -3846,19 +3868,20 @@
           sorted.forEach(([name,pts],i) => {
             if (i === 0 || !haveSameChampionshipRank(sorted[i], sorted[i-1], stats)) displayedRank = i + 1;
             const li = document.createElement('li');
-            li.appendChild(document.createTextNode(`${displayedRank}.`));
+            const rank = document.createElement('span');
+            rank.className = 'standing-rank';
+            rank.textContent = `${displayedRank}.`;
+            li.appendChild(rank);
             const link = document.createElement('span');
-            link.className = 'team-link';
+            link.className = 'team-link standing-entry';
             link.dataset.teamName = name;
-            link.style.display = 'inline-flex';
-            link.style.alignItems = 'center';
             const logoUrl = constructorLogos[name];
             if (logoUrl) {
               const img = document.createElement('img'); img.src=logoUrl; img.alt=name; img.className='constructor-logo'; img.style.margin='0 8px';
               img.onerror = function() { const fb=document.createElement('span'); fb.className='constructor-logo-fallback'; fb.style.backgroundColor=constructorColors[name]||'#999'; fb.style.margin='0 8px'; fb.textContent=name.charAt(0); this.replaceWith(fb); };
               link.appendChild(img);
             } else { const fb=document.createElement('span'); fb.className='constructor-logo-fallback'; fb.style.backgroundColor=constructorColors[name]||'#999'; fb.style.margin='0 8px'; fb.textContent=name.charAt(0); link.appendChild(fb); }
-            link.appendChild(document.createTextNode(name+' '+pts));
+            appendStandingResult(link, name, pts);
             li.appendChild(link);
             ul.appendChild(li);
           });
@@ -4466,7 +4489,7 @@
           { name: "Рё Хиракава", cardId: "team-card-hirakawa", number: 50, photo: "photos/teams/haas/hirakawa.png?photo-rev=20261102",
             bio: "Родился 7 марта 1994 года в Куре, Япония. В составе экипажа Toyota выиграл «24 часа Ле-Мана» в 2022 году. В сезонах 2022 и 2023 годов стал чемпионом мира по гонкам на выносливость. В 2025 году присоединился к Haas как резервный пилот.\n\nКого заменил в Мехико. В пятницу, 30 октября 2026 года, Хиракава провёл первую тренировку за Haas, а во второй за руль вернулся Эстебан Окон. Утром в субботу команда передала машину Хиракаве до конца этапа. Так он получил возможность впервые выйти на старт гонки Формулы-1. В официальном заявлении Haas причину замены Окона не раскрыла." },
           { name: "Рафаэль Камара", cardId: "team-card-camara", number: null, photo: "photos/teams/haas/camara.png",
-            bio: "Бразильский гонщик, родился 5 мая 2005 года. Чемпион европейской Формулы Regional 2024 года и Формулы-3 2025 года. В сезоне 2026 выступает в Формуле-2 за Invicta Racing и возглавляет личный зачёт. В августе прошёл тесты Haas на машине VF-25 в Портимане, а в октябре был объявлен основным пилотом команды на сезон 2027.\n\nКого заменяет. После Гран-при Мексики Haas подтвердила, что Эстебан Окон больше не будет выступать за команду в сезоне 2026. Камара займёт его место на Гран-при Сан-Паулу и станет напарником Оливера Бермана. Рё Хиракава, заменявший Окона в Мексике, пропустит Бразилию из-за участия в WEC. Подробности внутренней ситуации с Оконом команда не раскрывает.\n\nПо информации Globo, Камара также выступит в Лас-Вегасе, после чего сосредоточится на борьбе за титул в Формуле-2. Возвращение Хиракавы ожидается в Катаре и Абу-Даби; состав на эти этапы требует официального подтверждения." }
+            bio: "Бразильский гонщик, родился 5 мая 2005 года. Чемпион европейской Формулы Regional (2024) и Формулы-3 (2025). В 2026 году выступает в Формуле-2 за Invicta Racing. Объявлен пилотом Haas на сезон 2027.\n\nКого заменяет. На Гран-при Сан-Паулу займёт место Эстебана Окона в паре с Оливером Берманом. Рё Хиракава пропускает этап из-за участия в WEC." }
         ]
       },
       {
