@@ -162,11 +162,21 @@
     .track-anchors { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
     .track-anchors h3 { margin-top: 0; }
     .track-anchors ol, .track-anchors ul { columns: 2; -webkit-columns: 2; -moz-columns: 2; column-gap: 30px; padding-left: 20px; }
-    .track-anchors ul.track-nav-list { list-style: none; padding-left: 0; margin: 0; }
+    .track-anchors ul.track-nav-list { list-style: none; padding-left: 0; margin: 0; columns: auto; -webkit-columns: auto; -moz-columns: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .track-anchors .nav-number { display: inline-block; min-width: 2.1em; font-weight: bold; color: #cc0000; }
     .track-anchors li { margin-bottom: 10px; }
     .track-anchors a { text-decoration: none; color: #004bcc; }
     .track-anchors a:hover { text-decoration: underline; }
+    .track-anchors .track-nav-list li { display: block; margin: 0; }
+    .track-anchors .track-nav-list a { display: grid; grid-template-columns: 3ch minmax(0, 1fr); grid-template-areas: "number flag" "text text"; gap: 4px 6px; align-items: start; align-content: start; width: 100%; height: 100%; min-height: 76px; padding: 6px 8px; box-sizing: border-box; color: #222; background: #f5f5f5; border: 1px solid transparent; border-radius: 8px; }
+    .track-anchors .track-nav-list a:hover { text-decoration: none; border-color: #ddd; }
+    .track-anchors .track-nav-list a:active { background: #fff0f0; border-color: #c32329; }
+    .track-anchors .track-nav-list .nav-number { grid-area: number; min-width: 0; font-size: 13px; line-height: 1.3; font-weight: 400; font-variant-numeric: tabular-nums; }
+    .track-nav-list .nav-flag { grid-area: flag; justify-self: end; }
+    .track-nav-list .nav-flag img { display: block; width: 26px; height: 17px; object-fit: cover; border-radius: 2px; }
+    .track-nav-list .nav-text { grid-area: text; display: grid; gap: 2px; min-width: 0; }
+    .track-nav-list .nav-track { min-width: 0; font-weight: 500; overflow-wrap: anywhere; }
+    .track-nav-list .nav-date { color: #6b6b6b; font-size: 13px; line-height: 1.4; }
 
     .track-anchors .nav-dot { display: inline-block; min-width: 2.1em; font-weight: bold; color: #cc0000; }
     .track-anchors .nav-cancelled-link s {
@@ -311,6 +321,10 @@
       .excel-button { background: #2e8b57; }
       .reset-button { background: #ff3333; }
       .track-anchors a { color: #75a7fc; }
+      .track-anchors .track-nav-list a { color: #eee; background: #2a2a2a; }
+      .track-anchors .track-nav-list a:hover { border-color: #555; }
+      .track-anchors .track-nav-list a:active { background: #3b2527; border-color: #ff7777; }
+      .track-nav-list .nav-date { color: #b5b5b5; }
       .track-anchors .nav-number { color: #ff4444; }
 
       .track-anchors .nav-dot { color: #ff4444; }
@@ -1903,29 +1917,29 @@
         <div class="track-anchors">
           <h3>Быстрая навигация по трассам:</h3>
           <ul class="track-nav-list">
-            <li><span class="nav-number">1.</span><a href="#melbourne">🇦🇺 Мельбурн | 8 марта</a></li>
-            <li><span class="nav-number">2.</span><a href="#shanghai">🇨🇳 Шанхай | 15 марта*</a></li>
-            <li><span class="nav-number">3.</span><a href="#suzuka">🇯🇵 Сузука | 29 марта</a></li>
-            <li><span class="nav-number">4.</span><a href="#miami">🇺🇸 Майами | 3 мая*</a></li>
-            <li><span class="nav-number">5.</span><a href="#montreal">🇨🇦 Монреаль | 24 мая*</a></li>
-            <li><span class="nav-number">6.</span><a href="#monaco">🇲🇨 Монако | 7 июня</a></li>
-            <li><span class="nav-number">7.</span><a href="#barcelona">🇪🇸 Барселона | 14 июня</a></li>
-            <li><span class="nav-number">8.</span><a href="#spielberg">🇦🇹 Шпильберг | 28 июня</a></li>
-            <li><span class="nav-number">9.</span><a href="#silverstone">🇬🇧 Сильверстоун | 5 июля*</a></li>
-            <li><span class="nav-number">10.</span><a href="#spa">🇧🇪 Спа-Франкоршам | 19 июля</a></li>
-            <li><span class="nav-number">11.</span><a href="#budapest">🇭🇺 Хунгароринг | 26 июля</a></li>
-            <li><span class="nav-number">12.</span><a href="#zandvoort">🇳🇱 Зандворт | 23 августа*</a></li>
-            <li><span class="nav-number">13.</span><a href="#monza">🇮🇹 Монца | 6 сентября</a></li>
-            <li><span class="nav-number">14.</span><a href="#madrid">🇪🇸 Мадрид | 13 сентября</a></li>
-            <li><span class="nav-number">15.</span><a href="#baku">🇦🇿 Баку | 26 сентября</a></li>
-            <li><span class="nav-number">16.</span><a href="#sepang">🇧🇭 Сепанг | 4 октября</a></li>
-            <li><span class="nav-number">17.</span><a href="#singapore">🇸🇬 Марина-Бей | 11 октября*</a></li>
-            <li><span class="nav-number">18.</span><a href="#austin">🇺🇸 Остин | 25 октября</a></li>
-            <li><span class="nav-number">19.</span><a href="#mexico">🇲🇽 Мехико | 1 ноября</a></li>
-            <li><span class="nav-number">20.</span><a href="#saopaulo">🇧🇷 Сан-Паулу | 8 ноября</a></li>
-            <li><span class="nav-number">21.</span><a href="#lasvegas">🇺🇸 Лас-Вегас | 22 ноября</a></li>
-            <li><span class="nav-number">22.</span><a href="#lusail">🇶🇦 Лусаил | 29 ноября</a></li>
-            <li><span class="nav-number">23.</span><a href="#yasmarina">🇦🇪 Абу-Даби | 6 декабря</a></li>
+            <li><a href="#melbourne"><span class="nav-number">1.</span><span class="nav-flag" aria-hidden="true">🇦🇺</span><span class="nav-text"><span class="nav-track">Мельбурн</span> <span class="nav-date">8 марта</span></span></a></li>
+            <li><a href="#shanghai"><span class="nav-number">2.</span><span class="nav-flag" aria-hidden="true">🇨🇳</span><span class="nav-text"><span class="nav-track">Шанхай</span> <span class="nav-date">15 марта*</span></span></a></li>
+            <li><a href="#suzuka"><span class="nav-number">3.</span><span class="nav-flag" aria-hidden="true">🇯🇵</span><span class="nav-text"><span class="nav-track">Сузука</span> <span class="nav-date">29 марта</span></span></a></li>
+            <li><a href="#miami"><span class="nav-number">4.</span><span class="nav-flag" aria-hidden="true">🇺🇸</span><span class="nav-text"><span class="nav-track">Майами</span> <span class="nav-date">3 мая*</span></span></a></li>
+            <li><a href="#montreal"><span class="nav-number">5.</span><span class="nav-flag" aria-hidden="true">🇨🇦</span><span class="nav-text"><span class="nav-track">Монреаль</span> <span class="nav-date">24 мая*</span></span></a></li>
+            <li><a href="#monaco"><span class="nav-number">6.</span><span class="nav-flag" aria-hidden="true">🇲🇨</span><span class="nav-text"><span class="nav-track">Монако</span> <span class="nav-date">7 июня</span></span></a></li>
+            <li><a href="#barcelona"><span class="nav-number">7.</span><span class="nav-flag" aria-hidden="true">🇪🇸</span><span class="nav-text"><span class="nav-track">Барселона</span> <span class="nav-date">14 июня</span></span></a></li>
+            <li><a href="#spielberg"><span class="nav-number">8.</span><span class="nav-flag" aria-hidden="true">🇦🇹</span><span class="nav-text"><span class="nav-track">Шпильберг</span> <span class="nav-date">28 июня</span></span></a></li>
+            <li><a href="#silverstone"><span class="nav-number">9.</span><span class="nav-flag" aria-hidden="true">🇬🇧</span><span class="nav-text"><span class="nav-track">Сильверстоун</span> <span class="nav-date">5 июля*</span></span></a></li>
+            <li><a href="#spa"><span class="nav-number">10.</span><span class="nav-flag" aria-hidden="true">🇧🇪</span><span class="nav-text"><span class="nav-track">Спа-Франкоршам</span> <span class="nav-date">19 июля</span></span></a></li>
+            <li><a href="#budapest"><span class="nav-number">11.</span><span class="nav-flag" aria-hidden="true">🇭🇺</span><span class="nav-text"><span class="nav-track">Хунгароринг</span> <span class="nav-date">26 июля</span></span></a></li>
+            <li><a href="#zandvoort"><span class="nav-number">12.</span><span class="nav-flag" aria-hidden="true">🇳🇱</span><span class="nav-text"><span class="nav-track">Зандворт</span> <span class="nav-date">23 августа*</span></span></a></li>
+            <li><a href="#monza"><span class="nav-number">13.</span><span class="nav-flag" aria-hidden="true">🇮🇹</span><span class="nav-text"><span class="nav-track">Монца</span> <span class="nav-date">6 сентября</span></span></a></li>
+            <li><a href="#madrid"><span class="nav-number">14.</span><span class="nav-flag" aria-hidden="true">🇪🇸</span><span class="nav-text"><span class="nav-track">Мадрид</span> <span class="nav-date">13 сентября</span></span></a></li>
+            <li><a href="#baku"><span class="nav-number">15.</span><span class="nav-flag" aria-hidden="true">🇦🇿</span><span class="nav-text"><span class="nav-track">Баку</span> <span class="nav-date">26 сентября</span></span></a></li>
+            <li><a href="#sepang"><span class="nav-number">16.</span><span class="nav-flag" aria-hidden="true">🇧🇭</span><span class="nav-text"><span class="nav-track">Сепанг</span> <span class="nav-date">4 октября</span></span></a></li>
+            <li><a href="#singapore"><span class="nav-number">17.</span><span class="nav-flag" aria-hidden="true">🇸🇬</span><span class="nav-text"><span class="nav-track">Марина-Бей</span> <span class="nav-date">11 октября*</span></span></a></li>
+            <li><a href="#austin"><span class="nav-number">18.</span><span class="nav-flag" aria-hidden="true">🇺🇸</span><span class="nav-text"><span class="nav-track">Остин</span> <span class="nav-date">25 октября</span></span></a></li>
+            <li><a href="#mexico"><span class="nav-number">19.</span><span class="nav-flag" aria-hidden="true">🇲🇽</span><span class="nav-text"><span class="nav-track">Мехико</span> <span class="nav-date">1 ноября</span></span></a></li>
+            <li><a href="#saopaulo"><span class="nav-number">20.</span><span class="nav-flag" aria-hidden="true">🇧🇷</span><span class="nav-text"><span class="nav-track">Сан-Паулу</span> <span class="nav-date">8 ноября</span></span></a></li>
+            <li><a href="#lasvegas"><span class="nav-number">21.</span><span class="nav-flag" aria-hidden="true">🇺🇸</span><span class="nav-text"><span class="nav-track">Лас-Вегас</span> <span class="nav-date">22 ноября</span></span></a></li>
+            <li><a href="#lusail"><span class="nav-number">22.</span><span class="nav-flag" aria-hidden="true">🇶🇦</span><span class="nav-text"><span class="nav-track">Лусаил</span> <span class="nav-date">29 ноября</span></span></a></li>
+            <li><a href="#yasmarina"><span class="nav-number">23.</span><span class="nav-flag" aria-hidden="true">🇦🇪</span><span class="nav-text"><span class="nav-track">Абу-Даби</span> <span class="nav-date">6 декабря</span></span></a></li>
           </ul>
         </div>
         <div id="races"></div>
@@ -4903,25 +4917,17 @@
       renderTeams();
       initTeamImagesLazyLoading(false);
       loadPilotImagesWhenNeeded();
-      document.querySelectorAll('.track-anchors a').forEach(a => {
-        const firstNode = a.childNodes[0];
-        const text = (firstNode && firstNode.nodeType === 1 && firstNode.tagName === 'S') ? firstNode.childNodes[0] : firstNode;
-        if (text && text.nodeType === 3) {
-          const chars = [...text.textContent.trim()];
-          const fullEmoji = chars.slice(0,2).join('');
-          const code = flagEmoji[fullEmoji];
-          if (code) {
-            text.textContent = text.textContent.replace(fullEmoji, '').trimStart();
-            if (!flagImagesEnabled) return;
-            const flagNode = document.createElement('img');
-            flagNode.src = `flags/${code}.png`;
-            flagNode.width = 26;
-            flagNode.height = 17;
-            flagNode.style.cssText = 'vertical-align:middle;margin-right:8px;object-fit:cover;border-radius:2px;';
-            flagNode.alt = fullEmoji;
-            a.insertBefore(flagNode, a.firstChild);
-          }
-        }
+      document.querySelectorAll('.track-nav-list .nav-flag').forEach(slot => {
+        if (!flagImagesEnabled) { slot.remove(); return; }
+        const fullEmoji = slot.textContent.trim();
+        const code = flagEmoji[fullEmoji];
+        if (!code) return;
+        const flagNode = document.createElement('img');
+        flagNode.src = `flags/${code}.png`;
+        flagNode.width = 26;
+        flagNode.height = 17;
+        flagNode.alt = fullEmoji;
+        slot.replaceChildren(flagNode);
       });
 
       updateHeaderHeight();
